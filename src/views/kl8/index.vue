@@ -1,67 +1,57 @@
 <template>
   <div>
-    <!-- 数据切换按钮 -->
-    <div class="data-switch">
-      <a-button type="primary" @click="prevData" :disabled="currentIndex <= minIndex">
-        上一个数据
-      </a-button>
-      <span class="current-index">当前数据: {{ currentIndex.toString().padStart(3, '0') }}</span>
-      <a-button type="primary" @click="nextData" :disabled="currentIndex >= maxIndex">
-        下一个数据
-      </a-button>
-    </div>
-
-    <!-- 表格区域 - 仅在无错误时显示 -->
-    <div v-if="!isError">
-      <a-table
-        :dataSource="dataSource"
-        :columns="getHighlightedColumns"
-        bordered
-        :pagination="false"
-      />
-    </div>
-
-    <!-- 错误信息区域 - 仅在错误时显示 -->
-    <div v-else class="error-container">
-      <div class="error-title">数据解析错误</div>
-      <div class="error-message">{{ errorMessage }}</div>
-      <div v-if="errorLine" class="error-data">
-        <div class="error-data-title">错误数据行:</div>
-        <div class="error-data-content">{{ errorLine }}</div>
-      </div>
+    <a-table
+      :dataSource="dataSource"
+      :columns="getHighlightedColumns"
+      bordered
+      :pagination="false"
+    />
+    <div class="h-40px"></div>
+    <div class="flex h-40px items-center justify-center fixed bottom-0 w-100vw">
+      <a-config-provider :component-size="'small'">
+        <a-space wrap>
+          <a-button type="primary" @click="minData"> {{ minIndex }} </a-button>
+          <a-button type="primary" @click="prevData"> 上一个数据 </a-button>
+          <a-button type="primary" @click="nextData"> 下一个数据 </a-button>
+          <a-button type="primary" @click="maxData"> {{ maxIndex }} </a-button>
+        </a-space>
+      </a-config-provider>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
+import { Modal } from 'ant-design-vue'
+
+const title = useTitle()
 
 // 数据索引范围 (假设数据文件从 150 到 170)
-const minIndex = 160
-const maxIndex = 161
-const currentIndex = ref(maxIndex) // 默认从最小索引开始
+const minIndex = 159
+const maxIndex = 162
+const currentIndex = ref(maxIndex)
 const errorMessage = ref<string | null>(null)
-const errorLine = ref<string | null>(null) // 存储导致错误的数据行
-const isError = ref(false) // 错误状态标志
+const errorLine = ref<string | null>(null)
+const isError = ref(false)
 const highlightedColumns = reactive<Set<number>>(new Set())
 
-// 固定80列
-const columnCount = 80
+// 固定81列（前80是红球，最后1列用于附加号码）
+const columnCount = 81
 
 // 生成列配置
 const getHighlightedColumns = computed(() =>
   Array.from({ length: columnCount }, (_, index) => ({
-    title: `${(index + 1).toString().padStart(2, '0')}`,
+    title: index === 80 ? 'EX' : `${(index + 1).toString().padStart(2, '0')}`,
     dataIndex: `column_${index}`,
     key: `column_${index}`,
-    width: 30,
-    ellipsis: true,
     align: 'center',
-    customHeaderCell: (column) => ({
-      class: { 'highlighted-column': highlightedColumns.has(index) },
-      onClick: () => handleHeaderClick(index),
-    }),
-    customCell: (record) => ({
+    customHeaderCell: () =>
+      index === 80
+        ? {}
+        : {
+            onClick: () => handleHeaderClick(index),
+          },
+    customCell: () => ({
       class: { 'highlighted-column': highlightedColumns.has(index) },
     }),
   })),
@@ -72,11 +62,10 @@ const dataSource = ref<any[]>([])
 
 // 表头点击事件
 const handleHeaderClick = (columnIndex: number) => {
-  console.log('处理表头点击', columnIndex, highlightedColumns.has(columnIndex))
+  if (columnIndex === 80) return // 附加列不高亮
   highlightedColumns.has(columnIndex)
     ? highlightedColumns.delete(columnIndex)
     : highlightedColumns.add(columnIndex)
-  console.log('当前高亮列:', Array.from(highlightedColumns))
 }
 
 // 加载指定索引的数据
@@ -84,13 +73,15 @@ const loadData = async (index: number) => {
   isError.value = false
   errorMessage.value = null
   errorLine.value = null
-
+  title.value = index
   try {
-    // 动态导入数据文件
-    const dataModule = await import(`./data/${index.toString().padStart(3, '0')}`)
-    const ipt = dataModule.ipt || ''
+    const path = `./data/${index.toString().padStart(3, '0')}.ts`
+    const dataModule = await import(/* @vite-ignore */ path)
 
-    // 解析数据
+    const ipt = dataModule.ipt || ''
+    highlightedColumns.clear()
+    dataModule.isRedList.forEach((i) => highlightedColumns.add(i - 1))
+
     const lines = ipt
       .trim()
       .split('\n')
@@ -98,9 +89,9 @@ const loadData = async (index: number) => {
     if (lines.length === 0) throw new Error('没有有效的数据行')
 
     const parsedData = lines.map((line, lineIndex) => {
-      const cleanedLine = line.replace(/\s/g, '')
+      const [mainPart, extraRaw] = line.split(',')
+      const cleanedLine = mainPart.replace(/\s/g, '')
 
-      // 校验长度并记录错误行
       if (cleanedLine.length % 2 !== 0) {
         errorLine.value = line
         throw new Error(`第 ${lineIndex + 1} 行数据长度不是偶数，请检查：${line}`)
@@ -117,12 +108,23 @@ const loadData = async (index: number) => {
         numbers.push(number)
       }
 
+      // 附加号码处理（只允许1~10）
+      let extraValue = ''
+      if (extraRaw) {
+        const n = parseInt(extraRaw.trim(), 10)
+        if (!isNaN(n) && n >= 1 && n <= 10) {
+          extraValue = n.toString().padStart(2, '0')
+        }
+      }
+
       const rowData: Record<string, string> = {}
       for (let i = 0; i < columnCount; i++) rowData[`column_${i}`] = ''
       numbers.forEach((num) => {
         const columnIndex = parseInt(num, 10) - 1
         rowData[`column_${columnIndex}`] = num
       })
+
+      rowData[`column_80`] = extraValue
 
       return { key: `row_${lineIndex}`, ...rowData }
     })
@@ -151,6 +153,13 @@ const prevData = () => {
   }
 }
 
+function maxData() {
+  loadData(maxIndex)
+}
+function minData() {
+  loadData(minIndex)
+}
+
 // 下一个数据
 const nextData = () => {
   if (currentIndex.value < maxIndex) {
@@ -159,10 +168,20 @@ const nextData = () => {
   }
 }
 
-// 初始化加载默认数据
 onMounted(() => {
   loadData(currentIndex.value)
 })
+
+watch(
+  () => errorMessage.value,
+  (v) => {
+    Modal.confirm({
+      title: '错误',
+      content: v,
+      centered: true,
+    })
+  },
+)
 </script>
 
 <style scoped>
@@ -249,5 +268,16 @@ onMounted(() => {
 :deep(.ant-table-tbody .highlighted-column:not(:empty)) {
   background-color: #ffcdd2 !important;
   color: #c62828 !important;
+}
+</style>
+<style>
+.ant-notification-notice {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+  width: max-content !important;
+  margin: 0 !important;
 }
 </style>

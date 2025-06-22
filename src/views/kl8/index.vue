@@ -14,6 +14,8 @@
           <a-button type="primary" @click="prevData"> 上一个数据 </a-button>
           <a-button type="primary" @click="nextData"> 下一个数据 </a-button>
           <a-button type="primary" @click="maxData"> {{ maxIndex }} </a-button>
+          <a-button @click="copyToClipboard" type="primary">复制</a-button>
+          <a-button @click="clear" type="primary">清空</a-button>
         </a-space>
       </a-config-provider>
     </div>
@@ -21,23 +23,41 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, reactive, onMounted, watch } from 'vue'
-import { Modal } from 'ant-design-vue'
-
+import { Modal, message } from 'ant-design-vue'
+import { reactive } from 'vue'
 const title = useTitle()
 
 // 数据索引范围 (假设数据文件从 150 到 170)
 const minIndex = 159
-const maxIndex = 162
+const maxIndex = 163
 const currentIndex = ref(maxIndex)
 const errorMessage = ref<string | null>(null)
 const errorLine = ref<string | null>(null)
 const isError = ref(false)
-const highlightedColumns = reactive<Set<number>>(new Set())
-
-// 固定81列（前80是红球，最后1列用于附加号码）
+const highlightedColumns = reactive(new Set())
 const columnCount = 81
+const copyToClipboard = () => {
+  const text = Array.from(highlightedColumns)
+    .sort((a, b) => {
+      return a - b
+    })
+    .map((item) => item + 1)
 
+  console.log(text.join(','))
+
+  // // 复制到剪贴板
+  navigator.clipboard
+    .writeText(text.join(','))
+    .then(() => {
+      console.log('已复制到剪贴板:', text)
+    })
+    .catch((err) => {
+      console.error('复制失败:', err)
+    })
+}
+function clear() {
+  highlightedColumns.clear()
+}
 // 生成列配置
 const getHighlightedColumns = computed(() =>
   Array.from({ length: columnCount }, (_, index) => ({
@@ -63,6 +83,7 @@ const dataSource = ref<any[]>([])
 // 表头点击事件
 const handleHeaderClick = (columnIndex: number) => {
   if (columnIndex === 80) return // 附加列不高亮
+
   highlightedColumns.has(columnIndex)
     ? highlightedColumns.delete(columnIndex)
     : highlightedColumns.add(columnIndex)
@@ -70,6 +91,7 @@ const handleHeaderClick = (columnIndex: number) => {
 
 // 加载指定索引的数据
 const loadData = async (index: number) => {
+  const hide = message.loading('加载中...', 0)
   isError.value = false
   errorMessage.value = null
   errorLine.value = null
@@ -80,7 +102,9 @@ const loadData = async (index: number) => {
 
     const ipt = dataModule.ipt || ''
     highlightedColumns.clear()
-    dataModule.isRedList.forEach((i) => highlightedColumns.add(i - 1))
+    dataModule.isRedList.forEach((i) => {
+      highlightedColumns.add(i - 1)
+    })
 
     const lines = ipt
       .trim()
@@ -143,6 +167,7 @@ const loadData = async (index: number) => {
       console.error('解析错误:', error)
     }
   }
+  hide()
 }
 
 // 上一个数据

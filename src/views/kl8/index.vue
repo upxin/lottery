@@ -25,11 +25,19 @@
 <script lang="ts" setup>
 import { Modal, message } from 'ant-design-vue'
 import { reactive } from 'vue'
+const files = import.meta.glob('./data/*', {
+  eager: true,
+  as: 'url',
+})
+const names = Object.keys(files).map((key) => {
+  return key.split('/').pop() // 提取最后一部分作为文件名
+})
+
 const title = useTitle()
 
-// 数据索引范围 (假设数据文件从 150 到 170)
-const minIndex = 159
-const maxIndex = 163
+const minIndex = names[0]?.split('.')[0]
+const maxIndex = names[names.length - 1]?.split('.')[0]
+
 const currentIndex = ref(maxIndex)
 const errorMessage = ref<string | null>(null)
 const errorLine = ref<string | null>(null)

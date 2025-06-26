@@ -163,7 +163,6 @@ const loadData = async (index: number) => {
 
     dataSource.value = parsedData
       .map((row) => ({ ...row, numberCount: Object.values(row).filter((v) => v !== '').length }))
-      .sort((a, b) => b.numberCount - a.numberCount)
       .map((row) => ({ ...row, numberCount: undefined }))
   } catch (error) {
     isError.value = true

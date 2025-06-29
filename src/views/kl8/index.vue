@@ -26,8 +26,8 @@
 import { Modal, message } from 'ant-design-vue'
 import { reactive } from 'vue'
 const files = import.meta.glob('./data/*', {
-  eager: true,
-  as: 'url',
+  query: '?url',
+  import: 'default',
 })
 const names = Object.keys(files).map((key) => {
   return key.split('/').pop() // 提取最后一部分作为文件名

@@ -119,7 +119,6 @@ const loadData = async (index: number) => {
       .split('\n')
       .filter((line) => line.trim() !== '')
     if (lines.length === 0) throw new Error('没有有效的数据行')
-
     const parsedData = lines.map((line, lineIndex) => {
       const [mainPart, extraRaw] = line.split(',')
       const cleanedLine = mainPart.replace(/\s/g, '')
@@ -160,7 +159,24 @@ const loadData = async (index: number) => {
 
       return { key: `row_${lineIndex}`, ...rowData }
     })
+    function extractNonEmptyNumbersByGroup(arr) {
+      return arr
+        .map((item) => {
+          // 提取当前对象的非空数字
+          const nonEmpty = Object.values(item)
+            .filter((value) => {
+              return value && !isNaN(Number(value))
+            })
+            .map(String) // 保持字符串类型
 
+          return nonEmpty
+        })
+        .filter((group) => group.length > 0) // 过滤掉没有数字的组
+    }
+
+    // 调用函数获取分组结果
+    const groupedNumbers = extractNonEmptyNumbersByGroup(parsedData)
+    console.log('按对象分组的非空数字:', groupedNumbers)
     dataSource.value = parsedData
       .map((row) => ({ ...row, numberCount: Object.values(row).filter((v) => v !== '').length }))
       .map((row) => ({ ...row, numberCount: undefined }))

@@ -11,7 +11,6 @@
       <a-config-provider :component-size="'small'">
         <a-space wrap>
           <a-button @click="$router.push('/ssq')">ssq</a-button>
-
           <a-button type="primary" @click="minData"> {{ minIndex }} </a-button>
           <a-button type="primary" @click="prevData"> 上一个数据 </a-button>
           <a-button type="primary" @click="nextData"> 下一个数据 </a-button>
@@ -36,6 +35,7 @@ const names = Object.keys(files).map((key) => {
 })
 
 const title = useTitle()
+title.value = 'kl8'
 
 const minIndex = names[0]?.split('.')[0]
 const maxIndex = names[names.length - 1]?.split('.')[0]

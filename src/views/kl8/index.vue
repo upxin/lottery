@@ -10,6 +10,8 @@
     <div class="flex h-40px items-center justify-center fixed bottom-0 w-100vw">
       <a-config-provider :component-size="'small'">
         <a-space wrap>
+          <a-button @click="$router.push('/ssq')">ssq</a-button>
+
           <a-button type="primary" @click="minData"> {{ minIndex }} </a-button>
           <a-button type="primary" @click="prevData"> 上一个数据 </a-button>
           <a-button type="primary" @click="nextData"> 下一个数据 </a-button>

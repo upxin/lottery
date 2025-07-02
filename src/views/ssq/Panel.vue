@@ -35,7 +35,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from 'vue'
 import { redBallList } from './data' // 确保lists存在且路径正确
 // 接收父组件传递的标题和需要标红的数字
 const props = defineProps<{

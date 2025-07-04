@@ -1,0 +1,5 @@
+@layer utilities {
+  .c-bottom {
+    @apply flex w-screen items-center justify-center fixed bottom-0 bg-white z-10 py-4px;
+  }
+}

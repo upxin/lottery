@@ -1,4 +1,6 @@
-export const isRedList = []
+export const isRedList = [
+  1, 7, 13, 17, 22, 23, 38, 40, 41, 45, 46, 52, 53, 60, 66, 68, 69, 70, 71, 78,
+]
 
 export const ipt = `
 02 04 10162025 263334 3963 64,6

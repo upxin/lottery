@@ -1,8 +1,25 @@
 <template>
   <div>
-    <el-table :data="dataSource" border style="width: 1782px" class="mx-auto">
-      <!-- 使用 v-for 生成列 -->
+    <el-table
+      @row-click="handleRowClick"
+      :row-class-name="getRowClassName"
+      :data="dataSource"
+      border
+      style="width: 1822px"
+      class="mx-auto"
+    >
+      <!-- 新增：逗号前数据长度列 -->
       <el-table-column
+        prop="mainLength"
+        label="长度"
+        width="40"
+        align="center"
+        :resizable="false"
+      />
+
+      <!-- 原有列配置 -->
+      <el-table-column
+        :resizable="false"
         v-for="column in columns"
         :key="column.key"
         :prop="column.dataIndex"
@@ -10,14 +27,12 @@
         :align="column.align"
         :width="22"
       >
-        <!-- 表头模板 -->
         <template #header>
           <div @click="handleHeaderClick(column.dataIndex)">
             {{ column.title }}
           </div>
         </template>
 
-        <!-- 单元格模板 -->
         <template #default="{ row }">
           <div :class="getCellClass(column.dataIndex)">
             {{ row[column.dataIndex] }}
@@ -26,20 +41,25 @@
       </el-table-column>
     </el-table>
 
-    <!-- 底部控制栏保持不变 -->
+    <!-- 底部控制栏（新增复制按钮） -->
     <div class="c-bottom">
-      <el-button type="primary" @click="minData">{{ minIndex }}</el-button>
+      <el-button color="#002FA7" type="primary" @click="minData">{{ minIndex }}</el-button>
       <el-button type="primary" @click="prevData">上一个数据</el-button>
       <el-button type="primary" @click="nextData">下一个数据</el-button>
-      <el-button type="primary" @click="maxData">{{ maxIndex }}</el-button>
+      <el-button color="#002FA7" type="info" @click="maxData">{{ maxIndex }}</el-button>
       <el-button @click="copyToClipboard" type="primary">复制高亮数据</el-button>
-      <el-button @click="clear" type="primary">清空</el-button>
+      <!-- 新增：复制ipt数据（按长度排序） -->
+      <el-button @click="copySortedIptData" type="primary">复制ipt数据</el-button>
+      <el-button @click="clear" type="primary">清空高亮</el-button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-const router = useRouter()
+import { useHighLight } from '@/hooks/useHighLight'
+import { onMounted, ref, reactive, computed, watch } from 'vue' // 补充导入
+const { handleRowClick, getRowClassName } = useHighLight()
+
 const title = useTitle()
 title.value = 'kl8'
 
@@ -55,11 +75,7 @@ const errorLine = ref<string | null>(null)
 const isError = ref(false)
 const columnCount = 81
 
-// 默认高亮列（转换为0-80的索引）
-const defaultHighlighted = [
-  1, 7, 13, 17, 22, 23, 38, 40, 41, 45, 46, 52, 53, 60, 66, 68, 69, 70, 71, 78,
-]
-const highlightedColumns = reactive(new Set<number>(defaultHighlighted.map((i) => i - 1)))
+const highlightedColumns = reactive(new Set<number>())
 
 // 生成列配置（使用 dataIndex 而非 _idx）
 const columns = computed(() =>
@@ -76,14 +92,6 @@ const columns = computed(() =>
 const getDataIndex = (dataIndex: string) => {
   const match = dataIndex.match(/\d+/)
   return match ? parseInt(match[0]) : -1
-}
-
-// 获取表头样式
-const getHeaderClass = (dataIndex: string) => {
-  const colIndex = getDataIndex(dataIndex)
-  return colIndex !== -1 && highlightedColumns.has(colIndex) && colIndex !== 80
-    ? 'highlighted-header'
-    : ''
 }
 
 // 获取单元格样式
@@ -108,14 +116,17 @@ const handleHeaderClick = (dataIndex: string) => {
 
 // 数据源
 const dataSource = ref<any[]>([])
+// 存储原始ipt数据（用于复制功能）
+const rawIptData = ref<string>('')
 
-// 加载数据函数
+// 加载数据函数（新增长度计算和原始数据存储）
 const loadData = async (index: number) => {
   const loading = ElLoading.service()
   isError.value = false
   errorMessage.value = null
   errorLine.value = null
   title.value = index.toString()
+  rawIptData.value = '' // 重置原始数据
 
   try {
     const fileName = `./data/${index.toString().padStart(3, '0')}.ts`
@@ -124,6 +135,7 @@ const loadData = async (index: number) => {
 
     const dataModule = await loader()
     const ipt = dataModule.ipt || ''
+    rawIptData.value = ipt // 保存原始ipt数据
 
     // 清空当前高亮列并应用新的高亮配置
     highlightedColumns.clear()
@@ -150,7 +162,7 @@ const loadData = async (index: number) => {
       // 验证数据长度
       if (cleanedLine.length % 2 !== 0) {
         errorLine.value = line
-        throw new Error(`第 ${lineIndex + 1} 行数据长度不是偶数，请检查：${line}`)
+        throw new Error(`第 ${lineIndex + 1} 行数据长度不是偶数：${line}`)
       }
 
       // 解析数字
@@ -161,7 +173,7 @@ const loadData = async (index: number) => {
 
         if (isNaN(numValue) || numValue < 1 || numValue > 80) {
           errorLine.value = line
-          throw new Error(`第 ${lineIndex + 1} 行中数字 ${number} 不在 01-80 范围内，请检查`)
+          throw new Error(`第 ${lineIndex + 1} 行中数字 ${number} 不在1-80范围`)
         }
 
         numbers.push(number)
@@ -190,7 +202,10 @@ const loadData = async (index: number) => {
 
       rowData[`column_80`] = extraValue // EX列
 
-      return { key: `row_${lineIndex}`, ...rowData }
+      // 新增：添加逗号前数据长度（数字个数 = 字符长度 / 2）
+      rowData['mainLength'] = (cleanedLine.length / 2).toString()
+
+      return { id: `row_${lineIndex}`, key: `row_${lineIndex}`, ...rowData }
     })
 
     dataSource.value = parsedData
@@ -198,10 +213,8 @@ const loadData = async (index: number) => {
     isError.value = true
     if (error instanceof Error) {
       errorMessage.value = error.message
-      console.error('解析错误:', error.message)
     } else {
       errorMessage.value = '解析表格数据时发生未知错误'
-      console.error('解析错误:', error)
     }
   } finally {
     loading.close()
@@ -242,10 +255,47 @@ const copyToClipboard = () => {
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      console.log('已复制到剪贴板:', text)
+      ElMessage.success('已复制高亮数据')
     })
     .catch((err) => {
-      console.error('复制失败:', err)
+      ElMessage.error('复制失败')
+    })
+}
+
+// 新增：按每行数据长度排序后复制ipt数据（去空格）
+const copySortedIptData = () => {
+  if (!rawIptData.value.trim()) {
+    ElMessage.warning('没有可复制的ipt数据')
+    return
+  }
+
+  // 1. 处理原始数据：去空格、过滤空行
+  const processedLines = rawIptData.value
+    .trim()
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, '')) // 去所有空格
+    .filter((line) => line.trim() !== '') // 过滤空行
+
+  // 2. 按逗号前数据长度排序（从长到短）
+  const sortedLines = [...processedLines].sort((a, b) => {
+    // 分割逗号（支持单个或两个逗号）
+    const aMainLength = a.includes(',,') ? a.split(',,')[0].length : a.split(',')[0]?.length || 0
+
+    const bMainLength = b.includes(',,') ? b.split(',,')[0].length : b.split(',')[0]?.length || 0
+
+    return bMainLength - aMainLength // 降序排序
+  })
+
+  // 3. 拼接为文本并复制
+  const textToCopy = sortedLines.join('\n')
+
+  navigator.clipboard
+    .writeText(textToCopy)
+    .then(() => {
+      ElMessage.success('已按长度排序复制ipt数据')
+    })
+    .catch(() => {
+      ElMessage.error('复制ipt数据失败')
     })
 }
 
@@ -266,8 +316,8 @@ watch(
     if (v) {
       ElMessageBox.confirm(v, '错误提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
         type: 'error',
+        showCancelButton: false,
       })
     }
   },
@@ -295,11 +345,6 @@ watch(
   background-color: #ffe082 !important;
   color: #222 !important;
   font-weight: bold !important;
-}
-
-/* 非空单元格样式 */
-:deep(.el-table__body .el-table__cell:not(:empty)) {
-  background-color: #f0f9ff;
 }
 
 :deep(.el-table--small .cell) {

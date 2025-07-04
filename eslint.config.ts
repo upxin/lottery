@@ -21,6 +21,7 @@ export default defineConfigWithVueTs(
   skipFormatting,
   {
     rules: {
+      '@typescript-eslint/no-explicit-any': 0,
       'vue/multi-word-component-names': 0,
     },
   },

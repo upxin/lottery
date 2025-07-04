@@ -15,6 +15,8 @@ declare module 'vue' {
     Buttons: typeof import('./src/components/Buttons/Buttons.vue')['default']
     ElAffix: typeof import('element-plus/es')['ElAffix']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
+    ElButtonGroups: typeof import('element-plus/es')['ElButtonGroups']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElColumn: typeof import('element-plus/es')['ElColumn']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']

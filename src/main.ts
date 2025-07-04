@@ -1,6 +1,7 @@
-import 'virtual:uno.css'
 import './assets/common.css'
 import './assets/main.scss'
+
+import 'virtual:uno.css' // 放在最后 优先级高
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

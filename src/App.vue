@@ -2,7 +2,7 @@
 
 <template>
   <el-config-provider :size="'small'" :button="{ type: 'primary' }">
-    <section fixed bottom-0 z-99 pl-400px py-4px>
+    <section fixed bottom-0 z-99 py-4px pl-10px flex flex-col>
       <Buttons></Buttons>
     </section>
     <RouterView />

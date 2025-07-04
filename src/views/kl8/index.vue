@@ -12,10 +12,7 @@
       >
         <!-- 表头模板 -->
         <template #header>
-          <div
-            :class="getHeaderClass(column.dataIndex)"
-            @click="handleHeaderClick(column.dataIndex)"
-          >
+          <div @click="handleHeaderClick(column.dataIndex)">
             {{ column.title }}
           </div>
         </template>
@@ -30,7 +27,7 @@
     </el-table>
 
     <!-- 底部控制栏保持不变 -->
-    <div c-bottom>
+    <div class="c-bottom">
       <el-button type="primary" @click="minData">{{ minIndex }}</el-button>
       <el-button type="primary" @click="prevData">上一个数据</el-button>
       <el-button type="primary" @click="nextData">下一个数据</el-button>

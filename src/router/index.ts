@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Kl from '../views/kl8/index.vue'
+import Ssq from '@/views/ssq/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,7 +18,7 @@ const router = createRouter({
     {
       path: '/ssq',
       name: 'ssq',
-      component: () => import('@/views/ssq/index.vue'),
+      component: Ssq,
     },
     {
       path: '/dlt',

@@ -20,7 +20,7 @@
         align="center"
       >
         <template #header>
-          <div :class="getHeaderClass(col.prop)" @click.stop="toggleHighlight(col.prop)">
+          <div @click.stop="toggleHighlight(col.prop)">
             {{ col.label }}
           </div>
         </template>
@@ -49,7 +49,7 @@
         align="center"
       >
         <template #header>
-          <div :class="getHeaderClass(col.prop)" @click.stop="toggleHighlight(col.prop)">
+          <div @click.stop="toggleHighlight(col.prop)">
             {{ col.label }}
           </div>
         </template>

@@ -1,8 +1,6 @@
 <template>
-  <section
-    class="flex items-center justify-center border-0 border-b-6px border-gray-200 border-solid"
-  >
-    <el-button class="mx-20px" text type="success">
+  <section class="flex items-center border-0 border-b-2px border-gray-200 border-solid pt-10px">
+    <el-button style="width: 60px" text type="success">
       {{ title }}
     </el-button>
 
@@ -15,11 +13,8 @@
         <div
           v-for="(item, colIndex) in row"
           :key="`${rowIndex}-${colIndex}`"
-          class="m-2px bg-gray-50 text-gray-400 text-sm"
-          :class="[
-            'flex items-center justify-center w-22px h-22px rounded-md',
-            isNumberSelected(item.val) ? ' bg-red-50 text-red-600 font-medium' : '',
-          ]"
+          class="nums"
+          :class="[isNumberSelected(item.val) ? ' text-red-600 font-medium' : '']"
         >
           {{ item.val !== null ? item.val : '' }}
         </div>
@@ -35,10 +30,8 @@
         <div
           v-for="(item, colIndex) in row"
           :key="`${rowIndex}-${colIndex}_${item.val}`"
-          class="m-2px text-sm"
-          :class="['flex items-center justify-center w-22px h-22px rounded-md']"
+          class="text-gray-400 text-sm flex items-center justify-center w-26px"
           :style="{
-            background: blue == item.val ? '#eff6ff' : '#f9fafb',
             color: blue == item.val ? '#2563eb' : '#9ca3af',
             fontWeight: blue == item.val ? 500 : 400,
           }"
@@ -68,3 +61,8 @@ const isNumberSelected = (num: number | null) => {
   return props.highlightNums.includes(Number(num))
 }
 </script>
+<style lang="scss">
+.border-row {
+  @apply border-0 border-solid border-b-1px border-gray-200;
+}
+</style>

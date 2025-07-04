@@ -1,29 +1,65 @@
 <template>
-  <section flex flex-col items-center>
+  <section>
     <el-table
-      style="width: 1224px"
+      class="mx-auto"
+      style="width: 1240px"
       :data="parsedRows"
       border
       size="small"
-      :header-cell-style="headerCellStyle"
-      :cell-style="cellStyle"
       :height="getHeight"
     >
       <el-table-column type="index" width="24px" label="In" align="center"></el-table-column>
+
+      <!-- 前区列（N1-N33） -->
       <el-table-column
-        v-for="col in allHeaders"
+        v-for="col in headers33"
         :key="col.prop"
         :prop="col.prop"
         :label="col.label"
         :width="24"
         align="center"
-      />
+      >
+        <template #header>
+          <div :class="getHeaderClass(col.prop)" @click.stop="toggleHighlight(col.prop)">
+            {{ col.label }}
+          </div>
+        </template>
+        <template #default="{ row }">
+          <div :class="getCellClass(col.prop, row)">{{ row[col.prop] }}</div>
+        </template>
+      </el-table-column>
+
+      <!-- 分隔列 -->
+      <el-table-column label="," prop="comma" width="40" align="center">
+        <template #header>
+          <div class="comma-header">{{ ',' }}</div>
+        </template>
+        <template #default="{ row }">
+          <div :class="getCommaClass(row)">{{ row.comma }}</div>
+        </template>
+      </el-table-column>
+
+      <!-- 后区列（H1-H16） -->
+      <el-table-column
+        v-for="col in headers16"
+        :key="col.prop"
+        :prop="col.prop"
+        :label="col.label"
+        :width="24"
+        align="center"
+      >
+        <template #header>
+          <div :class="getHeaderClass(col.prop)" @click.stop="toggleHighlight(col.prop)">
+            {{ col.label }}
+          </div>
+        </template>
+        <template #default="{ row }">
+          <div :class="getCellClass(col.prop, row)">{{ row[col.prop] }}</div>
+        </template>
+      </el-table-column>
     </el-table>
-    <div
-      ref="footerRef"
-      class="flex w-screen items-center justify-center fixed bottom-0 py-4px bg-#fff z-10"
-    >
-      <el-button type="primary" @click="jumph" size="small">ssq-h</el-button>
+
+    <div ref="footerRef" class="c-bottom">
       <el-button
         type="primary"
         @click="prevHis"
@@ -33,7 +69,7 @@
       >
         上一个
       </el-button>
-      <el-button text class="mx-2" type="success" disabled> his/{{ currentHis }} </el-button>
+      <el-button text class="mx-2" type="success" disabled> {{ currentHis }} </el-button>
       <el-button
         type="primary"
         @click="nextHis"
@@ -46,15 +82,7 @@
       <el-button type="primary" @click="currentHis = maxHis" size="small" class="mr-2">
         new
       </el-button>
-      <el-button
-        type="primary"
-        @click="
-          () => {
-            toggle()
-          }
-        "
-        size="small"
-      >
+      <el-button type="primary" @click="toggle()" size="small">
         {{ showDot ? '显示数字' : '显示圆点' }}
       </el-button>
       <el-button type="primary" @click="copy" size="small"> copy </el-button>
@@ -63,15 +91,18 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
-const { height: windowHeight } = useWindowSize()
+const router = useRouter()
+const title = useTitle()
+title.value = 'ssq'
+
 const footerRef = ref<HTMLElement | null>(null)
+const { height: windowHeight } = useWindowSize()
 const { height: footerHeight } = useElementSize(footerRef)
 const [showDot, toggle] = useToggle(false)
-const title = useTitle()
 const extraSpace = 10
 
-const files = import.meta.glob('./his/*.ts', { eager: true })
+// 加载历史数据文件
+const files = import.meta.glob('./hisData/*.ts', { eager: true })
 const hisNums = Object.keys(files)
   .map((path) => {
     const m = path.match(/(\d+)\.ts$/)
@@ -84,236 +115,128 @@ const minHis = Math.min(...hisNums)
 const maxHis = Math.max(...hisNums)
 const currentHis = ref(maxHis)
 
-const g1 = ref<number[]>([])
-const g2 = ref<number[]>([])
-const ipt = ref('')
+const g1 = ref<number[]>([]) // 前区特殊标记
+const g2 = ref<number[]>([]) // 后区特殊标记
+const ipt = ref('') // 原始数据文本
 
-function loadData() {
+// 高亮状态管理
+const highlighted = reactive({
+  n: new Set<number>(), // 前区高亮状态 (1-33)
+  h: new Set<number>(), // 后区高亮状态 (1-16)
+})
+
+// 初始化高亮状态
+const syncHighlightFromData = () => {
+  highlighted.n.clear()
+  highlighted.h.clear()
+  g1.value.forEach((num) => highlighted.n.add(num))
+  g2.value.forEach((num) => highlighted.h.add(num))
+}
+
+// 加载数据函数
+const loadData = async () => {
   const loading = ElLoading.service({
-    lock: true, // 锁定屏幕滚动
-    text: '加载中...', // 显示文本
-    background: 'rgba(0, 0, 0, 0.7)', // 背景遮罩
-    target: document.body, // 覆盖整个页面
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)',
+    target: document.body,
   })
-  title.value = String(currentHis.value)
+
   try {
     const filePath = Object.keys(files).find((p) => p.endsWith(`${currentHis.value}.ts`))
     if (!filePath) throw new Error('未找到数据模块')
+
     const mod: any = files[filePath]
     g1.value = Array.isArray(mod?.g1) ? mod.g1 : []
     g2.value = Array.isArray(mod?.g2) ? mod.g2 : []
     ipt.value = typeof mod?.ipt === 'string' ? mod.ipt : ''
-    loading.close()
+
+    // 同步高亮状态
+    syncHighlightFromData()
+
+    title.value = `ssq #${currentHis.value}`
   } catch (e: any) {
     ElMessage.error('数据加载失败：' + (e?.message ?? e))
     g1.value = []
     g2.value = []
     ipt.value = ''
+  } finally {
     loading.close()
   }
 }
-loadData()
-watch(currentHis, loadData)
 
-const headers33 = Array.from({ length: 33 }, (_, i) => ({
-  label: String(i + 1).padStart(2, '0'),
-  prop: `N${i + 1}`,
-  width: 36,
-}))
-const headers16 = Array.from({ length: 16 }, (_, i) => ({
-  label: String(i + 1).padStart(2, '0'),
-  prop: `H${i + 1}`,
-  width: 36,
-}))
-const allHeaders = [...headers33, { label: ',', prop: 'comma', width: 40 }, ...headers16]
-
-function filterRange(nums: string[], min: number, max: number) {
-  return (nums ?? []).filter((n) => {
-    const v = Number(n)
-    return /^\d{2}$/.test(n) && v >= min && v <= max
-  })
+// 解析列属性（如 "N12" -> {type: "N", index: 12}）
+const parseColumnProp = (prop: string) => {
+  const match = prop.match(/^([NH])(\d+)$/)
+  if (!match) return null
+  return {
+    type: match[1] as 'N' | 'H',
+    index: parseInt(match[2], 10),
+  }
 }
-function copy() {
-  if (!ipt.value || typeof ipt.value !== 'string') {
-    ElMessage.warning('没有可复制的数据')
-    return
-  }
-  const lines = ipt.value.trim().split('\n')
-  const result: string[] = []
-  for (const line0 of lines) {
-    // 去除所有空白字符
-    const line = line0.replace(/\s+/g, '')
-    if (!line) continue
 
-    let main = '',
-      tail = '',
-      sep = ''
-    if (line.includes(',,') && line.split(',,').length === 2) {
-      ;[main, tail] = line.split(',,')
-      sep = ',,'
-    } else if (line.includes(',')) {
-      ;[main, tail] = line.split(',')
-      sep = ','
-    } else {
-      // 没有分隔符，不输出
-      continue
-    }
+// 表头样式
+const getHeaderClass = (prop: string) => {
+  const parsed = parseColumnProp(prop)
+  if (!parsed) return ''
 
-    // 保留原始顺序，直接拼接
-    const lineStr = main + sep + tail
-    if (lineStr) result.push(lineStr)
-  }
-  const text = result.join('\n')
+  const isHighlighted =
+    parsed.type === 'N' ? highlighted.n.has(parsed.index) : highlighted.h.has(parsed.index)
 
-  // 按逗号前数字长度排序函数
-  function sortByPrefixLength(inputString) {
-    return inputString
-      .split('\n') // 拆分为行
-      .sort((a, b) => {
-        // 提取每行第一个逗号前的部分
-        const prefixA = a.split(',')[0]
-        const prefixB = b.split(',')[0]
-
-        // 按长度降序排序
-        return prefixB.length - prefixA.length
-      })
-      .join('\n') // 重新组合为字符串
-  }
-
-  const sortedString = sortByPrefixLength(text)
-
-  if (!sortedString) {
-    ElMessage.warning('没有可复制的内容')
-    return
-  }
-  navigator.clipboard
-    .writeText(sortedString)
-    .then(() => ElMessage.success('已复制'))
-    .catch(() => ElMessage.error('复制失败'))
+  return isHighlighted ? (parsed.type === 'N' ? 'header-highlight-n' : 'header-highlight-h') : ''
 }
-function validateInput(ipt: string): boolean {
-  const lines = ipt.trim().split('\n')
-  for (const [lineIndex, line0] of lines.entries()) {
-    const line = line0.replace(/\s+/g, '')
-    if (!line) continue
 
-    // 必须有逗号，且最多只能有两个
-    const commaCount = (line.match(/,/g) || []).length
-    if (commaCount < 1 || commaCount > 2) {
-      ElMessage.error({
-        message: `格式错误: 第${lineIndex + 1}行: 必须有1或2个逗号`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
+// 单元格样式
+const getCellClass = (prop: string, row: any) => {
+  const parsed = parseColumnProp(prop)
+  if (!parsed || !row[prop]) return ''
 
-    // 分裂前区和后区
-    let main = '',
-      tail = ''
-    if (line.includes(',,') && line.split(',,').length === 2) {
-      ;[main, tail] = line.split(',,')
-    } else if (line.includes(',')) {
-      ;[main, tail] = line.split(',')
-    } else {
-      main = line
-      tail = ''
-    }
+  const isHighlighted =
+    parsed.type === 'N' ? highlighted.n.has(parsed.index) : highlighted.h.has(parsed.index)
 
-    // 前区不能为空
-    if (!main) {
-      ElMessage.error({
-        message: `前区不能为空: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-    // 后区不能为空
-    if (!tail) {
-      ElMessage.error({
-        message: `后区不能为空: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-
-    // 检查前区
-    const mainArr = main.match(/\d{2}/g) || []
-    if (mainArr.length === 0) {
-      ElMessage.error({
-        message: `前区号码格式错误: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-    const mainSet = new Set(mainArr)
-    if (mainArr.length !== mainSet.size) {
-      ElMessage.error({
-        message: `前区号码有重复: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-    if (!mainArr.every((n) => /^\d{2}$/.test(n) && +n >= 1 && +n <= 33)) {
-      ElMessage.error({
-        message: `前区号码范围应为01-33: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-
-    // 检查后区
-    const tailArr = tail.match(/\d{2}/g) || []
-    if (tailArr.length === 0) {
-      ElMessage.error({
-        message: `后区号码格式错误: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-    const tailSet = new Set(tailArr)
-    if (tailArr.length !== tailSet.size) {
-      ElMessage.error({
-        message: `后区号码有重复: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-    if (!tailArr.every((n) => /^\d{2}$/.test(n) && +n >= 1 && +n <= 16)) {
-      ElMessage.error({
-        message: `后区号码范围应为01-16: 第${lineIndex + 1}行: ${line0}`,
-        duration: 10000,
-        showClose: true,
-      })
-      return false
-    }
-  }
-  return true
+  return isHighlighted
+    ? parsed.type === 'N'
+      ? 'cell-highlight-n-primary'
+      : 'cell-highlight-h-primary'
+    : parsed.type === 'N'
+      ? 'cell-highlight-n-default'
+      : 'cell-highlight-h-default'
 }
-watch(
-  () => ipt.value,
-  (v) => {
-    validateInput(v)
-  },
-  { immediate: true },
-)
+
+// 切换高亮状态
+const toggleHighlight = (prop: string) => {
+  const parsed = parseColumnProp(prop)
+  if (!parsed) return
+
+  const set = parsed.type === 'N' ? highlighted.n : highlighted.h
+
+  if (set.has(parsed.index)) {
+    set.delete(parsed.index)
+  } else {
+    set.add(parsed.index)
+  }
+}
+
+// 分隔列样式
+const getCommaClass = (row: any) => {
+  return row._doubleComma ? 'comma-cell-double' : 'comma-cell-single'
+}
+
+// 解析原始数据为表格行
 const parsedRows = computed(() => {
   if (!ipt.value || typeof ipt.value !== 'string') return []
+
   const lines = ipt.value.trim().split('\n')
   const rows: any[] = []
+
   for (const [lineIndex, line0] of lines.entries()) {
-    const line = line0.replace(/\s+/g, '') // 先去空格
+    const line = line0.replace(/\s+/g, '')
     if (!line) continue
+
     let main = '',
       tail = '',
       isDoubleComma = false
+
     if (line.includes(',,') && line.split(',,').length === 2) {
       ;[main, tail] = line.split(',,')
       isDoubleComma = true
@@ -326,108 +249,201 @@ const parsedRows = computed(() => {
       isDoubleComma = false
     }
 
-    // 非法直接跳过，不弹窗
-    if (!/^(?:\d{2})*$/.test(main)) continue
-    if (tail && !/^(?:\d{2})*$/.test(tail)) continue
+    // 验证并过滤非法数据
+    const mainArr =
+      main.match(/\d{2}/g)?.filter((n) => /^\d{2}$/.test(n) && +n >= 1 && +n <= 33) || []
+    const tailArr =
+      tail.match(/\d{2}/g)?.filter((n) => /^\d{2}$/.test(n) && +n >= 1 && +n <= 16) || []
 
-    // 只允许前区 01-33，后区 01-16
-    const mainArr = filterRange(main.match(/\d{2}/g) ?? [], 1, 33)
-    const tailArr = filterRange(tail.match(/\d{2}/g) ?? [], 1, 16)
-    const beforeCount = mainArr.length
+    if (mainArr.length === 0 || tailArr.length === 0) continue
+
     const row: Record<string, any> = {}
 
-    headers33.forEach((h, idx) => {
+    // 填充前区数据
+    headers33.value.forEach((h, idx) => {
       const num = String(idx + 1).padStart(2, '0')
       row[h.prop] = mainArr.includes(num) ? (showDot.value ? '●' : num) : ''
     })
-    row['comma'] = String(beforeCount)
-    row['_commaRaw'] = beforeCount
+
+    // 填充分隔列
+    row['comma'] = String(mainArr.length)
+    row['_commaRaw'] = mainArr.length
     row['_doubleComma'] = isDoubleComma
-    headers16.forEach((h, idx) => {
+
+    // 填充后区数据
+    headers16.value.forEach((h, idx) => {
       const num = String(idx + 1).padStart(2, '0')
       row[h.prop] = tailArr.includes(num) ? (showDot.value ? '●' : num) : ''
     })
+
     rows.push(row)
   }
-  const rets = rows.sort((a, b) => b._commaRaw - a._commaRaw)
-  return rets
+
+  // 按前区数量排序
+  return rows.sort((a, b) => b._commaRaw - a._commaRaw)
 })
 
-// ----------- 样式 -----------
-function cellStyle({ column, row }: any) {
-  const key = column.property
-  if (/^N\d+$/.test(key) && row[key]) {
-    const n = Number(key.slice(1))
-    if (g1.value.includes(n)) {
-      return { background: '#fff6e6', color: '#e67c00', fontWeight: 'bold' }
-    }
-    return { background: '#e2f7e2', color: '#409EFF', fontWeight: 'bold' }
+// 前区列配置
+const headers33 = computed(() =>
+  Array.from({ length: 33 }, (_, i) => ({
+    label: String(i + 1).padStart(2, '0'),
+    prop: `N${i + 1}`,
+    width: 24,
+  })),
+)
+
+// 后区列配置
+const headers16 = computed(() =>
+  Array.from({ length: 16 }, (_, i) => ({
+    label: String(i + 1).padStart(2, '0'),
+    prop: `H${i + 1}`,
+    width: 24,
+  })),
+)
+
+// 复制功能
+const copy = () => {
+  if (!ipt.value || typeof ipt.value !== 'string') {
+    ElMessage.warning('没有可复制的数据')
+    return
   }
-  if (/^H\d+$/.test(key) && row[key]) {
-    const n = Number(key.slice(1))
-    if (g2.value.includes(n)) {
-      return { background: '#d0f2fc', color: '#2b7abf', fontWeight: 'bold' }
-    }
-    return { background: '#e2f7e2', color: '#409EFF', fontWeight: 'bold' }
-  }
-  if (key === 'comma') {
-    if (row._doubleComma) {
-      return { background: '#ffe4ec', color: '#e33', fontWeight: 'bold' }
+
+  const lines = ipt.value.trim().split('\n')
+  const result: string[] = []
+
+  for (const line0 of lines) {
+    const line = line0.replace(/\s+/g, '')
+    if (!line) continue
+
+    let main = '',
+      tail = '',
+      sep = ''
+
+    if (line.includes(',,') && line.split(',,').length === 2) {
+      ;[main, tail] = line.split(',,')
+      sep = ',,'
+    } else if (line.includes(',')) {
+      ;[main, tail] = line.split(',')
+      sep = ','
     } else {
-      return { background: '#f3f3f3', color: '#2c3e50', fontWeight: 'bold' }
+      continue
+    }
+
+    if (main && tail) {
+      result.push(main + sep + tail)
     }
   }
-  return {}
-}
 
-function headerCellStyle({ column }: any) {
-  if (column.property === 'comma') {
-    return { background: '#efefef', color: '#333', fontWeight: 'bold' }
+  // 按前区长度排序
+  const sortedResult = result
+    .sort((a, b) => {
+      const aLen = a.split(/,+/)[0].length
+      const bLen = b.split(/,+/)[0].length
+      return bLen - aLen
+    })
+    .join('\n')
+
+  if (!sortedResult) {
+    ElMessage.warning('没有可复制的内容')
+    return
   }
-  return {}
+
+  navigator.clipboard
+    .writeText(sortedResult)
+    .then(() => ElMessage.success('已复制'))
+    .catch(() => ElMessage.error('复制失败'))
 }
 
-// ----------- 修正 prevHis/nextHis 不越界 -----------
-function prevHis() {
+// 数据导航
+const prevHis = () => {
   const idx = hisNums.indexOf(currentHis.value)
   if (idx > 0) {
     currentHis.value = hisNums[idx - 1]
   }
 }
-function nextHis() {
+
+const nextHis = () => {
   const idx = hisNums.indexOf(currentHis.value)
   if (idx >= 0 && idx < hisNums.length - 1) {
     currentHis.value = hisNums[idx + 1]
   }
 }
 
-const router = useRouter()
-function jumph() {
-  const fullPath = router.resolve('/ssq-h').href
+const jumph = () => {
+  const fullPath = router.resolve('/ssq').href
   window.open(fullPath, '_blank')
 }
 
+// 表格高度计算
 const getHeight = computed(() => {
   return windowHeight.value - (footerHeight.value || 0) - extraSpace
 })
+
+// 生命周期钩子
+onMounted(() => {
+  loadData()
+})
+
+// 监听数据变化
+watch(currentHis, loadData)
+watch([g1, g2], syncHighlightFromData)
 </script>
 
 <style scoped>
-/* 这这样做 组件外层必须加容器标签 不然不生效  vue编译的时候没有唯一组件id去穿透类 */
+/* 表格基础样式 */
 :deep(.el-table--small .cell) {
   padding: 0;
+  text-align: center;
 }
 :deep(.el-table--small .el-table__cell) {
   padding: 0;
 }
-</style>
 
-<style>
-/* 不想加容器就只能用全局的 */
-/* .el-table--small .cell {
-  padding: 0;
+/* 前区（N）高亮样式 */
+.header-highlight-n {
+  background-color: #fff6e6 !important;
+  color: #e67c00 !important;
+  font-weight: bold;
+  cursor: pointer;
 }
-.el-table--small .el-table__cell {
-  padding: 0;
-} */
+.cell-highlight-n-primary {
+  background-color: #fff6e6 !important;
+  color: #e67c00 !important;
+  font-weight: bold;
+}
+.cell-highlight-n-default {
+  font-weight: bold;
+}
+
+.header-highlight-h {
+  background-color: #d0f2fc !important;
+  color: #2b7abf !important;
+  font-weight: bold;
+  cursor: pointer;
+}
+.cell-highlight-h-primary {
+  background-color: #d0f2fc !important;
+  color: #2b7abf !important;
+  font-weight: bold;
+}
+.cell-highlight-h-default {
+  font-weight: bold;
+}
+
+/* 分隔列样式 */
+:deep(.comma-header) {
+  background-color: #efefef !important;
+  color: #333 !important;
+  font-weight: bold;
+}
+:deep(.comma-cell-single) {
+  background-color: #f3f3f3 !important;
+  color: #2c3e50 !important;
+  font-weight: bold;
+}
+:deep(.comma-cell-double) {
+  background-color: #ffe4ec !important;
+  color: #e33 !important;
+  font-weight: bold;
+}
 </style>

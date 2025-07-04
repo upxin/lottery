@@ -5,10 +5,6 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      redirect: '/kl8',
-    },
-    {
       path: '/kl8',
       name: 'kl8',
       component: Kl,
@@ -22,6 +18,11 @@ const router = createRouter({
       path: '/ssq',
       name: 'ssq',
       component: () => import('@/views/ssq/index.vue'),
+    },
+    {
+      path: '/dlt',
+      name: 'dlt',
+      component: () => import('@/views/dlt/index.vue'),
     },
   ],
 })

@@ -1,147 +1,176 @@
 <template>
   <div>
-    <a-table
-      :dataSource="dataSource"
-      :columns="getHighlightedColumns"
-      bordered
-      :pagination="false"
-    />
-    <div class="h-40px"></div>
-    <div class="flex h-40px items-center justify-center fixed bottom-0 w-100vw">
-      <a-config-provider :component-size="'small'">
-        <a-space wrap>
-          <a-button @click="$router.push('/ssq')">ssq</a-button>
-          <a-button type="primary" @click="minData"> {{ minIndex }} </a-button>
-          <a-button type="primary" @click="prevData"> 上一个数据 </a-button>
-          <a-button type="primary" @click="nextData"> 下一个数据 </a-button>
-          <a-button type="primary" @click="maxData"> {{ maxIndex }} </a-button>
-          <a-button @click="copyToClipboard" type="primary">复制</a-button>
-          <a-button @click="clear" type="primary">清空</a-button>
-        </a-space>
-      </a-config-provider>
+    <el-table :data="dataSource" border style="width: 1782px" class="mx-auto">
+      <!-- 使用 v-for 生成列 -->
+      <el-table-column
+        v-for="column in columns"
+        :key="column.key"
+        :prop="column.dataIndex"
+        :label="column.title"
+        :align="column.align"
+        :width="22"
+      >
+        <!-- 表头模板 -->
+        <template #header>
+          <div
+            :class="getHeaderClass(column.dataIndex)"
+            @click="handleHeaderClick(column.dataIndex)"
+          >
+            {{ column.title }}
+          </div>
+        </template>
+
+        <!-- 单元格模板 -->
+        <template #default="{ row }">
+          <div :class="getCellClass(column.dataIndex)">
+            {{ row[column.dataIndex] }}
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 底部控制栏保持不变 -->
+    <div c-bottom>
+      <el-button type="primary" @click="minData">{{ minIndex }}</el-button>
+      <el-button type="primary" @click="prevData">上一个数据</el-button>
+      <el-button type="primary" @click="nextData">下一个数据</el-button>
+      <el-button type="primary" @click="maxData">{{ maxIndex }}</el-button>
+      <el-button @click="copyToClipboard" type="primary">复制高亮数据</el-button>
+      <el-button @click="clear" type="primary">清空</el-button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Modal, message } from 'ant-design-vue'
-import { reactive } from 'vue'
-const files = import.meta.glob('./data/*', {
-  query: '?url',
-  import: 'default',
-})
-const names = Object.keys(files).map((key) => {
-  return key.split('/').pop() // 提取最后一部分作为文件名
-})
-
+const router = useRouter()
 const title = useTitle()
 title.value = 'kl8'
 
+// 加载数据文件
+const files = import.meta.glob('./data/*')
+const names = Object.keys(files).map((key) => key.split('/').pop())
+
 const minIndex = names[0]?.split('.')[0]
 const maxIndex = names[names.length - 1]?.split('.')[0]
-
 const currentIndex = ref(maxIndex)
 const errorMessage = ref<string | null>(null)
 const errorLine = ref<string | null>(null)
 const isError = ref(false)
-const highlightedColumns = reactive(new Set())
 const columnCount = 81
-const copyToClipboard = () => {
-  const text = Array.from(highlightedColumns)
-    .sort((a, b) => {
-      return a - b
-    })
-    .map((item) => item + 1)
 
-  console.log(text.join(','))
+// 默认高亮列（转换为0-80的索引）
+const defaultHighlighted = [
+  1, 7, 13, 17, 22, 23, 38, 40, 41, 45, 46, 52, 53, 60, 66, 68, 69, 70, 71, 78,
+]
+const highlightedColumns = reactive(new Set<number>(defaultHighlighted.map((i) => i - 1)))
 
-  // // 复制到剪贴板
-  navigator.clipboard
-    .writeText(text.join(','))
-    .then(() => {
-      console.log('已复制到剪贴板:', text)
-    })
-    .catch((err) => {
-      console.error('复制失败:', err)
-    })
-}
-function clear() {
-  highlightedColumns.clear()
-}
-// 生成列配置
-const getHighlightedColumns = computed(() =>
+// 生成列配置（使用 dataIndex 而非 _idx）
+const columns = computed(() =>
   Array.from({ length: columnCount }, (_, index) => ({
     title: index === 80 ? 'EX' : `${(index + 1).toString().padStart(2, '0')}`,
-    dataIndex: `column_${index}`,
+    dataIndex: `column_${index}`, // 格式为 "column_0", "column_1", ...
     key: `column_${index}`,
     align: 'center',
-    customHeaderCell: () =>
-      index === 80
-        ? {}
-        : {
-            onClick: () => handleHeaderClick(index),
-          },
-    customCell: () => ({
-      class: { 'highlighted-column': highlightedColumns.has(index) },
-    }),
+    index: index, // 保存原始索引（0-80）
   })),
 )
+
+// 根据 dataIndex 获取列索引（例如 "column_15" -> 15）
+const getDataIndex = (dataIndex: string) => {
+  const match = dataIndex.match(/\d+/)
+  return match ? parseInt(match[0]) : -1
+}
+
+// 获取表头样式
+const getHeaderClass = (dataIndex: string) => {
+  const colIndex = getDataIndex(dataIndex)
+  return colIndex !== -1 && highlightedColumns.has(colIndex) && colIndex !== 80
+    ? 'highlighted-header'
+    : ''
+}
+
+// 获取单元格样式
+const getCellClass = (dataIndex: string) => {
+  const colIndex = getDataIndex(dataIndex)
+  return colIndex !== -1 && highlightedColumns.has(colIndex) && colIndex !== 80
+    ? 'highlighted-cell'
+    : ''
+}
+
+// 表头点击事件处理
+const handleHeaderClick = (dataIndex: string) => {
+  const colIndex = getDataIndex(dataIndex)
+  if (colIndex === -1 || colIndex === 80) return
+
+  if (highlightedColumns.has(colIndex)) {
+    highlightedColumns.delete(colIndex)
+  } else {
+    highlightedColumns.add(colIndex)
+  }
+}
 
 // 数据源
 const dataSource = ref<any[]>([])
 
-// 表头点击事件
-const handleHeaderClick = (columnIndex: number) => {
-  if (columnIndex === 80) return // 附加列不高亮
-
-  highlightedColumns.has(columnIndex)
-    ? highlightedColumns.delete(columnIndex)
-    : highlightedColumns.add(columnIndex)
-}
-
-// 加载指定索引的数据
+// 加载数据函数
 const loadData = async (index: number) => {
-  const hide = message.loading('加载中...', 0)
+  const loading = ElLoading.service()
   isError.value = false
   errorMessage.value = null
   errorLine.value = null
-  title.value = index
+  title.value = index.toString()
+
   try {
-    const path = `./data/${index.toString().padStart(3, '0')}.ts`
-    const dataModule = await import(/* @vite-ignore */ path)
+    const fileName = `./data/${index.toString().padStart(3, '0')}.ts`
+    const loader = files[fileName]
+    if (!loader) throw new Error('数据文件不存在')
 
+    const dataModule = await loader()
     const ipt = dataModule.ipt || ''
-    highlightedColumns.clear()
-    dataModule.isRedList.forEach((i) => {
-      highlightedColumns.add(i - 1)
-    })
 
+    // 清空当前高亮列并应用新的高亮配置
+    highlightedColumns.clear()
+    if (Array.isArray(dataModule.isRedList)) {
+      dataModule.isRedList.forEach((i: number) => {
+        if (i >= 1 && i <= 80) {
+          highlightedColumns.add(i - 1)
+        }
+      })
+    }
+
+    // 解析数据行
     const lines = ipt
       .trim()
       .split('\n')
       .filter((line) => line.trim() !== '')
+
     if (lines.length === 0) throw new Error('没有有效的数据行')
+
     const parsedData = lines.map((line, lineIndex) => {
       const [mainPart, extraRaw] = line.split(',')
       const cleanedLine = mainPart.replace(/\s/g, '')
 
+      // 验证数据长度
       if (cleanedLine.length % 2 !== 0) {
         errorLine.value = line
         throw new Error(`第 ${lineIndex + 1} 行数据长度不是偶数，请检查：${line}`)
       }
 
+      // 解析数字
       const numbers: string[] = []
       for (let i = 0; i < cleanedLine.length; i += 2) {
         const number = cleanedLine.slice(i, i + 2)
         const numValue = parseInt(number, 10)
+
         if (isNaN(numValue) || numValue < 1 || numValue > 80) {
           errorLine.value = line
           throw new Error(`第 ${lineIndex + 1} 行中数字 ${number} 不在 01-80 范围内，请检查`)
         }
+
         numbers.push(number)
       }
 
-      // 附加号码处理（只允许1~10）
+      // 处理附加号码（EX列）
       let extraValue = ''
       if (extraRaw) {
         const n = parseInt(extraRaw.trim(), 10)
@@ -150,38 +179,24 @@ const loadData = async (index: number) => {
         }
       }
 
+      // 构建行数据对象
       const rowData: Record<string, string> = {}
-      for (let i = 0; i < columnCount; i++) rowData[`column_${i}`] = ''
+      for (let i = 0; i < columnCount; i++) {
+        rowData[`column_${i}`] = ''
+      }
+
+      // 填充数据
       numbers.forEach((num) => {
         const columnIndex = parseInt(num, 10) - 1
         rowData[`column_${columnIndex}`] = num
       })
 
-      rowData[`column_80`] = extraValue
+      rowData[`column_80`] = extraValue // EX列
 
       return { key: `row_${lineIndex}`, ...rowData }
     })
-    function extractNonEmptyNumbersByGroup(arr) {
-      return arr
-        .map((item) => {
-          // 提取当前对象的非空数字
-          const nonEmpty = Object.values(item)
-            .filter((value) => {
-              return value && !isNaN(Number(value))
-            })
-            .map(String) // 保持字符串类型
 
-          return nonEmpty
-        })
-        .filter((group) => group.length > 0) // 过滤掉没有数字的组
-    }
-
-    // 调用函数获取分组结果
-    const groupedNumbers = extractNonEmptyNumbersByGroup(parsedData)
-    console.log('按对象分组的非空数字:', groupedNumbers)
     dataSource.value = parsedData
-      .map((row) => ({ ...row, numberCount: Object.values(row).filter((v) => v !== '').length }))
-      .map((row) => ({ ...row, numberCount: undefined }))
   } catch (error) {
     isError.value = true
     if (error instanceof Error) {
@@ -191,143 +206,109 @@ const loadData = async (index: number) => {
       errorMessage.value = '解析表格数据时发生未知错误'
       console.error('解析错误:', error)
     }
+  } finally {
+    loading.close()
   }
-  hide()
 }
 
-// 上一个数据
+// 数据导航函数
 const prevData = () => {
-  if (currentIndex.value > minIndex) {
-    currentIndex.value--
-    loadData(currentIndex.value)
+  if (currentIndex.value && minIndex && parseInt(currentIndex.value) > parseInt(minIndex)) {
+    currentIndex.value = (parseInt(currentIndex.value) - 1).toString()
+    loadData(parseInt(currentIndex.value))
   }
 }
 
-function maxData() {
-  loadData(maxIndex)
-}
-function minData() {
-  loadData(minIndex)
-}
-
-// 下一个数据
 const nextData = () => {
-  if (currentIndex.value < maxIndex) {
-    currentIndex.value++
-    loadData(currentIndex.value)
+  if (currentIndex.value && maxIndex && parseInt(currentIndex.value) < parseInt(maxIndex)) {
+    currentIndex.value = (parseInt(currentIndex.value) + 1).toString()
+    loadData(parseInt(currentIndex.value))
   }
 }
 
+const maxData = () => {
+  if (maxIndex) loadData(parseInt(maxIndex))
+}
+
+const minData = () => {
+  if (minIndex) loadData(parseInt(minIndex))
+}
+
+// 复制高亮列到剪贴板
+const copyToClipboard = () => {
+  const text = Array.from(highlightedColumns)
+    .sort((a, b) => a - b)
+    .filter((idx) => idx !== 80) // 排除EX列
+    .map((idx) => (idx + 1).toString().padStart(2, '0'))
+    .join(',')
+
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      console.log('已复制到剪贴板:', text)
+    })
+    .catch((err) => {
+      console.error('复制失败:', err)
+    })
+}
+
+// 清空高亮列
+const clear = () => {
+  highlightedColumns.clear()
+}
+
+// 生命周期钩子
 onMounted(() => {
-  loadData(currentIndex.value)
+  if (currentIndex.value) loadData(parseInt(currentIndex.value))
 })
 
+// 错误消息监听
 watch(
   () => errorMessage.value,
   (v) => {
-    Modal.confirm({
-      title: '错误',
-      content: v,
-      centered: true,
-    })
+    if (v) {
+      ElMessageBox.confirm(v, '错误提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'error',
+      })
+    }
   },
 )
 </script>
 
 <style scoped>
-/* 数据切换按钮样式 */
-.data-switch {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f0f2f5;
-  border-radius: 4px;
+/* 表格样式 */
+:deep(.el-table--small .el-table__cell) {
+  padding: 0 !important;
+  text-align: center;
+  font-size: 12px;
+  height: 24px;
 }
 
-.current-index {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 0 15px;
+/* 高亮表头样式 */
+.highlighted-header {
+  background-color: #fdd835 !important;
+  color: #222 !important;
+  font-weight: bold !important;
 }
 
-/* 基础样式 */
-.error-container {
-  padding: 20px;
-  background-color: #fef0f0;
-  border: 1px solid #fccccc;
-  border-radius: 4px;
-  margin-top: 20px;
+/* 高亮单元格样式 */
+.highlighted-cell {
+  background-color: #ffe082 !important;
+  color: #222 !important;
+  font-weight: bold !important;
 }
 
-.error-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #c62828;
-  margin-bottom: 10px;
-}
-
-.error-message {
-  color: #e53935;
-  margin-bottom: 15px;
-  line-height: 1.5;
-}
-
-.error-data {
-  background-color: #fff;
-  border: 1px solid #f0f0f0;
-  padding: 15px;
-  border-radius: 4px;
-}
-
-.error-data-title {
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 5px;
-}
-
-.error-data-content {
-  font-family: monospace;
-  background-color: #f9f9f9;
-  padding: 10px;
-  border-radius: 4px;
-  overflow-x: auto;
-}
-
-/* 表格样式（保持不变） */
-:deep(.ant-table-tbody .ant-table-cell),
-:deep(.ant-table-thead .ant-table-cell) {
-  padding: 0;
-}
-
-:deep(.ant-table-cell:not(:empty)) {
+/* 非空单元格样式 */
+:deep(.el-table__body .el-table__cell:not(:empty)) {
   background-color: #f0f9ff;
 }
 
-:deep(.ant-table-thead .highlighted-column) {
-  background-color: #e53935 !important;
-  color: #fff !important;
+:deep(.el-table--small .cell) {
+  padding: 0;
 }
-
-:deep(.ant-table-tbody .highlighted-column) {
-  background-color: #ffebee !important;
-  color: #e53935 !important;
-}
-
-:deep(.ant-table-tbody .highlighted-column:not(:empty)) {
-  background-color: #ffcdd2 !important;
-  color: #c62828 !important;
-}
-</style>
-<style>
-.ant-notification-notice {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  z-index: 9999 !important;
-  width: max-content !important;
-  margin: 0 !important;
+:deep(.el-table--small .el-table__cell) {
+  padding: 0;
 }
 </style>

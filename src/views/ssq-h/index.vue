@@ -12,12 +12,11 @@
       :blue="item[item.length - 1]"
     />
   </section>
-  <div class="flex w-full items-center justify-center fixed bottom-0 py-10px bg-#fff">
-    <el-button :type="'primary'" @click="$router.push('/kl8')" size="small"> kl8 </el-button>
+  <div c-bottom>
     <el-button :type="'primary'" @click="prevHis" :disabled="currentHis <= 1" size="small">
       上一个
     </el-button>
-    <el-button text class="mx-2" :type="'success'">his/{{ currentHis }}</el-button>
+    <el-button text class="mx-2" :type="'success'">{{ currentHis }}</el-button>
     <el-button :type="'primary'" @click="nextHis" :disabled="currentHis >= maxHis" size="small">
       下一个
     </el-button>
@@ -30,7 +29,6 @@ import Panel from './Panel.vue'
 const title = useTitle('')
 title.value = 'ssq'
 
-// 自动扫描 his 目录所有文件（js/ts/json等，按实际情况写匹配模式）
 const hisModules = import.meta.glob('./his/*.[jt]s') // 支持js和ts
 
 const hisKeys = Object.keys(hisModules) // ['./his/1.js', './his/2.js', ...]

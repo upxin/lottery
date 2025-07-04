@@ -1,12 +1,10 @@
 <script setup lang="ts"></script>
 
 <template>
-  <a-config-provider
-    :theme="{
-      token: {},
-      components: {},
-    }"
-  >
+  <el-config-provider :size="'small'" :button="{ type: 'primary' }">
+    <section fixed bottom-0 z-99 pl-400px py-4px>
+      <Buttons></Buttons>
+    </section>
     <RouterView />
-  </a-config-provider>
+  </el-config-provider>
 </template>

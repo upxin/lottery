@@ -14,9 +14,9 @@ const router = createRouter({
       component: Kl,
     },
     {
-      path: '/ssq-b',
-      name: 'ssq-b',
-      component: () => import('@/views/ssq-b/index.vue'),
+      path: '/ssq-h',
+      name: 'ssq-h',
+      component: () => import('@/views/ssq-h/index.vue'),
     },
     {
       path: '/ssq',

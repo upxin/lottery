@@ -1,6 +1,7 @@
 <template>
-  <section>
+  <section flex flex-col items-center>
     <el-table
+      style="width: 1224px"
       :data="parsedRows"
       border
       size="small"
@@ -20,9 +21,9 @@
     </el-table>
     <div
       ref="footerRef"
-      class="flex w-full items-center justify-center fixed bottom-0 py-4px bg-#fff z-10"
+      class="flex w-screen items-center justify-center fixed bottom-0 py-4px bg-#fff z-10"
     >
-      <el-button type="primary" @click="jumpKl8" size="small">kl8-{{ getHeight }}</el-button>
+      <el-button type="primary" @click="jumph" size="small">ssq-h</el-button>
       <el-button
         type="primary"
         @click="prevHis"
@@ -41,6 +42,9 @@
         class="mr-2"
       >
         下一个
+      </el-button>
+      <el-button type="primary" @click="currentHis = maxHis" size="small" class="mr-2">
+        new
       </el-button>
       <el-button
         type="primary"
@@ -85,7 +89,12 @@ const g2 = ref<number[]>([])
 const ipt = ref('')
 
 function loadData() {
-  console.log(4444)
+  const loading = ElLoading.service({
+    lock: true, // 锁定屏幕滚动
+    text: '加载中...', // 显示文本
+    background: 'rgba(0, 0, 0, 0.7)', // 背景遮罩
+    target: document.body, // 覆盖整个页面
+  })
   title.value = String(currentHis.value)
   try {
     const filePath = Object.keys(files).find((p) => p.endsWith(`${currentHis.value}.ts`))
@@ -94,17 +103,18 @@ function loadData() {
     g1.value = Array.isArray(mod?.g1) ? mod.g1 : []
     g2.value = Array.isArray(mod?.g2) ? mod.g2 : []
     ipt.value = typeof mod?.ipt === 'string' ? mod.ipt : ''
+    loading.close()
   } catch (e: any) {
     ElMessage.error('数据加载失败：' + (e?.message ?? e))
     g1.value = []
     g2.value = []
     ipt.value = ''
+    loading.close()
   }
 }
 loadData()
 watch(currentHis, loadData)
 
-// ----------- 保证表头和数据数组始终可用 -----------
 const headers33 = Array.from({ length: 33 }, (_, i) => ({
   label: String(i + 1).padStart(2, '0'),
   prop: `N${i + 1}`,
@@ -154,12 +164,30 @@ function copy() {
     if (lineStr) result.push(lineStr)
   }
   const text = result.join('\n')
-  if (!text) {
+
+  // 按逗号前数字长度排序函数
+  function sortByPrefixLength(inputString) {
+    return inputString
+      .split('\n') // 拆分为行
+      .sort((a, b) => {
+        // 提取每行第一个逗号前的部分
+        const prefixA = a.split(',')[0]
+        const prefixB = b.split(',')[0]
+
+        // 按长度降序排序
+        return prefixB.length - prefixA.length
+      })
+      .join('\n') // 重新组合为字符串
+  }
+
+  const sortedString = sortByPrefixLength(text)
+
+  if (!sortedString) {
     ElMessage.warning('没有可复制的内容')
     return
   }
   navigator.clipboard
-    .writeText(text)
+    .writeText(sortedString)
     .then(() => ElMessage.success('已复制'))
     .catch(() => ElMessage.error('复制失败'))
 }
@@ -276,7 +304,6 @@ watch(
   },
   { immediate: true },
 )
-// ----------- 只做数据转换，不再弹窗 -----------
 const parsedRows = computed(() => {
   if (!ipt.value || typeof ipt.value !== 'string') return []
   const lines = ipt.value.trim().split('\n')
@@ -322,7 +349,8 @@ const parsedRows = computed(() => {
     })
     rows.push(row)
   }
-  return rows.sort((a, b) => b._commaRaw - a._commaRaw)
+  const rets = rows.sort((a, b) => b._commaRaw - a._commaRaw)
+  return rets
 })
 
 // ----------- 样式 -----------
@@ -374,8 +402,9 @@ function nextHis() {
 }
 
 const router = useRouter()
-function jumpKl8() {
-  router.push('/kl8')
+function jumph() {
+  const fullPath = router.resolve('/ssq-h').href
+  window.open(fullPath, '_blank')
 }
 
 const getHeight = computed(() => {
@@ -384,10 +413,21 @@ const getHeight = computed(() => {
 </script>
 
 <style scoped>
+/* 这这样做 组件外层必须加容器标签 不然不生效  vue编译的时候没有唯一组件id去穿透类 */
 :deep(.el-table--small .cell) {
   padding: 0;
 }
 :deep(.el-table--small .el-table__cell) {
   padding: 0;
 }
+</style>
+
+<style>
+/* 不想加容器就只能用全局的 */
+/* .el-table--small .cell {
+  padding: 0;
+}
+.el-table--small .el-table__cell {
+  padding: 0;
+} */
 </style>

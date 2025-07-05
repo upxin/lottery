@@ -2,6 +2,7 @@
   <el-table
     class="mx-auto"
     style="width: 1240px"
+    :highlight-current-row="false"
     :data="parsedRows"
     border
     size="small"

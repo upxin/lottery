@@ -1,5 +1,6 @@
 <template>
   <el-table
+    :highlight-current-row="false"
     @row-click="handleRowClick"
     :row-class-name="getRowClassName"
     :data="dataSource"
@@ -90,7 +91,7 @@ const getDataIndex = (dataIndex: string) => {
 const getCellClass = (dataIndex: string) => {
   const colIndex = getDataIndex(dataIndex)
   return colIndex !== -1 && highlightedColumns.has(colIndex) && colIndex !== 80
-    ? 'highlighted-cell'
+    ? 'cell-highlight-n-primary'
     : ''
 }
 

@@ -13,42 +13,26 @@ body {
   padding: 0;
   user-select: none;
 }
-
-.highlighted-row {
-  background-color: red !important;
-  color: #fff;
-}
-.highlighted-row .el-table__cell {
-  background-color: transparent !important;
+// 高亮点击行
+.highlighted-row .cell {
+  @apply bg-klein-blue text-lemon-yellow;
 }
 
-.header-highlight-n {
-  background-color: #fff6e6 !important;
-  color: #e67c00 !important;
-  font-weight: bold;
-  cursor: pointer;
-}
+// 高亮前区
 .cell-highlight-n-primary {
-  background-color: #fff6e6 !important;
-  color: #e67c00 !important;
+  @apply bg-bordeaux-red text-lemon-yellow;
   font-weight: bold;
 }
 
-.header-highlight-h {
-  background-color: #d0f2fc !important;
-  color: #2b7abf !important;
-  font-weight: bold;
-  cursor: pointer;
-}
+// 高亮后区
 .cell-highlight-h-primary {
-  background-color: #d0f2fc !important;
-  color: #2b7abf !important;
+  @apply bg-klein-blue text-lemon-yellow;
   font-weight: bold;
 }
 
 .comma-cell-double {
-  background-color: #ffe4ec !important;
-  color: #e33 !important;
+  background-color: #ffe4ec;
+  color: #e33;
   font-weight: bold;
 }
 

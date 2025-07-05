@@ -1,17 +1,20 @@
 <template>
   <section
-    class="flex flex-col items-center overflow-y-auto pb-10px pt-24px box-border"
-    style="height: calc(100vh - 44px)"
+    :style="{ height: `${getHeight}px` }"
+    class="flex flex-col items-center overflow-y-auto box-border affix-container"
   >
-    <section flex class="w-650px box-border fixed top-0 bg-gray-50">
-      <el-button style="width: 60px" text type="success"> 路 </el-button>
-      <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
-        {{ item }}
-      </div>
-    </section>
+    <el-affix target=".affix-container" :offset="30">
+      <section flex class="w-650px box-border bg-gray-50">
+        <el-button style="width: 60px" text type="success"> 路 </el-button>
+        <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
+          <el-button text :type="'warning'"> {{ item }} </el-button>
+        </div>
+      </section>
+    </el-affix>
+
     <Panel
       class="w-650px"
-      v-for="(item, index) in hisRets"
+      v-for="(item, index) in [...hisRets, ...hisRets, ...hisRets]"
       :key="index"
       :title="'' + item[0]"
       :highlight-nums="getHighlightNums(item)"
@@ -19,13 +22,15 @@
     />
   </section>
   <div class="c-bottom">
+    <el-button :type="'primary'" @click="currentHis = 1" size="small"> 最早周期 </el-button>
     <el-button :type="'primary'" @click="prevHis" :disabled="currentHis <= 1" size="small">
       上周期
     </el-button>
-    <el-button :type="'info'">{{ currentHis }}</el-button>
+    <el-button text :type="'warning'">{{ currentHis }}</el-button>
     <el-button :type="'primary'" @click="nextHis" :disabled="currentHis >= maxHis" size="small">
       下周期
     </el-button>
+    <el-button :type="'primary'" @click="currentHis = maxHis" size="small"> 最新周期 </el-button>
     <el-button
       :type="'success'"
       @click="currentHis = maxHis"
@@ -40,8 +45,12 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from 'vue'
 import Panel from './Panel.vue'
+import { useAutoHeight } from '@/hooks/useHeight'
+const extraHeight = ref(60)
+const { getHeight } = useAutoHeight(extraHeight)
+
 const title = useTitle('')
-title.value = 'ssq'
+title.value = 'ssq-h'
 
 const hisModules = import.meta.glob('./his/*.[jt]s') // 支持js和ts
 const roads = [1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0]
@@ -51,7 +60,8 @@ const hisNumbers = hisKeys
   .filter(Boolean)
   .sort((a, b) => a - b)
 
-const maxHis = hisNumbers[hisNumbers.length - 1] || 1
+const maxHis = hisNumbers[hisNumbers.length - 1]
+
 const currentHis = ref(maxHis)
 const hisRets = ref<Array<string[]>>([])
 

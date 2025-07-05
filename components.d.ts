@@ -27,6 +27,10 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTableV2: typeof import('element-plus/es')['ElTableV2']
     ElTag: typeof import('element-plus/es')['ElTag']
+    'Ic:baselineHome': typeof import('~icons/ic/baseline-home')['default']
+    'IconIc:baselineHome': typeof import('~icons/ic/baseline-home')['default']
+    'IconIcons8:chevronDownRound': typeof import('~icons/icons8/chevron-down-round')['default']
+    'Icons8:chevronDownRound': typeof import('~icons/icons8/chevron-down-round')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

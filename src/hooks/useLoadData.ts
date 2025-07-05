@@ -29,9 +29,6 @@ export function useLotteryData(
 
   // DOM 相关
   const footerRef = ref<HTMLElement | null>(null)
-  const { height: windowHeight } = useWindowSize()
-  const { height: footerHeight } = useElementSize(footerRef)
-  const extraSpace = 10
 
   // 数据状态
   const hisNums = ref<number[]>([])
@@ -97,7 +94,7 @@ export function useLotteryData(
 
       // 同步高亮状态
       syncHighlightFromData()
-      title.value = `${lotteryType} #${index}`
+      title.value = `${lotteryType} ${index}`
       regData()
       return true
     } catch (e: any) {
@@ -201,11 +198,6 @@ export function useLotteryData(
     parsedRows.value = sortedRows
     return sortedRows
   }
-
-  // 表格高度计算
-  const getHeight = computed(() => {
-    return windowHeight.value - (footerHeight.value || 0) - extraSpace
-  })
 
   // 数据导航
   const prevHis = () => {
@@ -339,8 +331,6 @@ export function useLotteryData(
     // 配置
     frontHeaders,
     backHeaders,
-    // 计算属性
-    getHeight,
     // 方法
     toggleShowDot,
     prevHis,

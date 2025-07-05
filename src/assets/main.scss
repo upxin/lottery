@@ -51,3 +51,11 @@ body {
   color: #e33 !important;
   font-weight: bold;
 }
+
+.el-table--small .cell {
+  padding: 0;
+  text-align: center;
+}
+.el-table--small .el-table__cell {
+  padding: 0;
+}

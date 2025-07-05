@@ -1,57 +1,49 @@
 <template>
-  <div>
-    <el-table
-      @row-click="handleRowClick"
-      :row-class-name="getRowClassName"
-      :data="dataSource"
-      border
-      style="width: 1822px"
-      class="mx-auto"
+  <el-table
+    @row-click="handleRowClick"
+    :row-class-name="getRowClassName"
+    :data="dataSource"
+    border
+    style="width: 1822px"
+    class="mx-auto"
+  >
+    <!-- 新增：逗号前数据长度列 -->
+    <el-table-column prop="mainLength" label="长度" width="40" align="center" :resizable="false" />
+
+    <!-- 原有列配置 -->
+    <el-table-column
+      :resizable="false"
+      v-for="column in columns"
+      :key="column.key"
+      :prop="column.dataIndex"
+      :label="column.title"
+      :align="column.align"
+      :width="22"
     >
-      <!-- 新增：逗号前数据长度列 -->
-      <el-table-column
-        prop="mainLength"
-        label="长度"
-        width="40"
-        align="center"
-        :resizable="false"
-      />
+      <template #header>
+        <div @click="handleHeaderClick(column.dataIndex)">
+          {{ column.title }}
+        </div>
+      </template>
 
-      <!-- 原有列配置 -->
-      <el-table-column
-        :resizable="false"
-        v-for="column in columns"
-        :key="column.key"
-        :prop="column.dataIndex"
-        :label="column.title"
-        :align="column.align"
-        :width="22"
-      >
-        <template #header>
-          <div @click="handleHeaderClick(column.dataIndex)">
-            {{ column.title }}
-          </div>
-        </template>
+      <template #default="{ row }">
+        <div :class="getCellClass(column.dataIndex)">
+          {{ row[column.dataIndex] }}
+        </div>
+      </template>
+    </el-table-column>
+  </el-table>
 
-        <template #default="{ row }">
-          <div :class="getCellClass(column.dataIndex)">
-            {{ row[column.dataIndex] }}
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 底部控制栏（新增复制按钮） -->
-    <div class="c-bottom">
-      <el-button color="#002FA7" type="primary" @click="minData">{{ minIndex }}</el-button>
-      <el-button type="primary" @click="prevData">上一个数据</el-button>
-      <el-button type="primary" @click="nextData">下一个数据</el-button>
-      <el-button color="#002FA7" type="info" @click="maxData">{{ maxIndex }}</el-button>
-      <el-button @click="copyToClipboard" type="primary">复制高亮数据</el-button>
-      <!-- 新增：复制ipt数据（按长度排序） -->
-      <el-button @click="copySortedIptData" type="primary">复制ipt数据</el-button>
-      <el-button @click="clear" type="primary">清空高亮</el-button>
-    </div>
+  <!-- 底部控制栏（新增复制按钮） -->
+  <div class="c-bottom">
+    <el-button color="#002FA7" type="primary" @click="minData">{{ minIndex }}</el-button>
+    <el-button type="primary" @click="prevData">上一个数据</el-button>
+    <el-button type="primary" @click="nextData">下一个数据</el-button>
+    <el-button color="#002FA7" type="info" @click="maxData">{{ maxIndex }}</el-button>
+    <el-button @click="copyToClipboard" type="primary">复制高亮数据</el-button>
+    <!-- 新增：复制ipt数据（按长度排序） -->
+    <el-button @click="copySortedIptData" type="primary">复制ipt数据</el-button>
+    <el-button @click="clear" type="primary">清空高亮</el-button>
   </div>
 </template>
 
@@ -323,34 +315,3 @@ watch(
   },
 )
 </script>
-
-<style scoped>
-/* 表格样式 */
-:deep(.el-table--small .el-table__cell) {
-  padding: 0 !important;
-  text-align: center;
-  font-size: 12px;
-  height: 24px;
-}
-
-/* 高亮表头样式 */
-.highlighted-header {
-  background-color: #fdd835 !important;
-  color: #222 !important;
-  font-weight: bold !important;
-}
-
-/* 高亮单元格样式 */
-.highlighted-cell {
-  background-color: #ffe082 !important;
-  color: #222 !important;
-  font-weight: bold !important;
-}
-
-:deep(.el-table--small .cell) {
-  padding: 0;
-}
-:deep(.el-table--small .el-table__cell) {
-  padding: 0;
-}
-</style>

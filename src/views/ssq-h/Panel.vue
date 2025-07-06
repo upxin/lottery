@@ -1,5 +1,5 @@
 <template>
-  <section class="flex items-center border-0 border-b-2px border-gray-200 border-solid pt-10px">
+  <section class="flex items-center border-0 border-b-1px border-gray-200 border-solid pt-2px">
     <el-button style="width: 60px" text type="success">
       {{ title }}
     </el-button>
@@ -30,7 +30,7 @@
         <div
           v-for="(item, colIndex) in row"
           :key="`${rowIndex}-${colIndex}_${item.val}`"
-          class="text-gray-400 text-sm flex items-center justify-center w-26px"
+          class="nums"
           :style="{
             color: blue == item.val ? '#2563eb' : '#9ca3af',
             fontWeight: blue == item.val ? 500 : 400,

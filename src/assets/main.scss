@@ -6,6 +6,26 @@
 *::-webkit-scrollbar {
   display: none;
 }
+:root {
+  /* 基础颜色变量定义 */
+  --klein-blue: #002fa7; /* 克莱因蓝 */
+  --pure-red: #ff0000; /* 正红色 */
+  --pure-black: #000000; /* 纯黑色 */
+  --pure-white: #ffffff; /* 纯白色 */
+  --lemon-yellow: #ffff00; /* 柠檬黄 */
+  --grass-green: #00ff00; /* 草绿色 */
+  --sky-blue: #87ceeb; /* 天蓝色 */
+  --deep-purple: #800080; /* 深紫色 */
+  --chocolate-brown: #d2691e; /* 巧克力棕 */
+  --rose-pink: #ff69b4; /* 玫瑰粉 */
+  --bordeaux-red: #800020; /* 波尔多红（经典暗红） */
+  --bordeaux-dark: #5c0011; /* 深波尔多红 */
+  --bordeaux-light: #a52639; /* 浅波尔多红 */
+
+  /* 可选：预定义带透明度的变体（基于基础变量） */
+  --klein-blue-50: rgba(var(--klein-blue-rgb), 0.5);
+  --pure-red-30: rgba(var(--pure-red-rgb), 0.3);
+}
 
 html,
 body {
@@ -13,26 +33,37 @@ body {
   padding: 0;
   user-select: none;
 }
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  @apply bg-klein-blue text-lemon-yellow;
+}
+
 // 高亮点击行
-.highlighted-row .cell {
+.highlighted-row td.el-table__cell {
   @apply bg-klein-blue text-lemon-yellow;
 }
+.highlighted-row:hover td.el-table__cell {
+  @apply bg-klein-blue! text-lemon-yellow!;
+}
 
-// 高亮前区
-.cell-highlight-n-primary {
-  @apply bg-bordeaux-red text-lemon-yellow;
+// 高亮colum
+.high-colum {
+  @apply bg-bordeaux-red! text-lemon-yellow;
   font-weight: bold;
 }
 
-// 高亮后区
-.cell-highlight-h-primary {
+.header-highlight-n {
   @apply bg-klein-blue text-lemon-yellow;
-  font-weight: bold;
 }
-
+.header-highlight-h {
+  @apply bg-klein-blue text-lemon-yellow;
+}
+.comma-cell-single,
+.comma-header {
+  @apply bg-sky-blue;
+}
 .comma-cell-double {
   background-color: #ffe4ec;
-  color: #e33;
+  color: #e33 !important;
   font-weight: bold;
 }
 
@@ -42,4 +73,7 @@ body {
 }
 .el-table--small .el-table__cell {
   padding: 0;
+}
+.el-scrollbar__bar.is-vertical {
+  width: 0;
 }

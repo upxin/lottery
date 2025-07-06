@@ -1,7 +1,8 @@
 <template>
   <section
     :style="{ height: `${getHeight}px` }"
-    class="flex flex-col items-center overflow-y-auto box-border affix-container"
+    ref="tableRef"
+    class="flex flex-col items-center overflow-y-auto box-border affix-container pos-relative"
   >
     <el-affix target=".affix-container" :offset="30">
       <section flex class="w-650px box-border bg-gray-50">
@@ -14,13 +15,27 @@
 
     <Panel
       class="w-650px"
-      v-for="(item, index) in [...hisRets, ...hisRets, ...hisRets]"
+      v-for="(item, index) in hisRets"
       :key="index"
       :title="'' + item[0]"
       :highlight-nums="getHighlightNums(item)"
       :blue="item[item.length - 1]"
     />
   </section>
+
+  <div class="pos-fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
+    <!-- 滚动到顶部按钮 -->
+    <div
+      class="i-icons8:chevron-up-round text-klein-blue cursor-pointer transition-transform text-30px"
+      @click="scrollToTop"
+    ></div>
+    <!-- 滚动到底部按钮 -->
+    <div
+      class="i-icons8:chevron-down-round text-klein-blue cursor-pointer transition-transform text-30px"
+      @click="scrollToBottom"
+    ></div>
+  </div>
+
   <div class="c-bottom">
     <el-button :type="'primary'" @click="currentHis = 1" size="small"> 最早周期 </el-button>
     <el-button :type="'primary'" @click="prevHis" :disabled="currentHis <= 1" size="small">
@@ -89,4 +104,30 @@ const nextHis = () => {
 }
 
 const getHighlightNums = (item: string[]) => item.slice(1, -1).map((num) => Number(num))
+
+const tableRef = useTemplateRef('tableRef')
+const scrollToTop = () => {
+  if (tableRef.value) {
+    const tableEl = tableRef.value
+    if (tableEl) {
+      tableEl.scrollTo({
+        top: 0,
+        behavior: 'smooth', // 平滑滚动
+      })
+    }
+  }
+}
+
+// 滚动到底部
+const scrollToBottom = () => {
+  if (tableRef.value) {
+    const tableEl = tableRef.value
+    if (tableEl) {
+      tableEl.scrollTo({
+        top: tableEl.scrollHeight,
+        behavior: 'smooth', // 平滑滚动
+      })
+    }
+  }
+}
 </script>

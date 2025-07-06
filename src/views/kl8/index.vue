@@ -46,7 +46,7 @@
     <el-button type="primary" @click="nextData" :disabled="!hasNext">下一个数据</el-button>
     <el-button color="#002FA7" type="info" @click="maxData">last</el-button>
     <el-button @click="copyToClipboard" type="primary">复制高亮数据</el-button>
-    <el-button @click="copySortedIptData" type="primary">复制ipt数据</el-button>
+    <el-button @click="copySortedIptData" type="primary">复制表格数据</el-button>
     <el-button @click="clear" type="primary">清空高亮</el-button>
   </div>
 </template>

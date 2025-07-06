@@ -89,6 +89,7 @@ export function useLotteryData(
     }
   }
 
+  const errMsg = ref('')
   // 加载指定期号数据
   const loadData = async (period: string | number) => {
     const loading = ElLoading.service({
@@ -107,8 +108,11 @@ export function useLotteryData(
       // 数据校验
       const frontMax = lotteryType === 'ssq' ? 33 : 35
       const backMax = lotteryType === 'ssq' ? 16 : 12
-      if (!validateIptData(ipt, frontMax, backMax)) {
-        return
+
+      const errCheck = validateIptData(ipt, frontMax, backMax)
+      if (errCheck) {
+        errMsg.value = errCheck
+        return false
       }
 
       // 更新原始数据
@@ -144,6 +148,10 @@ export function useLotteryData(
   }
 
   // 解析数据为表格行（修正字段名匹配）
+
+  let noSortData: any = []
+  let sortData: any = []
+
   const regData = () => {
     if (!rawData.value.ipt) {
       parsedRows.value = []
@@ -193,7 +201,23 @@ export function useLotteryData(
       rows.push(row)
     })
 
-    parsedRows.value = rows.sort((a, b) => b._commaRaw - a._commaRaw)
+    const temp = JSON.parse(JSON.stringify(rows))
+    noSortData = temp
+    sortData = rows.sort((a, b) => b._commaRaw - a._commaRaw)
+
+    parsedRows.value = sortData
+  }
+
+  const sorted = ref(false)
+
+  function sortByLen() {
+    if (!sorted.value) {
+      parsedRows.value = sortData
+    } else {
+      parsedRows.value = noSortData
+    }
+    sorted.value = !sorted.value
+    console.log(sorted.value)
   }
 
   const nextHis = () => {
@@ -359,6 +383,7 @@ export function useLotteryData(
     if (newVal) loadData(newVal)
   })
   return {
+    sortByLen,
     footerRef,
     currentHis,
     minHis,
@@ -366,7 +391,7 @@ export function useLotteryData(
     parsedRows,
     availablePeriods,
     highlighted,
-
+    errMsg,
     // 列配置
     frontHeaders,
     backHeaders,

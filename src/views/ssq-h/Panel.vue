@@ -1,5 +1,5 @@
 <template>
-  <section class="flex items-center border-0 border-b-1px border-gray-200 border-solid pt-2px">
+  <section class="flex items-center border-0 border-b-1px border-solid pt-2px">
     <el-button style="width: 60px" text type="success">
       {{ title }}
     </el-button>

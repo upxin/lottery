@@ -15,7 +15,12 @@
 
     <Panel
       class="w-650px"
+      :class="[
+        periods.has(item[0]) ? 'bg-gray-1' : '',
+        index % 3 === 1 ? 'border-red-300' : 'border-gray-300',
+      ]"
       v-for="(item, index) in hisRets"
+      @click="handlePanel(item[0])"
       :key="index"
       :title="'' + item[0]"
       :highlight-nums="getHighlightNums(item)"
@@ -129,5 +134,16 @@ const scrollToBottom = () => {
       })
     }
   }
+}
+
+const periods = ref(new Set())
+
+function handlePanel(key: number | string) {
+  if (periods.value.has(key)) {
+    periods.value.delete(key)
+    return
+  }
+  periods.value.add(key)
+  console.log(periods.value)
 }
 </script>

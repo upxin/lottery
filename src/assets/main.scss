@@ -23,6 +23,8 @@
   --bordeaux-light: #a52639; /* 浅波尔多红 */
 
   /* 可选：预定义带透明度的变体（基于基础变量） */
+
+  --klein-blue-rgb: 0, 47, 167;
   --klein-blue-50: rgba(var(--klein-blue-rgb), 0.5);
   --pure-red-30: rgba(var(--pure-red-rgb), 0.3);
 }

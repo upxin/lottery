@@ -1,5 +1,5 @@
-export const g1 = [2, 3, 15, 21, 22, 33]
-export const g2 = [6]
+export const g1 = [2, 3, 15, 21, 22, 33, 6]
+
 export const ipt = `
 
 01 0708 13141923273031,14

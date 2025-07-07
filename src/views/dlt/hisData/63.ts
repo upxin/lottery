@@ -43,5 +43,4 @@ export const ipt = `
 01 13 14 15 19 20 26 35 , 04 05 06 10
 10 11 12 15 20 28 29 , 01 05
 `
-export const g1 = [5, 18, 26, 29, 32]
-export const g2 = [7, 10]
+export const g1 = [5, 18, 26, 29, 32, 7, 10]

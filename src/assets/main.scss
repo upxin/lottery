@@ -36,15 +36,12 @@ body {
   user-select: none;
 }
 .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
-  @apply bg-klein-blue text-lemon-yellow;
+  @apply bg-klein-blue;
 }
 
 // 高亮点击行
 .highlighted-row td.el-table__cell {
-  @apply bg-klein-blue text-lemon-yellow;
-}
-.highlighted-row:hover td.el-table__cell {
-  @apply bg-klein-blue! text-lemon-yellow!;
+  @apply bg-klein-blue;
 }
 
 // 高亮colum
@@ -72,6 +69,8 @@ body {
 .el-table--small .cell {
   padding: 0;
   text-align: center;
+  line-height: 18px;
+  height: 18px;
 }
 .el-table--small .el-table__cell {
   padding: 0;

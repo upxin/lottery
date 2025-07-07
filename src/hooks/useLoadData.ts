@@ -117,8 +117,8 @@ export function useLotteryData(
 
       // 更新原始数据
       rawData.value = {
-        g1: Array.isArray(mod?.g1) ? mod.g1 : [],
-        g2: Array.isArray(mod?.g2) ? mod.g2 : [],
+        g1: lotteryType === 'ssq' ? mod.g1.slice(1, 7) : mod.g1.slice(1, 6),
+        g2: lotteryType === 'ssq' ? mod.g1.slice(-1) : mod.g1.slice(-2),
         ipt,
       }
 
@@ -382,6 +382,10 @@ export function useLotteryData(
   watch(currentHis, (newVal) => {
     if (newVal) loadData(newVal)
   })
+
+  function clear() {
+    highlighted.n.clear()
+  }
   return {
     sortByLen,
     footerRef,
@@ -397,6 +401,7 @@ export function useLotteryData(
     backHeaders,
 
     // 方法
+    clear,
     prevHis,
     nextHis,
     jumpToMin,

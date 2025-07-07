@@ -91,6 +91,7 @@
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
     <el-button type="primary" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
+    <el-button @click="clear" type="primary">清空高亮</el-button>
   </div>
 
   <div class="fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
@@ -144,6 +145,7 @@ const curData = import.meta.glob('./*.ts', { eager: true })
 const files = Object.assign({}, his, curData)
 const {
   sortByLen,
+  clear,
   errMsg,
   footerRef,
   currentHis,

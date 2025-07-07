@@ -53,9 +53,7 @@
 
 <script lang="ts" setup>
 import { useHighLight } from '@/hooks/useHighLight'
-import { onMounted, ref, reactive, computed, watch } from 'vue'
 import { useTitle } from '@vueuse/core'
-import { ElLoading, ElMessage, ElNotification } from 'element-plus'
 
 // 基础配置
 const { handleRowClick, getRowClassName } = useHighLight()
@@ -85,8 +83,8 @@ const currentFileIndex = computed(() => {
   return fileNames.value.indexOf(currentFileName.value || '')
 })
 
-const hasPrev = computed(() => currentFileIndex.value > 0)
-const hasNext = computed(() => currentFileIndex.value < fileNames.value.length - 1)
+const hasNext = computed(() => currentFileIndex.value > 0)
+const hasPrev = computed(() => currentFileIndex.value < fileNames.value.length - 1)
 
 // --------------------------
 // 数据加载与解析
@@ -184,24 +182,24 @@ const getHeaderClass = (dataIndex: string) => {
 // --------------------------
 // 导航函数（基于文件名列表索引）
 // --------------------------
-const prevData = () => {
-  if (hasPrev.value) {
+const nextData = () => {
+  if (hasNext.value) {
     currentFileName.value = fileNames.value[currentFileIndex.value - 1]
   }
 }
 
-const nextData = () => {
-  if (hasNext.value) {
+const prevData = () => {
+  if (hasPrev.value) {
     currentFileName.value = fileNames.value[currentFileIndex.value + 1]
   }
 }
 
 const minData = () => {
-  currentFileName.value = fileNames.value[0]
+  currentFileName.value = fileNames.value[fileNames.value.length - 1]
 }
 
 const maxData = () => {
-  currentFileName.value = fileNames.value[fileNames.value.length - 1]
+  currentFileName.value = fileNames.value[0]
 }
 
 // --------------------------

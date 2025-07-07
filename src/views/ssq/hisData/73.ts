@@ -1,5 +1,5 @@
-export const g1 = [2, 7, 10, 27, 30, 33]
-export const g2 = [11]
+export const g1 = [2, 7, 10, 27, 30, 33, 11]
+
 export const ipt = `
 0204050915192531,01 02
 04 0609 1016172126 273132,14

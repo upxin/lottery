@@ -49,6 +49,19 @@
     <el-button @click="copySortedIptData" type="primary">复制表格数据</el-button>
     <el-button @click="clear" type="primary">清空高亮</el-button>
   </div>
+
+  <div
+    style="z-index: 99999999"
+    v-if="errorMessage"
+    class="fixed inset-0 flex items-center justify-center bg-white/90 p-4"
+  >
+    <div class="text-center max-w-lg w-full">
+      <!-- 错误信息显示 -->
+      <p class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-klein-blue mb-6 break-words">
+        {{ errorMessage }}
+      </p>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -61,10 +74,6 @@ const title = useTitle()
 title.value = 'kl8'
 const columnCount = 81
 
-// --------------------------
-// 核心修改：基于文件名称处理索引
-// --------------------------
-// 1. 获取所有文件的名称（不带路径和扩展名）
 const fileNames = computed(() => {
   return Object.keys(files)
     .map((path) => {
@@ -86,10 +95,10 @@ const currentFileIndex = computed(() => {
 const hasNext = computed(() => currentFileIndex.value > 0)
 const hasPrev = computed(() => currentFileIndex.value < fileNames.value.length - 1)
 
-// --------------------------
-// 数据加载与解析
-// --------------------------
-const files = import.meta.glob('./data/*', { eager: false }) // 懒加载
+const his = import.meta.glob('./hisData/*.ts', { eager: true })
+const curData = import.meta.glob('./*.ts', { eager: true })
+const files = Object.assign({}, his, curData)
+
 const dataSource = ref<any[]>([])
 const rawIptData = ref<string>('')
 const highlightedColumns = reactive(new Set<number>())
@@ -105,73 +114,100 @@ const loadData = async (fileName: string) => {
   rawIptData.value = ''
 
   try {
-    // 根据文件名查找文件路径
+    // 根据文件名查找文件路径（匹配以 "文件名.ts" 结尾的路径）
     const filePath = Object.keys(files).find((path) => path.endsWith(`${fileName}.ts`))
     if (!filePath) throw new Error(`文件 ${fileName}.ts 不存在`)
 
-    // 加载文件模块
-    const loader = files[filePath]
-    const dataModule = await loader()
+    // 直接获取模块内容（因使用 eager: true，无需调用加载函数）
+    const dataModule = files[filePath] as {
+      ipt?: string
+      isRedList?: number[]
+    }
+
+    // 提取原始数据
     const ipt = dataModule.ipt || ''
     rawIptData.value = ipt
 
-    // 同步高亮状态
+    // 同步高亮状态（从模块中获取 isRedList）
     highlightedColumns.clear()
     if (Array.isArray(dataModule.isRedList)) {
       dataModule.isRedList.forEach((i: number) => {
-        if (i >= 1 && i <= 80) highlightedColumns.add(i - 1)
+        // 只处理 1-80 范围内的列索引（转换为 0 基索引）
+        if (i >= 1 && i <= 80) {
+          highlightedColumns.add(i - 1)
+        }
       })
     }
 
-    // 解析数据行（逻辑不变）
+    // 解析数据行（处理空行和格式验证）
     const lines = ipt
       .trim()
       .split('\n')
-      .filter((line) => line.trim())
-    if (lines.length === 0) throw new Error('没有有效数据行')
+      .filter((line) => line.trim()) // 过滤空行
 
+    if (lines.length === 0) {
+      throw new Error('没有有效数据行')
+    }
+
+    // 解析每行数据为表格行格式
     const parsedData = lines.map((line, lineIndex) => {
+      // 分割主数据和附加数据（兼容单逗号分割）
       const [mainPart, extraRaw] = line.split(',')
-      const cleanedLine = mainPart.replace(/\s/g, '')
+      const cleanedLine = mainPart.replace(/\s/g, '') // 清除所有空格
 
+      // 验证主数据长度为偶数（确保两两一组）
       if (cleanedLine.length % 2 !== 0) {
-        throw new Error(`第 ${lineIndex + 1} 行长度非偶数：${line}`)
+        throw new Error(`第 ${lineIndex + 1} 行格式错误：主数据长度非偶数（${line}）`)
       }
 
+      // 提取主数据中的数字（两两一组）
       const numbers: string[] = []
       for (let i = 0; i < cleanedLine.length; i += 2) {
         const num = cleanedLine.slice(i, i + 2)
         const numValue = parseInt(num, 10)
+
+        // 验证数字有效性（1-80 范围内）
         if (isNaN(numValue) || numValue < 1 || numValue > 80) {
-          throw new Error(`第 ${lineIndex + 1} 行数字无效：${num}`)
+          throw new Error(`第 ${lineIndex + 1} 行包含无效数字：${num}`)
         }
         numbers.push(num)
       }
 
-      // 构建行数据
+      // 构建表格行数据（初始化 81 列）
       const rowData: Record<string, string> = {}
       for (let i = 0; i < columnCount; i++) {
         rowData[`column_${i}`] = ''
       }
+
+      // 填充主数据到对应列
       numbers.forEach((num) => {
-        const colIdx = parseInt(num, 10) - 1
+        const colIdx = parseInt(num, 10) - 1 // 转换为 0 基索引
         rowData[`column_${colIdx}`] = num
       })
+
+      // 处理附加数据（最后一列）
       rowData['column_80'] = extraRaw ? extraRaw.trim().padStart(2, '0') : ''
+      // 记录主数据数字个数（用于排序）
       rowData['mainLength'] = (cleanedLine.length / 2).toString()
 
       return { id: `row_${lineIndex}`, ...rowData }
     })
 
-    // 按数字个数排序（多的在前）
-    dataSource.value = parsedData.sort((a, b) => parseInt(b.mainLength) - parseInt(a.mainLength))
+    // 按主数据数字个数降序排序（多的在前）
+    // .sort((a, b) => {
+    //   return parseInt(b.mainLength) - parseInt(a.mainLength)
+    // })
+    dataSource.value = parsedData
   } catch (error) {
+    // 捕获并处理所有错误
     isError.value = true
-    errorMessage.value = error instanceof Error ? error.message : '数据加载失败'
+    errorMessage.value = error instanceof Error ? error.message : '数据加载失败，请检查文件格式'
   } finally {
+    // 确保加载状态关闭
     loading.close()
   }
 }
+
 const getHeaderClass = (dataIndex: string) => {
   const colIndex = getDataIndex(dataIndex)
   // 表头高亮样式（与单元格区分，可自定义）
@@ -289,11 +325,5 @@ onMounted(() => {
 // 监听当前文件名变化，自动加载数据
 watch(currentFileName, (fileName) => {
   if (fileName) loadData(fileName)
-})
-
-watch(errorMessage, (v) => {
-  if (v) {
-    ElNotification({ title: '错误', message: v, duration: 0, type: 'error' })
-  }
 })
 </script>

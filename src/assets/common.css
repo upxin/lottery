@@ -1,5 +1,5 @@
 .c-bottom {
-  @apply flex w-screen items-center justify-center fixed bottom-0 bg-white z-10 py-3px;
+  @apply flex w-screen items-center justify-center fixed bottom-0 bg-white z-100 py-3px;
 }
 .nums {
   @apply text-gray-400 text-sm flex items-center justify-center w-26px leading-none;

@@ -8,7 +8,7 @@
 }
 :root {
   /* 基础颜色变量定义 */
-  --klein-blue: #002fa7; /* 克莱因蓝 */
+  --klein-blue: rgb(0, 47, 167); /* 克莱因蓝 */
   --pure-red: #ff0000; /* 正红色 */
   --pure-black: #000000; /* 纯黑色 */
   --pure-white: #ffffff; /* 纯白色 */
@@ -22,11 +22,7 @@
   --bordeaux-dark: #5c0011; /* 深波尔多红 */
   --bordeaux-light: #a52639; /* 浅波尔多红 */
 
-  /* 可选：预定义带透明度的变体（基于基础变量） */
-
-  --klein-blue-rgb: 0, 47, 167;
-  --klein-blue-50: rgba(var(--klein-blue-rgb), 0.5);
-  --pure-red-30: rgba(var(--pure-red-rgb), 0.3);
+  --klein-blue-50: rgba(0, 47, 167, 0.5);
 }
 
 html,
@@ -58,7 +54,7 @@ body {
 }
 .comma-cell-single,
 .comma-header {
-  @apply bg-sky-blue;
+  @apply bg-sky;
 }
 .comma-cell-double {
   background-color: #ffe4ec;

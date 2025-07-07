@@ -1,34 +1,36 @@
 <template>
   <section
-    :style="{ height: `${getHeight}px` }"
-    ref="tableRef"
-    class="flex flex-col items-center overflow-y-auto box-border affix-container pos-relative"
+    flex
+    class="w-650px box-border bg-gray-50 pos-absolute top-30px left-1/2 -translate-x-1/2 z-999"
   >
-    <el-affix target=".affix-container" :offset="30">
-      <section flex class="w-650px box-border bg-gray-50">
-        <el-button style="width: 60px" text type="success"> 路 </el-button>
-        <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
-          <el-button text :type="'warning'"> {{ item }} </el-button>
-        </div>
-      </section>
-    </el-affix>
+    <el-button style="width: 60px" text type="success"> 路 </el-button>
+    <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
+      <el-button text :type="'warning'"> {{ item }} </el-button>
+    </div>
+  </section>
 
+  <section
+    :style="{ maxHeight: `${getHeight}px` }"
+    ref="tableRef"
+    class="flex flex-col items-center overflow-y-auto box-border affix-container pos-relative pt-32px"
+  >
     <Panel
       class="w-650px"
       :class="[
         periods.has(item[0]) ? 'bg-gray-1' : '',
         index % 3 === 1 ? 'border-red-300' : 'border-gray-300',
       ]"
-      v-for="(item, index) in hisRets"
+      v-for="(item, index) in [...hisRets]"
       @click="handlePanel(item[0])"
       :key="index"
       :title="'' + item[0]"
       :highlight-nums="getHighlightNums(item)"
       :blue="item[item.length - 1]"
     />
+    <MockPanel class="pos-sticky w-650px bg-white flex justify-center z-999 bottom-0"></MockPanel>
   </section>
 
-  <div class="pos-fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
+  <div class="pos-fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-5000">
     <!-- 滚动到顶部按钮 -->
     <div
       class="i-icons8:chevron-up-round text-klein-blue cursor-pointer transition-transform text-30px"
@@ -41,32 +43,25 @@
     ></div>
   </div>
 
-  <div class="c-bottom">
-    <el-button :type="'primary'" @click="currentHis = 1" size="small"> 最早周期 </el-button>
+  <div class="c-bottom z-999">
+    <el-button :type="'warning'" @click="currentHis = 1" size="small"> 最早周期 </el-button>
     <el-button :type="'primary'" @click="prevHis" :disabled="currentHis <= 1" size="small">
       上周期
     </el-button>
-    <el-button text :type="'warning'">{{ currentHis }}</el-button>
+    <el-button text :type="'danger'">{{ currentHis }}</el-button>
     <el-button :type="'primary'" @click="nextHis" :disabled="currentHis >= maxHis" size="small">
       下周期
     </el-button>
-    <el-button :type="'primary'" @click="currentHis = maxHis" size="small"> 最新周期 </el-button>
-    <el-button
-      :type="'success'"
-      @click="currentHis = maxHis"
-      :disabled="currentHis >= maxHis"
-      size="small"
-    >
-      最新周期
-    </el-button>
+    <el-button :type="'warning'" @click="currentHis = maxHis" size="small"> 最新周期 </el-button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watchEffect } from 'vue'
 import Panel from './Panel.vue'
 import { useAutoHeight } from '@/hooks/useHeight'
-const extraHeight = ref(60)
+import MockPanel from './MockPanel.vue'
+
+const extraHeight = ref(30 + 30)
 const { getHeight } = useAutoHeight(extraHeight)
 
 const title = useTitle('')
@@ -137,13 +132,4 @@ const scrollToBottom = () => {
 }
 
 const periods = ref(new Set())
-
-function handlePanel(key: number | string) {
-  if (periods.value.has(key)) {
-    periods.value.delete(key)
-    return
-  }
-  periods.value.add(key)
-  console.log(periods.value)
-}
 </script>

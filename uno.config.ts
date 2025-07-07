@@ -21,7 +21,7 @@ export default defineConfig({
       'bordeaux-red': '#800020', // 波尔多红（经典暗红）
       'bordeaux-dark': '#5C0011', // 深波尔多红
       'bordeaux-light': '#A52639', // 浅波尔多红
-      'klein-blue-50': 'rgba(var(--klein-blue-rgb), 0.5)',
+      'klein-blue-50': 'rgba(0, 47, 167, 0.5)',
     },
   },
   presets: [

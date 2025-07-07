@@ -203,12 +203,13 @@ export function useLotteryData(
 
     const temp = JSON.parse(JSON.stringify(rows))
     noSortData = temp
+
     sortData = rows.sort((a, b) => b._commaRaw - a._commaRaw)
 
-    parsedRows.value = sortData
+    parsedRows.value = sorted.value ? sortData : noSortData
   }
 
-  const sorted = ref(false)
+  const sorted = ref(true)
 
   function sortByLen() {
     if (!sorted.value) {
@@ -254,12 +255,6 @@ export function useLotteryData(
       .map((line) => line.replace(/\s+/g, ''))
       .filter((line) => line)
       .filter((line) => line.split(/,+/).length === 2)
-      .sort((a, b) => {
-        const aLen = a.split(/,+/)[0].length
-        const bLen = b.split(/,+/)[0].length
-        return bLen - aLen
-      })
-
     if (lines.length === 0) {
       ElMessage.warning('没有有效数据可复制')
       return

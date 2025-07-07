@@ -11,7 +11,6 @@ const router = useRouter()
 
 const navigateTo = (path: string, w?: boolean) => {
   if (w) {
-    // 打开新标签页：使用路由的完整URL
     const fullPath = router.resolve(path).href // 解析路由为完整URL
     window.open(fullPath, '_blank') // _blank 表示新标签页
     return

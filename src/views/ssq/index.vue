@@ -92,43 +92,11 @@
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
     <el-button type="primary" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
     <el-button @click="clear" type="primary">清空高亮</el-button>
+    <el-button @click="reBackHighLight" type="primary">重置高亮</el-button>
   </div>
 
-  <div class="fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
-    <!-- 滚动到顶部按钮 -->
-    <div
-      class="i-icons8:chevron-up-round text-klein-blue cursor-pointer transition-transform text-30px"
-      @click="scrollToTop"
-    ></div>
-    <!-- 滚动到底部按钮 -->
-    <div
-      class="i-icons8:chevron-down-round text-klein-blue cursor-pointer transition-transform text-30px"
-      @click="scrollToBottom"
-    ></div>
-  </div>
-  <div
-    style="z-index: 99999999"
-    v-if="errMsg"
-    class="fixed inset-0 flex items-center justify-center bg-white/90 p-4"
-  >
-    <div class="text-center max-w-lg w-full">
-      <!-- 错误信息显示 -->
-      <p class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-klein-blue mb-6 break-words">
-        {{ errMsg.split(':')[0] }}
-      </p>
-      <p class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-klein-blue mb-6 break-words">
-        {{ errMsg.split(':')[1] }}
-      </p>
-      <!-- 操作按钮组 -->
-      <div class="flex items-center justify-center gap-4">
-        <!-- 复制按钮（复制冒号前面的内容） -->
-        <el-button @click="copyPrefixText" :size="'large'" :type="'warning'">
-          <i class="i-ic:round-content-copy text-lg"></i>
-          <span>复制前缀</span>
-        </el-button>
-      </div>
-    </div>
-  </div>
+  <Error :err-msg="errMsg"></Error>
+  <ScrollTable :el="tableRef?.$el"></ScrollTable>
 </template>
 
 <script lang="ts" setup>
@@ -144,6 +112,7 @@ const his = import.meta.glob('./hisData/*.ts', { eager: true })
 const curData = import.meta.glob('./*.ts', { eager: true })
 const files = Object.assign({}, his, curData)
 const {
+  reBackHighLight,
   sortByLen,
   clear,
   errMsg,
@@ -168,43 +137,5 @@ const {
   backCount: 16, // 后区数量
 })
 
-const copyPrefixText = () => {
-  // 拆分字符串，取冒号前面的部分
-  const prefix = errMsg.value.split(':')[0].trim()
-
-  navigator.clipboard
-    .writeText(prefix)
-    .then(() => {
-      ElMessage.success('已复制')
-    })
-    .catch(() => {
-      ElMessage.error('复制失败')
-    })
-}
-
 const tableRef = useTemplateRef('tableRef')
-const scrollToTop = () => {
-  if (tableRef.value) {
-    const tableEl = tableRef.value.$el.querySelector('.el-scrollbar__wrap')
-    if (tableEl) {
-      tableEl.scrollTo({
-        top: 0,
-        behavior: 'smooth', // 平滑滚动
-      })
-    }
-  }
-}
-
-// 滚动到底部
-const scrollToBottom = () => {
-  if (tableRef.value) {
-    const tableEl = tableRef.value.$el.querySelector('.el-scrollbar__wrap')
-    if (tableEl) {
-      tableEl.scrollTo({
-        top: tableEl.scrollHeight,
-        behavior: 'smooth', // 平滑滚动
-      })
-    }
-  }
-}
 </script>

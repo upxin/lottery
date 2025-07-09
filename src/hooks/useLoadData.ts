@@ -255,6 +255,13 @@ export function useLotteryData(
       .map((line) => line.replace(/\s+/g, ''))
       .filter((line) => line)
       .filter((line) => line.split(/,+/).length === 2)
+      .sort((a, b) => {
+        // 新增排序逻辑
+        const aPrefix = a.split(',')[0]
+        const bPrefix = b.split(',')[0]
+        return bPrefix.length - aPrefix.length // 按逗号前长度降序
+      })
+
     if (lines.length === 0) {
       ElMessage.warning('没有有效数据可复制')
       return
@@ -381,6 +388,24 @@ export function useLotteryData(
   function clear() {
     highlighted.n.clear()
   }
+
+  const cacheHighLights = new Set<number>()
+  watch(
+    () => highlighted.n,
+    (v) => {
+      if (v.size == 0) return
+      cacheHighLights.clear()
+      for (const element of v) {
+        cacheHighLights.add(element)
+      }
+    },
+    { immediate: true, deep: true },
+  )
+  function reBackHighLight() {
+    for (const element of cacheHighLights) {
+      highlighted.n.add(element)
+    }
+  }
   return {
     sortByLen,
     footerRef,
@@ -410,7 +435,7 @@ export function useLotteryData(
     // 内部方法（调试用）
     regData,
     loadData,
-
+    reBackHighLight,
     // 原始数据
     rawData,
   }

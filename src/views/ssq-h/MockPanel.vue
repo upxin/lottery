@@ -1,6 +1,30 @@
 <template>
   <section class="flex items-center py-10px">
-    <el-button style="width: 60px" type="primary" :size="'small'"> 清除 </el-button>
+    <section flex flex-col>
+      <el-button
+        text
+        style="width: 60px"
+        type="primary"
+        :size="'small'"
+        @click="
+          () => {
+            redBalls.clear()
+            blueBalls.clear()
+          }
+        "
+      >
+        清除
+      </el-button>
+      <el-button
+        text
+        style="width: 60px; margin-left: 0"
+        type="warning"
+        :size="'small'"
+        @click="copyRedBallsNumbers"
+      >
+        复制
+      </el-button>
+    </section>
 
     <section>
       <div
@@ -73,6 +97,19 @@ function handleRed(num: number) {
     return
   }
   redBalls.value.add(num)
+}
+/**
+ * 复制redBalls中的数字到剪贴板
+ * @param {Ref<Set<number>>} redBalls - 包含红球数字的ref
+ * @returns {Promise<void>} 当复制成功时解析的Promise
+ */
+const copyRedBallsNumbers = async () => {
+  try {
+    const numbersArray = Array.from(redBalls.value).sort((a, b) => a - b)
+    const numbersString = numbersArray.join(',')
+    await navigator.clipboard.writeText(numbersString)
+    ElMessage.success('复制成功')
+  } catch (error) {}
 }
 </script>
 <style lang="scss">

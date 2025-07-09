@@ -8,7 +8,9 @@
       <div
         v-for="(row, rowIndex) in redBallList"
         :key="rowIndex"
-        class="flex items-center whitespace-nowrap"
+        class="flex items-center whitespace-nowrap my-2px"
+        :class="[rows.has(`${title}_${rowIndex}`) ? 'bg-gray-1' : '']"
+        @click="handleRow(`${title}_${rowIndex}`)"
       >
         <div
           v-for="(item, colIndex) in row"
@@ -46,7 +48,7 @@
 <script lang="ts" setup>
 import { redBallList } from './data' // 确保lists存在且路径正确
 import { blueBallList } from './data'
-
+const rows = ref(new Set())
 // 接收父组件传递的标题和需要标红的数字
 const props = defineProps<{
   title: string
@@ -59,6 +61,13 @@ const isNumberSelected = (num: number | null) => {
   if (num === null) return false
   // 强制转为数字，避免字符串/数字类型不匹配
   return props.highlightNums.includes(Number(num))
+}
+function handleRow(item: string) {
+  if (rows.value.has(item)) {
+    rows.value.delete(item)
+  } else {
+    rows.value.add(item)
+  }
 }
 </script>
 <style lang="scss">

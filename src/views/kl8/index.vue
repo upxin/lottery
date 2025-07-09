@@ -45,9 +45,10 @@
     <el-button type="primary" @click="prevData" :disabled="!hasPrev">上一个数据</el-button>
     <el-button type="primary" @click="nextData" :disabled="!hasNext">下一个数据</el-button>
     <el-button color="#002FA7" type="info" @click="maxData">last</el-button>
-    <el-button @click="copyToClipboard" type="primary">复制高亮数据</el-button>
+    <el-button @click="copyToClipboard" type="warning">复制高亮数据</el-button>
     <el-button @click="copySortedIptData" type="primary">复制表格数据</el-button>
     <el-button @click="clear" type="primary">清空高亮</el-button>
+    <el-button @click="reBackHighLight" type="primary">重置高亮</el-button>
   </div>
 
   <div
@@ -57,7 +58,7 @@
   >
     <div class="text-center max-w-lg w-full">
       <!-- 错误信息显示 -->
-      <p class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-klein-blue mb-6 break-words">
+      <p class="text-23px font-bold text-klein-blue mb-6 break-words">
         {{ errorMessage }}
       </p>
     </div>
@@ -194,10 +195,11 @@ const loadData = async (fileName: string) => {
     })
 
     // 按主数据数字个数降序排序（多的在前）
+
+    dataSource.value = parsedData
     // .sort((a, b) => {
     //   return parseInt(b.mainLength) - parseInt(a.mainLength)
     // })
-    dataSource.value = parsedData
   } catch (error) {
     // 捕获并处理所有错误
     isError.value = true
@@ -326,4 +328,22 @@ onMounted(() => {
 watch(currentFileName, (fileName) => {
   if (fileName) loadData(fileName)
 })
+
+const cacheHighLights = new Set<number>()
+watch(
+  () => highlightedColumns,
+  (v) => {
+    if (v.size == 0) return
+    cacheHighLights.clear()
+    for (const element of v) {
+      cacheHighLights.add(element)
+    }
+  },
+  { immediate: true, deep: true },
+)
+function reBackHighLight() {
+  for (const element of cacheHighLights) {
+    highlightedColumns.add(element)
+  }
+}
 </script>

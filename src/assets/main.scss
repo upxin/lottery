@@ -32,17 +32,17 @@ body {
   user-select: none;
 }
 .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
-  @apply bg-klein-blue;
+  @apply bg-sky;
 }
 
 // 高亮点击行
 .highlighted-row td.el-table__cell {
-  @apply bg-klein-blue;
+  @apply bg-sky-blue;
 }
 
 // 高亮colum
 .high-colum {
-  @apply bg-bordeaux-red! text-lemon-yellow;
+  @apply bg-sky-blue text-lemon-yellow;
   font-weight: bold;
 }
 

@@ -1,5 +1,6 @@
 <template>
   <el-table
+    ref="tableRef"
     class="mx-auto"
     style="width: 1000px"
     :highlight-current-row="false"
@@ -89,38 +90,20 @@
       最新一期
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
-    <el-button type="primary" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
+    <el-button type="warning" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
+    <el-button @click="clear" type="primary">清空高亮</el-button>
+    <el-button @click="reBackHighLight" type="primary">重置高亮</el-button>
   </div>
-
-  <div
-    style="z-index: 99999999"
-    v-if="errMsg"
-    class="fixed inset-0 flex items-center justify-center bg-white/90 p-4"
-  >
-    <div class="text-center max-w-lg w-full">
-      <!-- 错误信息显示 -->
-      <p class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-klein-blue mb-6 break-words">
-        {{ errMsg.split(':')[0] }}
-      </p>
-      <p class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-klein-blue mb-6 break-words">
-        {{ errMsg.split(':')[1] }}
-      </p>
-      <!-- 操作按钮组 -->
-      <div class="flex items-center justify-center gap-4">
-        <!-- 复制按钮（复制冒号前面的内容） -->
-        <el-button @click="copyPrefixText" :size="'large'" :type="'warning'">
-          <i class="i-ic:round-content-copy text-lg"></i>
-          <span>复制前缀</span>
-        </el-button>
-      </div>
-    </div>
-  </div>
+  <Error :err-msg="errMsg"></Error>
+  <ScrollTable :el="tableRef?.$el"></ScrollTable>
 </template>
 
 <script lang="ts" setup>
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
+const tableRef = useTemplateRef('tableRef')
+
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)
 const width = 20
@@ -136,6 +119,7 @@ const {
   parsedRows,
   frontHeaders,
   backHeaders,
+  reBackHighLight,
   prevHis,
   nextHis,
   copyTable,
@@ -147,22 +131,9 @@ const {
   errMsg,
   getCommaClass,
   getHeaderCellClass,
+  clear,
 } = useLotteryData('dlt', files, {
   frontCount: 35, // 前区数量
   backCount: 12, // 后区数量
 })
-
-const copyPrefixText = () => {
-  // 拆分字符串，取冒号前面的部分
-  const prefix = errMsg.value.split(':')[0].trim()
-
-  navigator.clipboard
-    .writeText(prefix)
-    .then(() => {
-      ElMessage.success('已复制')
-    })
-    .catch(() => {
-      ElMessage.error('复制失败')
-    })
-}
 </script>

@@ -1,4 +1,4 @@
-export const g1 = [2, 7, 10, 27, 30, 33, 11]
+export const g1 = [73, 2, 7, 10, 27, 30, 33, 11]
 
 export const ipt = `
 0204050915192531,01 02

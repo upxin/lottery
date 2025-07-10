@@ -1,15 +1,12 @@
 <template>
   <section class="flex items-center border-0 border-b-1px border-solid pt-2px">
-    <el-button style="width: 60px" text type="success">
-      {{ title }}
-    </el-button>
+    <el-button style="width: 65px" text type="warning"> {{ title }}-{{ index }} </el-button>
 
     <section>
       <div
         v-for="(row, rowIndex) in redBallList"
         :key="rowIndex"
         class="flex items-center whitespace-nowrap my-2px"
-        :class="[rows.has(`${title}_${rowIndex}`) ? 'bg-gray-1' : '']"
         @click="handleRow(`${title}_${rowIndex}`)"
       >
         <div
@@ -54,6 +51,7 @@ const props = defineProps<{
   title: string
   highlightNums: number[]
   blue: number | string
+  index: number
 }>()
 
 // 检查数字是否需要标红（处理类型匹配）

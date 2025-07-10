@@ -3,7 +3,7 @@
     <section flex flex-col>
       <el-button
         text
-        style="width: 60px"
+        style="width: 65px"
         type="primary"
         :size="'small'"
         @click="
@@ -17,7 +17,7 @@
       </el-button>
       <el-button
         text
-        style="width: 60px; margin-left: 0"
+        style="width: 65px; margin-left: 0"
         type="warning"
         :size="'small'"
         @click="copyRedBallsNumbers"

@@ -3,7 +3,7 @@
     flex
     class="w-650px box-border bg-gray-50 pos-absolute top-30px left-1/2 -translate-x-1/2 z-999"
   >
-    <el-button style="width: 60px" text type="success"> 路 </el-button>
+    <el-button style="width: 65px" text type="success"> 路 </el-button>
     <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
       <el-button text :type="'warning'"> {{ item }} </el-button>
     </div>
@@ -17,12 +17,13 @@
     <Panel
       class="w-650px"
       :class="[
-        periods.has(item[0]) ? 'bg-gray-1' : '',
         index % 3 === 1 ? 'border-red-300' : 'border-gray-300',
+        highLights.has(item[0]) ? 'bg-sky-blue' : '',
       ]"
       v-for="(item, index) in [...hisRets]"
       @click="handlePanel(item[0])"
       :key="index"
+      :index="index + 1"
       :title="'' + item[0]"
       :highlight-nums="getHighlightNums(item)"
       :blue="item[item.length - 1]"
@@ -60,6 +61,7 @@
 import Panel from './Panel.vue'
 import { useAutoHeight } from '@/hooks/useHeight'
 import MockPanel from './MockPanel.vue'
+import { useLocalStorage } from '@/hooks/useStorage'
 
 const extraHeight = ref(30 + 30)
 const { getHeight } = useAutoHeight(extraHeight)
@@ -131,5 +133,12 @@ const scrollToBottom = () => {
   }
 }
 
-const periods = ref(new Set())
+const highLights = useLocalStorage('highLights', new Set())
+function handlePanel(item: string) {
+  if (highLights.value.has(item)) {
+    highLights.value.delete(item)
+  } else {
+    highLights.value.add(item)
+  }
+}
 </script>

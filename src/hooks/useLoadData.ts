@@ -33,10 +33,8 @@ export function useLotteryData(
   const rawData = ref<LotteryData>({ g1: [], g2: [], ipt: '' })
   const parsedRows = ref<ParsedRow[]>([])
 
-  const highlighted = reactive({
-    n: new Set<number>(), // 前区高亮 (1-frontCount)
-    h: new Set<number>(), // 后区高亮 (1-backCount)
-  })
+  const highlightedBack = ref(new Set()) // 后区高亮 (1-backCount)
+  const highlightedFront = ref(new Set()) // 前区高亮 (1-frontCount)
 
   const availablePeriods = computed(() => {
     return Object.keys(files)
@@ -90,6 +88,7 @@ export function useLotteryData(
   }
 
   const errMsg = ref('')
+
   // 加载指定期号数据
   const loadData = async (period: string | number) => {
     const loading = ElLoading.service({
@@ -123,6 +122,7 @@ export function useLotteryData(
       }
 
       syncHighlightFromData()
+
       title.value = `${lotteryType} ${period}`
       regData()
       return true
@@ -141,10 +141,10 @@ export function useLotteryData(
 
   // 从原始数据同步高亮状态
   const syncHighlightFromData = () => {
-    highlighted.n.clear()
-    highlighted.h.clear()
-    rawData.value.g1.forEach((num) => highlighted.n.add(num))
-    rawData.value.g2.forEach((num) => highlighted.h.add(num))
+    highlightedFront.value.clear()
+    highlightedBack.value.clear()
+    rawData.value.g1.forEach((num) => highlightedFront.value.add(num))
+    rawData.value.g2.forEach((num) => highlightedBack.value.add(num))
   }
 
   // 解析数据为表格行（修正字段名匹配）
@@ -275,11 +275,11 @@ export function useLotteryData(
 
   const copyHighlighted = () => {
     // 1. 过滤无效值（排除 0 和非数字），并排序
-    const validFrontNums = Array.from(highlighted.n.values())
+    const validFrontNums = Array.from(highlightedFront.value.values())
       .filter((num) => Number.isInteger(num) && num > 0) // 只保留正整数
       .sort((a, b) => a - b)
 
-    const validBackNums = Array.from(highlighted.h.values())
+    const validBackNums = Array.from(highlightedBack.value.values())
       .filter((num) => Number.isInteger(num) && num > 0)
       .sort((a, b) => a - b)
 
@@ -324,7 +324,7 @@ export function useLotteryData(
     const parsed = parseColumnProp(prop)
     if (!parsed) return
 
-    const targetSet = parsed.type === 'N' ? highlighted.n : highlighted.h
+    const targetSet = parsed.type === 'N' ? highlightedFront.value : highlightedBack.value
     if (targetSet.has(parsed.index)) {
       targetSet.delete(parsed.index)
     } else {
@@ -338,7 +338,9 @@ export function useLotteryData(
 
     // 判断是否高亮（仅基于列索引和高亮状态）
     const isHighlighted =
-      parsed.type === 'N' ? highlighted.n.has(parsed.index) : highlighted.h.has(parsed.index)
+      parsed.type === 'N'
+        ? highlightedFront.value.has(parsed.index)
+        : highlightedBack.value.has(parsed.index)
 
     // 只在高亮时返回类名
     if (!isHighlighted) return ''
@@ -358,7 +360,9 @@ export function useLotteryData(
     if (!parsed) return ''
 
     const isHighlighted =
-      parsed.type === 'N' ? highlighted.n.has(parsed.index) : highlighted.h.has(parsed.index)
+      parsed.type === 'N'
+        ? highlightedFront.value.has(parsed.index)
+        : highlightedBack.value.has(parsed.index)
 
     if (!isHighlighted) return ''
 
@@ -386,12 +390,12 @@ export function useLotteryData(
   })
 
   function clear() {
-    highlighted.n.clear()
+    highlightedFront.value.clear()
   }
 
   const cacheHighLights = new Set<number>()
   watch(
-    () => highlighted.n,
+    () => highlightedFront.value,
     (v) => {
       if (v.size == 0) return
       cacheHighLights.clear()
@@ -403,7 +407,7 @@ export function useLotteryData(
   )
   function reBackHighLight() {
     for (const element of cacheHighLights) {
-      highlighted.n.add(element)
+      highlightedFront.value.add(element)
     }
   }
   return {
@@ -414,7 +418,6 @@ export function useLotteryData(
     maxHis,
     parsedRows,
     availablePeriods,
-    highlighted,
     errMsg,
     // 列配置
     frontHeaders,

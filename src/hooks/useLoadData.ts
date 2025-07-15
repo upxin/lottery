@@ -25,7 +25,6 @@ export function useLotteryData(
 ) {
   const { frontCount, backCount } = columnConfig
   const title = useTitle()
-  title.value = lotteryType
 
   const footerRef = ref<HTMLElement | null>(null)
 

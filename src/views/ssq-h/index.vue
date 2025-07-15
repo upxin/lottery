@@ -1,21 +1,16 @@
 <template>
   <section
-    flex
-    class="w-650px box-border bg-gray-50 pos-absolute top-30px left-1/2 -translate-x-1/2 z-999"
-  >
-    <el-button style="width: 65px" text type="success"> 路 </el-button>
-    <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
-      <el-button text :type="'warning'"> {{ item }} </el-button>
-    </div>
-  </section>
-
-  <section
     :style="{ maxHeight: `${getHeight}px` }"
     ref="tableRef"
-    class="flex flex-col items-center overflow-y-auto box-border affix-container pos-relative pt-32px"
+    class="flex flex-col items-center overflow-y-auto box-border affix-container pos-relative"
   >
+    <section w-651px flex class="box-border bg-gray-50 pos-sticky top-0">
+      <el-button style="width: 65px" text type="success"> 路 </el-button>
+      <div v-for="(item, colIndex) in roads" :key="`${item}-${colIndex}`" class="nums">
+        <el-button text :type="'warning'"> {{ item }} </el-button>
+      </div>
+    </section>
     <Panel
-      class="w-650px"
       :class="[
         index % 3 === 1 ? 'border-red-300' : 'border-gray-300',
         highLights.has(item[0]) ? 'bg-sky-blue' : '',
@@ -28,7 +23,7 @@
       :highlight-nums="getHighlightNums(item)"
       :blue="item[item.length - 1]"
     />
-    <MockPanel class="pos-sticky w-650px bg-white flex justify-center z-999 bottom-0"></MockPanel>
+    <MockPanel class="pos-sticky bg-white flex justify-center z-999 bottom-0"></MockPanel>
   </section>
 
   <div class="pos-fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-5000">
@@ -62,12 +57,11 @@ import Panel from './Panel.vue'
 import { useAutoHeight } from '@/hooks/useHeight'
 import MockPanel from './MockPanel.vue'
 import { useLocalStorage } from '@/hooks/useStorage'
-
+const route = useRoute()
+const title = useTitle()
+title.value = route.name as string
 const extraHeight = ref(30 + 30)
 const { getHeight } = useAutoHeight(extraHeight)
-
-const title = useTitle('')
-title.value = 'ssq-h'
 
 const hisModules = import.meta.glob('./his/*.[jt]s') // 支持js和ts
 const roads = [1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0]

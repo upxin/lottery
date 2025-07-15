@@ -1,20 +1,24 @@
 <template>
-  <el-button type="primary" @click="navigateTo('/ssq')">ssq</el-button>
-  <el-button type="primary" @click="navigateTo('/dlt')">dlt</el-button>
-  <el-button type="primary" @click="navigateTo('/ssq-h')">ssq-h</el-button>
-  <el-button type="primary" @click="navigateTo('/ssq-h', true)">ssq-h-window</el-button>
+  <el-button
+    v-for="route in routes"
+    :key="route.path"
+    type="primary"
+    @click="navigateTo(route.path, true)"
+  >
+    {{ route.name || route.path }}
+  </el-button>
 </template>
 
 <script setup lang="ts">
 const router = useRouter()
+const routes = router.options.routes
 
-const navigateTo = (path: string, w?: boolean) => {
+const navigateTo = (path: string, w: boolean) => {
   if (w) {
-    const fullPath = router.resolve(path).href // 解析路由为完整URL
-    window.open(fullPath, '_blank') // _blank 表示新标签页
+    const fullPath = router.resolve(path).href
+    window.open(fullPath, '_blank')
     return
   }
-  // 正常跳转（当前标签页）
   router.push(path)
 }
 </script>

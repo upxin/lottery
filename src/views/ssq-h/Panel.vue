@@ -1,5 +1,5 @@
 <template>
-  <section class="flex items-center border-0 border-b-1px border-solid pt-2px">
+  <section class="flex items-center border-0 border-b-1px border-solid pt-2px justify-center">
     <el-button style="width: 65px" text type="warning"> {{ title }}-{{ index }} </el-button>
 
     <section>

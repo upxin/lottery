@@ -135,4 +135,9 @@ function handlePanel(item: string) {
     highLights.value.add(item)
   }
 }
+
+const state = reactive({
+  ipt: 'test',
+})
+provide('test', { state })
 </script>

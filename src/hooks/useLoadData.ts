@@ -409,6 +409,32 @@ export function useLotteryData(
       highlightedFront.value.add(element)
     }
   }
+
+  onKeyStroke('ArrowUp', (e) => {
+    // 排除输入框/文本域等需要输入的场景
+    if (
+      e.target instanceof HTMLInputElement ||
+      e.target instanceof HTMLTextAreaElement ||
+      e.target instanceof HTMLSelectElement
+    ) {
+      return // 不干扰正常输入
+    }
+    e.preventDefault() // 阻止页面滚动
+    prevHis() // 调用上一期方法
+  })
+
+  // 监听下箭头（ArrowDown）→ 下一期
+  onKeyStroke('ArrowDown', (e) => {
+    if (
+      e.target instanceof HTMLInputElement ||
+      e.target instanceof HTMLTextAreaElement ||
+      e.target instanceof HTMLSelectElement
+    ) {
+      return
+    }
+    e.preventDefault()
+    nextHis() // 调用下一期方法
+  })
   return {
     sortByLen,
     footerRef,

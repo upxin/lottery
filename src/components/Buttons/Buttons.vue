@@ -5,13 +5,17 @@
     type="primary"
     @click="navigateTo(route.path, true)"
   >
-    {{ route.name || route.path }}
+    {{ route.name }}
   </el-button>
 </template>
 
 <script setup lang="ts">
 const router = useRouter()
-const routes = router.options.routes
+const routes = computed(() => {
+  return router.options.routes.filter((item) => {
+    return item.path !== '/'
+  })
+})
 
 const navigateTo = (path: string, w: boolean) => {
   if (w) {

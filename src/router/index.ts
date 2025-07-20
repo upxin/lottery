@@ -5,6 +5,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      redirect: '/ssq',
+    },
+    {
       path: '/ssq-h',
       name: 'ssq-h',
       component: () => import('@/views/ssq-h/index.vue'),

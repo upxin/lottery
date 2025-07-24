@@ -102,7 +102,7 @@ export function useLotteryData(
 
       const mod: any = files[filePath]
       const ipt = typeof mod?.ipt === 'string' ? mod.ipt : ''
-
+      const g1 = mod.g1
       // 数据校验
       const frontMax = lotteryType === 'ssq' ? 33 : 35
       const backMax = lotteryType === 'ssq' ? 16 : 12
@@ -115,8 +115,8 @@ export function useLotteryData(
 
       // 更新原始数据
       rawData.value = {
-        g1: lotteryType === 'ssq' ? mod.g1.slice(1, 7) : mod.g1.slice(1, 6),
-        g2: lotteryType === 'ssq' ? mod.g1.slice(-1) : mod.g1.slice(-2),
+        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : g1.slice(1, 6),
+        g2: lotteryType === 'ssq' ? g1?.slice(-1) : g1.slice(-2),
         ipt,
       }
 
@@ -437,6 +437,8 @@ export function useLotteryData(
   })
   return {
     sortByLen,
+    highlightedBack,
+    highlightedFront,
     footerRef,
     currentHis,
     minHis,

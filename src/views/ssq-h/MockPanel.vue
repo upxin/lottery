@@ -1,5 +1,5 @@
 <template>
-  <section class="flex items-center py-10px">
+  <section class="flex items-center py-10px pos-sticky bg-white flex justify-center z-999 bottom-0">
     <section flex flex-col>
       <el-button
         text
@@ -65,11 +65,17 @@
       </div>
     </section>
   </section>
+  <!-- <el-input
+    v-model:model-value="state.ipt"
+    style="width: 200px; position: fixed"
+    class="left-0 bottom-40px"
+  ></el-input> -->
 </template>
 
 <script lang="ts" setup>
 import { redBallList } from './data' // 确保lists存在且路径正确
 import { blueBallList } from './data'
+const { state } = inject('test')
 
 const redBalls = ref(new Set())
 const blueBalls = ref(new Set())

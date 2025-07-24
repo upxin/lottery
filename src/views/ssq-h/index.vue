@@ -23,7 +23,7 @@
       :highlight-nums="getHighlightNums(item)"
       :blue="item[item.length - 1]"
     />
-    <MockPanel class="pos-sticky bg-white flex justify-center z-999 bottom-0"></MockPanel>
+    <MockPanel></MockPanel>
   </section>
 
   <div class="pos-fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-5000">
@@ -49,6 +49,7 @@
       下周期
     </el-button>
     <el-button :type="'warning'" @click="currentHis = maxHis" size="small"> 最新周期 </el-button>
+    <!-- <el-input v-model:model-value="state.ipt" style="width: 200px"></el-input> -->
   </div>
 </template>
 

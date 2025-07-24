@@ -1,6 +1,6 @@
 export const validateIptData = (ipt: string, front = 33, back = 16): string | null => {
   if (typeof ipt !== 'string' || !ipt.trim()) {
-    return '输入数据必须是非空字符串'
+    return ipt
   }
 
   const lines = ipt.trim().split('\n')

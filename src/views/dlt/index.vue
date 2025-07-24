@@ -96,12 +96,22 @@
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
+  <div pos-fixed left-0 top-0 w-120px>
+    <p text-bordeaux-light flex flex-wrap>
+      <span v-for="item in red" :key="item" px-4px>{{ item }}</span>
+    </p>
+    <p text-klein-blue flex flex-wrap>
+      <span v-for="item in blue" :key="item" px-4px>{{ item }}</span>
+    </p>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
+import { RED, BLUE } from './names'
+
 const tableRef = useTemplateRef('tableRef')
 
 const extraHeight = ref(60)
@@ -109,7 +119,12 @@ const { getHeight } = useAutoHeight(extraHeight)
 const width = 20
 const { getRowClassName, handleRowClick } = useHighLight()
 const his = import.meta.glob('./hisData/*.ts', { eager: true })
-const curData = import.meta.glob('./*.ts', { eager: true })
+const curData = {
+  ...import.meta.glob('./[1-9].ts', { eager: true }),
+  ...import.meta.glob('./[1-9][0-9].ts', { eager: true }),
+  ...import.meta.glob('./1[0-9][0-9].ts', { eager: true }),
+  ...import.meta.glob('./200.ts', { eager: true }),
+}
 const files = Object.assign({}, his, curData)
 const {
   footerRef,
@@ -119,6 +134,8 @@ const {
   parsedRows,
   frontHeaders,
   backHeaders,
+  highlightedBack,
+  highlightedFront,
   reBackHighLight,
   prevHis,
   nextHis,
@@ -135,5 +152,21 @@ const {
 } = useLotteryData('dlt', files, {
   frontCount: 35, // 前区数量
   backCount: 12, // 后区数量
+})
+
+const red = computed(() => {
+  const ret = {}
+  for (const element of highlightedFront.value) {
+    ret[element] = RED[element]
+  }
+  return Object.values(ret) || []
+})
+
+const blue = computed(() => {
+  const ret = {}
+  for (const element of highlightedBack.value) {
+    ret[element] = BLUE[element]
+  }
+  return Object.values(ret) || []
 })
 </script>

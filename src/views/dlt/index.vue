@@ -91,19 +91,28 @@
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
     <el-button type="warning" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
-    <el-button @click="clear" type="primary">清空高亮</el-button>
-    <el-button @click="reBackHighLight" type="primary">重置高亮</el-button>
+    <el-button
+      @click="
+        () => {
+          !isClear ? clear() : reBackHighLight()
+          toggle()
+        }
+      "
+      :type="!isClear ? 'danger' : 'warning'"
+    >
+      {{ !isClear ? '清空高亮' : '重置高亮' }}
+    </el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <div pos-fixed left-0 top-0 w-120px>
+  <!-- <div pos-fixed left-0 top-0 w-120px>
     <p text-bordeaux-light flex flex-wrap>
       <span v-for="item in red" :key="item" px-4px>{{ item }}</span>
     </p>
     <p text-klein-blue flex flex-wrap>
       <span v-for="item in blue" :key="item" px-4px>{{ item }}</span>
     </p>
-  </div>
+  </div> -->
 </template>
 
 <script lang="ts" setup>
@@ -113,6 +122,7 @@ import { useAutoHeight } from '@/hooks/useHeight'
 import { RED, BLUE } from './names'
 
 const tableRef = useTemplateRef('tableRef')
+const [isClear, toggle] = useToggle()
 
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)

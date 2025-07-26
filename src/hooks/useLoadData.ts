@@ -104,8 +104,18 @@ export function useLotteryData(
       const ipt = typeof mod?.ipt === 'string' ? mod.ipt : ''
       const g1 = mod.g1
       // 数据校验
-      const frontMax = lotteryType === 'ssq' ? 33 : 35
-      const backMax = lotteryType === 'ssq' ? 16 : 12
+      let frontMax = 33
+      let backMax = 12
+      if (lotteryType === 'ssq') {
+        frontMax = 33
+        backMax = 16
+      } else if (lotteryType === 'dlt') {
+        frontMax = 35
+        backMax = 12
+      } else {
+        frontMax = 80
+        backMax = 10
+      }
 
       const errCheck = validateIptData(ipt, frontMax, backMax)
       if (errCheck) {

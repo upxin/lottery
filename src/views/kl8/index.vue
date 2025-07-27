@@ -59,7 +59,7 @@
     >
       <template #header>
         <div @click.stop="toggleHighlight(col.prop)" :class="getHeaderCellClass(col.prop)">
-          {{ col.label }}
+          {{ col.prop }}
         </div>
       </template>
     </el-table-column>
@@ -105,14 +105,6 @@
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <!-- <div pos-fixed left-0 top-0 w-120px>
-    <p text-bordeaux-light flex flex-wrap>
-      <span v-for="item in red" :key="item" px-4px>{{ item }}</span>
-    </p>
-    <p text-klein-blue flex flex-wrap>
-      <span v-for="item in blue" :key="item" px-4px>{{ item }}</span>
-    </p>
-  </div> -->
 </template>
 
 <script lang="ts" setup>
@@ -145,7 +137,6 @@ const {
   frontHeaders,
   backHeaders,
   highlightedBack,
-  highlightedFront,
   reBackHighLight,
   prevHis,
   nextHis,
@@ -162,21 +153,5 @@ const {
 } = useLotteryData('kl8', files, {
   frontCount: 80, // 前区数量
   backCount: 1, // 后区数量
-})
-
-const red = computed(() => {
-  const ret = {}
-  for (const element of highlightedFront.value) {
-    ret[element] = RED[element]
-  }
-  return Object.values(ret) || []
-})
-
-const blue = computed(() => {
-  const ret = {}
-  for (const element of highlightedBack.value) {
-    ret[element] = BLUE[element]
-  }
-  return Object.values(ret) || []
 })
 </script>

@@ -125,7 +125,7 @@ export function useLotteryData(
 
       // 更新原始数据
       rawData.value = {
-        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : g1.slice(1, 6),
+        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : lotteryType === 'dlt' ? g1.slice(1, 6) : g1,
         g2: lotteryType === 'ssq' ? g1?.slice(-1) : g1.slice(-2),
         ipt,
       }
@@ -177,7 +177,6 @@ export function useLotteryData(
       const separator = trimmedLine.includes(',,') ? ',,' : ','
       const [main, tail] = trimmedLine.split(separator)
       if (!main || !tail) return
-
       // 解析前区/后区数字
       const mainArr = Array.from({ length: main.length / 2 }, (_, i) =>
         main.substring(i * 2, i * 2 + 2),
@@ -186,7 +185,6 @@ export function useLotteryData(
       const tailArr = Array.from({ length: tail.length / 2 }, (_, i) =>
         tail.substring(i * 2, i * 2 + 2),
       ).filter((num) => num >= '01' && num <= String(backCount).padStart(2, '0'))
-
       // 构建行数据
       const row: ParsedRow = {
         id: `row_${index}`,
@@ -207,6 +205,9 @@ export function useLotteryData(
         row[h.prop] = tailArr.includes(num) ? num : ''
       })
 
+      if (lotteryType === 'kl8') {
+        row.h1 = tail
+      }
       rows.push(row)
     })
 

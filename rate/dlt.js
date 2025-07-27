@@ -1,7 +1,11 @@
 import { readFileSync, writeFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
-
+function numberToChinese(num) {
+  const index = num / 5
+  return String(num)
+  // return String.fromCharCode('a'.charCodeAt(0) + index)
+}
 // 获取当前脚本所在目录
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -63,7 +67,7 @@ try {
 
     // 生成Markdown内容
     result.forEach((item) => {
-      mdContent.push(`- ${item.percent}%: ${item.nums.join(', ')}`)
+      mdContent.push(`${numberToChinese(item.percent)}: ${item.nums.join(', ')}`)
     })
     mdContent.push('')
   })

@@ -388,10 +388,6 @@ export function useLotteryData(
     return row._doubleComma ? 'comma-cell-double' : 'comma-cell-single'
   }
   onBeforeMount(() => {
-    // 校验列数配置
-    if (![33, 35].includes(frontCount)) {
-      console.warn(`前区列数 ${frontCount} 可能不符合规则（通常为 33 或 35）`)
-    }
     initPeriod()
   })
 

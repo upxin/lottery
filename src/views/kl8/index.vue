@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     class="mx-auto"
-    style="width: 1800px"
+    style="width: 1680px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -64,7 +64,6 @@
       </template>
     </el-table-column>
   </el-table>
-
   <div ref="footerRef" class="c-bottom">
     <el-select
       v-model="currentHis"
@@ -91,30 +90,28 @@
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
     <el-button type="warning" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
-    <el-button
-      @click="
-        () => {
-          !isClear ? clear() : reBackHighLight()
-          toggle()
-        }
-      "
-      :type="!isClear ? 'danger' : 'warning'"
-    >
-      {{ !isClear ? '清空高亮' : '重置高亮' }}
+    <el-button @click="reBackHighLight" type="warning">
+      {{ '重置高亮' }}
     </el-button>
+    <el-button @click="clear" :type="'danger'">
+      {{ '清空高亮' }}
+    </el-button>
+    <el-button type="primary" @click="toggle()" size="small" class="mr-2"> list </el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
+  <List :list="list" v-model:visible="visible"></List>
 </template>
 
 <script lang="ts" setup>
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
-import { RED, BLUE } from './names'
+
+import List from './List.vue'
 
 const tableRef = useTemplateRef('tableRef')
-const [isClear, toggle] = useToggle()
+const [visible, toggle] = useToggle()
 
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)
@@ -136,7 +133,6 @@ const {
   parsedRows,
   frontHeaders,
   backHeaders,
-  highlightedBack,
   reBackHighLight,
   prevHis,
   nextHis,
@@ -153,5 +149,11 @@ const {
 } = useLotteryData('kl8', files, {
   frontCount: 80, // 前区数量
   backCount: 1, // 后区数量
+})
+
+const list = computed(() => {
+  if (!currentHis.value) return {}
+  const filePath = Object.keys(files).find((path) => path.endsWith(`${currentHis.value}.ts`))
+  return files[filePath].only
 })
 </script>

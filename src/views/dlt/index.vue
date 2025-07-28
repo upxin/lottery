@@ -91,16 +91,11 @@
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
     <el-button type="warning" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
-    <el-button
-      @click="
-        () => {
-          !isClear ? clear() : reBackHighLight()
-          toggle()
-        }
-      "
-      :type="!isClear ? 'danger' : 'warning'"
-    >
-      {{ !isClear ? '清空高亮' : '重置高亮' }}
+    <el-button @click="reBackHighLight" type="warning">
+      {{ '重置高亮' }}
+    </el-button>
+    <el-button @click="clear" :type="'danger'">
+      {{ '清空高亮' }}
     </el-button>
   </div>
   <Error :err-msg="errMsg"></Error>

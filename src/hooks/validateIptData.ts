@@ -67,3 +67,36 @@ export const validateIptData = (ipt: string, front = 33, back = 16): string | nu
   // 所有行校验通过
   return null
 }
+
+export const validateIptDatakl8 = (ipt: string, front = 80) => {
+  const lines = ipt.split('\n').filter((line) => line.trim() !== '')
+
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex]
+    const commaIndex = line.indexOf(',')
+    const dataPart = commaIndex !== -1 ? line.substring(0, commaIndex) : line
+
+    const cleaned = dataPart.replace(/\s/g, '')
+
+    if (cleaned.length % 2 !== 0) {
+      return `第${lineIndex + 1}行：数据长度不是偶数，可能存在未补0的数字`
+    }
+
+    const numbers = cleaned.match(/.{2}/g) || []
+
+    for (let numIndex = 0; numIndex < numbers.length; numIndex++) {
+      const num = numbers[numIndex]
+      const numValue = parseInt(num, 10)
+
+      if (isNaN(numValue) || numValue < 1 || numValue > front) {
+        return `第${lineIndex + 1}行第${numIndex + 1}个数字(${num})：不在01-${front}范围内`
+      }
+
+      if (numValue < 10 && num[0] !== '0') {
+        return `第${lineIndex + 1}行第${numIndex + 1}个数字(${num})：小于10但未补0`
+      }
+    }
+  }
+
+  return null
+}

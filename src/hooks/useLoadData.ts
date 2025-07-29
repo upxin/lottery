@@ -1,4 +1,4 @@
-import { validateIptData } from './validateIptData'
+import { validateIptData, validateIptDatakl8 } from './validateIptData'
 
 // 类型定义
 export interface LotteryData {
@@ -117,16 +117,24 @@ export function useLotteryData(
         backMax = 10
       }
 
-      const errCheck = validateIptData(ipt, frontMax, backMax)
-      if (errCheck) {
-        errMsg.value = errCheck
-        return false
+      if (lotteryType !== 'kl8') {
+        const errCheck = validateIptData(ipt, frontMax, backMax)
+        if (errCheck) {
+          errMsg.value = errCheck
+          return false
+        }
+      } else {
+        const errCheck = validateIptDatakl8(ipt, frontMax, backMax)
+        if (errCheck) {
+          errMsg.value = errCheck
+          return false
+        }
       }
 
       // 更新原始数据
       rawData.value = {
-        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : lotteryType === 'dlt' ? g1.slice(1, 6) : g1,
-        g2: lotteryType === 'ssq' ? g1?.slice(-1) : g1.slice(-2),
+        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : lotteryType === 'dlt' ? g1?.slice(1, 6) : g1,
+        g2: lotteryType === 'ssq' ? g1?.slice(-1) : g1?.slice(-2),
         ipt,
       }
 
@@ -175,8 +183,8 @@ export function useLotteryData(
       if (!trimmedLine) return
 
       const separator = trimmedLine.includes(',,') ? ',,' : ','
-      const [main, tail] = trimmedLine.split(separator)
-      if (!main || !tail) return
+      const [main, tail = ''] = trimmedLine.split(separator)
+      if (!main) return
       // 解析前区/后区数字
       const mainArr = Array.from({ length: main.length / 2 }, (_, i) =>
         main.substring(i * 2, i * 2 + 2),
@@ -185,7 +193,7 @@ export function useLotteryData(
       const tailArr = Array.from({ length: tail.length / 2 }, (_, i) =>
         tail.substring(i * 2, i * 2 + 2),
       ).filter((num) => num >= '01' && num <= String(backCount).padStart(2, '0'))
-      // 构建行数据
+
       const row: ParsedRow = {
         id: `row_${index}`,
         comma: String(mainArr.length),
@@ -442,6 +450,7 @@ export function useLotteryData(
     e.preventDefault()
     nextHis() // 调用下一期方法
   })
+
   return {
     sortByLen,
     highlightedBack,

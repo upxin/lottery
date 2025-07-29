@@ -79,7 +79,7 @@ export const validateIptDatakl8 = (ipt: string, front = 80) => {
     const cleaned = dataPart.replace(/\s/g, '')
 
     if (cleaned.length % 2 !== 0) {
-      return `第${lineIndex + 1}行：数据长度不是偶数，可能存在未补0的数字`
+      return `${line}：数据长度不是偶数，可能存在未补0的数字`
     }
 
     const numbers = cleaned.match(/.{2}/g) || []
@@ -89,11 +89,11 @@ export const validateIptDatakl8 = (ipt: string, front = 80) => {
       const numValue = parseInt(num, 10)
 
       if (isNaN(numValue) || numValue < 1 || numValue > front) {
-        return `第${lineIndex + 1}行第${numIndex + 1}个数字(${num})：不在01-${front}范围内`
+        return `${line}：不在01-${front}范围内`
       }
 
       if (numValue < 10 && num[0] !== '0') {
-        return `第${lineIndex + 1}行第${numIndex + 1}个数字(${num})：小于10但未补0`
+        return `${line}：小于10但未补0`
       }
     }
   }

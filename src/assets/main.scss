@@ -40,6 +40,10 @@ body {
   @apply bg-sky-blue;
 }
 
+.highlighted-row2 {
+  @apply bg-rose;
+}
+
 // 高亮colum
 .high-colum {
   @apply bg-sky-blue text-lemon-yellow;

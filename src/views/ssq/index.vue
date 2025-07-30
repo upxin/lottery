@@ -111,7 +111,7 @@ import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
 import Mock from './Mock.vue'
 
-const [showPanel, toggle] = useToggle()
+const [showPanel, toggle] = useToggle(true)
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)
 

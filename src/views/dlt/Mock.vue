@@ -41,7 +41,7 @@ const { style } = useDraggable(draggableRef, {
 
 // 解析Markdown
 const parsedData = ref([])
-const selectedNumbers = useLocalStorage('highLights', new Set())
+const selectedNumbers = useLocalStorage('dlt_mock', new Set())
 
 const parseMarkdown = (content) => {
   const percentGroups = []

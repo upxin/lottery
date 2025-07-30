@@ -90,24 +90,28 @@
       最新一期
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
-    <el-button type="primary" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
+    <el-button type="success" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
     <el-button @click="reBackHighLight" type="warning">
       {{ '重置高亮' }}
     </el-button>
     <el-button @click="clear" :type="'danger'">
       {{ '清空高亮' }}
     </el-button>
+    <el-button @click="toggle()">显示模拟盘</el-button>
   </div>
 
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
+  <Mock v-show="showPanel"></Mock>
 </template>
 
 <script lang="ts" setup>
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
-const [isClear, toggle] = useToggle()
+import Mock from './Mock.vue'
+
+const [showPanel, toggle] = useToggle()
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)
 

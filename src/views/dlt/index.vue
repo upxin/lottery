@@ -1,7 +1,6 @@
 <template>
   <el-table
     ref="tableRef"
-    class="mx-auto"
     style="width: 1000px"
     :highlight-current-row="false"
     :data="parsedRows"
@@ -90,24 +89,18 @@
       最新一期
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
-    <el-button type="warning" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
+    <el-button type="success" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
     <el-button @click="reBackHighLight" type="warning">
       {{ '重置高亮' }}
     </el-button>
     <el-button @click="clear" :type="'danger'">
       {{ '清空高亮' }}
     </el-button>
+    <el-button @click="toggle()">显示模拟盘</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <!-- <div pos-fixed left-0 top-0 w-120px>
-    <p text-bordeaux-light flex flex-wrap>
-      <span v-for="item in red" :key="item" px-4px>{{ item }}</span>
-    </p>
-    <p text-klein-blue flex flex-wrap>
-      <span v-for="item in blue" :key="item" px-4px>{{ item }}</span>
-    </p>
-  </div> -->
+  <Mock v-show="showPanel"></Mock>
 </template>
 
 <script lang="ts" setup>
@@ -115,9 +108,9 @@ import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
 import { RED, BLUE } from './names'
-
+import Mock from './Mock.vue'
 const tableRef = useTemplateRef('tableRef')
-const [isClear, toggle] = useToggle()
+const [showPanel, toggle] = useToggle(true)
 
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)

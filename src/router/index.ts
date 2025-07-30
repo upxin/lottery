@@ -23,11 +23,6 @@ const router = createRouter({
       name: 'dlt',
       component: () => import('@/views/dlt/index.vue'),
     },
-    {
-      path: '/kl8',
-      name: 'kl8',
-      component: () => import('@/views/kl8/index.vue'),
-    },
   ],
 })
 

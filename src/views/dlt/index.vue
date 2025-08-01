@@ -1,6 +1,7 @@
 <template>
   <el-table
     ref="tableRef"
+    mx-auto
     style="width: 1000px"
     :highlight-current-row="false"
     :data="parsedRows"
@@ -100,7 +101,7 @@
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <Mock v-show="showPanel"></Mock>
+  <Mock v-show="showPanel" @close="toggle()"></Mock>
 </template>
 
 <script lang="ts" setup>

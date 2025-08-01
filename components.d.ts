@@ -8,10 +8,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AButton: typeof import('ant-design-vue/es')['Button']
-    AConfigProvider: typeof import('ant-design-vue/es')['ConfigProvider']
-    ASpace: typeof import('ant-design-vue/es')['Space']
-    ATable: typeof import('ant-design-vue/es')['Table']
     Buttons: typeof import('./src/components/Buttons/Buttons.vue')['default']
     ElAffix: typeof import('element-plus/es')['ElAffix']
     ElAlert: typeof import('element-plus/es')['ElAlert']
@@ -28,6 +24,7 @@ declare module 'vue' {
     ElInput: typeof import('element-plus/es')['ElInput']
     ElLoading: typeof import('element-plus/es')['ElLoading']
     ElOption: typeof import('element-plus/es')['ElOption']
+    ElProvide: typeof import('element-plus/es')['ElProvide']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSpace: typeof import('element-plus/es')['ElSpace']
     ElTable: typeof import('element-plus/es')['ElTable']

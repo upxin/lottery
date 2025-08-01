@@ -1,12 +1,12 @@
 <template>
   <section
-    w-600px
+    w-500px
     z-9999
-    class="bg-klein-blue text-fuchsia p-10px rounded-md fixed"
+    class="bg-klein-blue text-fuchsia p-10px rounded-md fixed box-border"
     ref="draggableRef"
     :style="style"
   >
-    <div v-for="item in parsedData" :key="item.percent" flex py-10px>
+    <div v-for="item in parsedData" :key="item.percent" flex pb-6px>
       <div w-28px>{{ item.percent }}:</div>
       <div class="flex flex-wrap flex-1">
         <el-button
@@ -23,6 +23,7 @@
     <div class="flex justify-center">
       <el-button @click="copy">复制</el-button>
       <el-button @click="selectedNumbers.clear()">清除</el-button>
+      <el-button @click="emits('close')" :type="'danger'">关闭</el-button>
     </div>
   </section>
 </template>
@@ -30,13 +31,16 @@
 <script setup lang="ts">
 // 从localStorage缓存位置信息
 import { useLocalStorage } from '@/hooks/useStorage'
-
-const position = useStorage('draggable-panel-position', { x: 0, y: 0 })
 const draggableRef = ref(null)
-
+const panelWidth = 600
+const initialX = window.innerWidth / 2 - panelWidth / 2
+const panelHeight = 450
+const windowHeight = window.innerHeight
+const initialY = windowHeight - panelHeight
+const emits = defineEmits(['close'])
 // 使用VueUse的拖拽功能
 const { style } = useDraggable(draggableRef, {
-  initialValue: position.value,
+  initialValue: { x: initialX, y: initialY },
 })
 
 // 解析Markdown

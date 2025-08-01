@@ -5,13 +5,16 @@ import { fileURLToPath } from 'url'
 function numberToChinese(num) {
   return num.toString().padStart(2, '0')
 }
+
 function formatNumber(num) {
   return num.toString().padStart(2, '0')
 }
+const BALL_SIZE = 35
+const BALL_LEN = 5
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataPath = resolve(__dirname, './dlt.json')
-const outputPath = resolve(__dirname, 'dlt.md')
+const outputPath = resolve(__dirname, 'DLT.md')
 const WINDOW_SIZE = 20
 
 try {
@@ -23,17 +26,16 @@ try {
     throw new Error(`数据不足${WINDOW_SIZE}期，无法生成统计`)
   }
 
-  // 验证每期数据为5个有效数字（1-35的两位字符串）
   data.forEach((draw, drawIndex) => {
-    if (!Array.isArray(draw) || draw.length !== 5) {
-      throw new Error(`第${drawIndex + 1}期数据错误：需包含5个数字`)
+    if (!Array.isArray(draw) || draw.length !== BALL_LEN) {
+      throw new Error(`第${drawIndex + 1}期数据错误：需包含${BALL_LEN}个数字`)
     }
     draw.forEach((num, numIndex) => {
       if (
         typeof num !== 'string' ||
         !/^\d{2}$/.test(num) ||
         parseInt(num) < 1 ||
-        parseInt(num) > 35
+        parseInt(num) > BALL_SIZE
       ) {
         throw new Error(`第${drawIndex + 1}期第${numIndex + 1}个数字错误：${num}`)
       }
@@ -48,16 +50,16 @@ try {
 
   const mdContent = []
   // 存储“在上20期的百分比分布”的累积统计结果
-  const distributionStats = {} // 格式：{ "35": { "1": 1 }, "25": { "1": 2 }, ... }
+  const distributionStats = {}
 
   // 3. 处理每组数据
   windows.forEach((window, windowIndex) => {
     const lastDraw = window[window.length - 1]
-    mdContent.push(`## 第${windowIndex + 1}组（最后一期：${lastDraw.join(', ')}）`)
+    mdContent.push(`## 第${windowIndex + 1}组（最后一期：${lastDraw.join(' ')}）`)
 
     // 统计当前组20期的数字分布
     const numberCounts = {}
-    for (let i = 1; i <= 35; i++) {
+    for (let i = 1; i <= BALL_SIZE; i++) {
       numberCounts[formatNumber(i)] = 0
     }
     window.flat().forEach((num) => {
@@ -88,12 +90,11 @@ try {
         }
       })
 
-      // 生成分布字符串（如“30:1个 25:1个”）
       distributionStr = Object.entries(distribution)
         .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
-        .map(([percent, count]) => `${percent}:${count}个`)
+        .map(([percent, count]) => `${percent}(${count}个)`)
         .join(' ')
-      mdContent.push(`在上20期的百分比分布是${distributionStr}`)
+      mdContent.push(`在上${WINDOW_SIZE}期的百分比分布 ${distributionStr}`)
 
       // 5. 累积统计到distributionStats中
       Object.entries(distribution).forEach(([percent, count]) => {
@@ -111,7 +112,7 @@ try {
     Object.entries(percentGroups)
       .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
       .forEach(([percent, nums]) => {
-        mdContent.push(`${numberToChinese(percent)}: ${nums.sort().join(', ')}`)
+        mdContent.push(`${numberToChinese(percent)}   ${nums.sort().join(', ')}`)
       })
 
     mdContent.push('')
@@ -119,10 +120,10 @@ try {
     window.percentGroups = percentGroups
   })
 
-  // 6. 生成最终累积统计结果
-  mdContent.push('## 累积统计：所有组的“在上20期的百分比分布”')
+  mdContent.push('## 累积统计：')
   mdContent.push('| 百分比 | 数量（个） | 出现次数 |')
-  mdContent.push('|--------|------------|----------|')
+  mdContent.push('|------------------------------|')
+  mdContent.push('|------------------------------|')
 
   function getPercentTotalStats(distributionStats) {
     const result = []
@@ -140,9 +141,10 @@ try {
   }
   const percentTotalStats = getPercentTotalStats(distributionStats)
   percentTotalStats.forEach(({ percent, total }) => {
-    mdContent.push(`| ${percent}% | ${total}次 |`)
+    mdContent.push(`| ${formatNumber(percent)}%  | ${total}次 |`)
   })
-  mdContent.push('|--------|------------|----------|')
+  mdContent.push('|------------------------------|')
+  mdContent.push('|------------------------------|')
 
   // 按百分比降序排列，相同百分比下按数量升序
   Object.entries(distributionStats)
@@ -151,7 +153,7 @@ try {
       Object.entries(countMap)
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
         .forEach(([count, times]) => {
-          mdContent.push(`| ${percent}% | ${count}个 | ${times}次 |`)
+          mdContent.push(`| ${formatNumber(percent)}% | ${count}个 | ${times}次     |`)
         })
     })
 

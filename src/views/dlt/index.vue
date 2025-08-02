@@ -108,10 +108,9 @@
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
-import { RED, BLUE } from './names'
 import Mock from './Mock.vue'
 const tableRef = useTemplateRef('tableRef')
-const [showPanel, toggle] = useToggle(true)
+const [showPanel, toggle] = useToggle(false)
 
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)
@@ -133,8 +132,6 @@ const {
   parsedRows,
   frontHeaders,
   backHeaders,
-  highlightedBack,
-  highlightedFront,
   reBackHighLight,
   prevHis,
   nextHis,
@@ -151,21 +148,5 @@ const {
 } = useLotteryData('dlt', files, {
   frontCount: 35, // 前区数量
   backCount: 12, // 后区数量
-})
-
-const red = computed(() => {
-  const ret = {}
-  for (const element of highlightedFront.value) {
-    ret[element] = RED[element]
-  }
-  return Object.values(ret) || []
-})
-
-const blue = computed(() => {
-  const ret = {}
-  for (const element of highlightedBack.value) {
-    ret[element] = BLUE[element]
-  }
-  return Object.values(ret) || []
 })
 </script>

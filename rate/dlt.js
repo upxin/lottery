@@ -2,10 +2,6 @@ import { readFileSync, writeFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
-function numberToChinese(num) {
-  return num.toString().padStart(2, '0')
-}
-
 function formatNumber(num) {
   return num.toString().padStart(2, '0')
 }
@@ -55,7 +51,7 @@ try {
   // 3. 处理每组数据
   windows.forEach((window, windowIndex) => {
     const lastDraw = window[window.length - 1]
-    mdContent.push(`## 第${windowIndex + 1}组（最后一期：${lastDraw.join(' ')}）`)
+    mdContent.push(`##第${windowIndex + 1}组（最后一期：${lastDraw.join(' ')}）`)
 
     // 统计当前组20期的数字分布
     const numberCounts = {}
@@ -112,7 +108,7 @@ try {
     Object.entries(percentGroups)
       .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
       .forEach(([percent, nums]) => {
-        mdContent.push(`${numberToChinese(percent)}   ${nums.sort().join(', ')}`)
+        mdContent.push(`${formatNumber(percent)} : ${nums.sort().join(', ')}`)
       })
 
     mdContent.push('')
@@ -141,7 +137,7 @@ try {
   }
   const percentTotalStats = getPercentTotalStats(distributionStats)
   percentTotalStats.forEach(({ percent, total }) => {
-    mdContent.push(`| ${formatNumber(percent)}%  | ${total}次 |`)
+    mdContent.push(`| ${formatNumber(percent)}% | ${total}次     |`)
   })
   mdContent.push('|------------------------------|')
   mdContent.push('|------------------------------|')

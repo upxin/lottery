@@ -9,7 +9,7 @@ const BALL_SIZE = 33
 const BALL_LEN = 6
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dataPath = resolve(__dirname, './SSQ.json')
+const dataPath = resolve(__dirname, './ssq.json')
 const outputPath = resolve(__dirname, 'SSQ.md')
 const WINDOW_SIZE = 20
 

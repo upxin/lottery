@@ -2,7 +2,7 @@
   <section
     w-500px
     z-9999
-    class="bg-klein-blue text-fuchsia p-10px rounded-md fixed box-border"
+    class="bg-klein-blue text-fuchsia pb-10px pt-14px pl-10px rounded-md fixed box-border"
     ref="draggableRef"
     :style="style"
   >

@@ -36,7 +36,7 @@ export function useLotteryData(
   const highlightedFront = ref(new Set()) // 前区高亮 (1-frontCount)
 
   const availablePeriods = computed(() => {
-    return Object.keys(files)
+    const ret = Object.keys(files)
       .map((filePath) => {
         const fileName = filePath.split('/').pop() || ''
         const match = fileName.match(/(.+)\.ts$/)
@@ -44,6 +44,8 @@ export function useLotteryData(
       })
       .filter((period): period is string => period !== null)
       .sort((a, b) => b.localeCompare(a)) // 降序排列（最新在前）
+
+    return ret
   })
 
   const minHis = computed(() => availablePeriods.value.at(-1) || '')

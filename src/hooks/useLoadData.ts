@@ -119,18 +119,10 @@ export function useLotteryData(
         backMax = 10
       }
 
-      if (lotteryType !== 'kl8') {
-        const errCheck = validateIptData(ipt, frontMax, backMax)
-        if (errCheck) {
-          errMsg.value = errCheck
-          return false
-        }
-      } else {
-        const errCheck = validateIptDatakl8(ipt, frontMax, backMax)
-        if (errCheck) {
-          errMsg.value = errCheck
-          return false
-        }
+      const errCheck = validateIptData(ipt, frontMax, backMax)
+      if (errCheck) {
+        errMsg.value = errCheck
+        return false
       }
 
       // 更新原始数据

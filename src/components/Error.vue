@@ -14,6 +14,12 @@ const copyPrefixText = () => {
       ElMessage.error('复制失败')
     })
 }
+watch(
+  () => props.errMsg,
+  (v) => {
+    console.log(typeof v)
+  },
+)
 </script>
 <template>
   <div
@@ -24,17 +30,14 @@ const copyPrefixText = () => {
     <div class="text-center max-w-lg w-full">
       <!-- 错误信息显示 -->
       <p class="text-23px font-bold text-klein-blue mb-6 break-words">
-        {{ errMsg.split(':')[0] }}
-      </p>
-      <p class="text-23px font-bold text-klein-blue mb-6 break-words">
-        {{ errMsg.split(':')[1] }}
+        {{ errMsg }}
       </p>
       <!-- 操作按钮组 -->
       <div class="flex items-center justify-center gap-4">
         <!-- 复制按钮（复制冒号前面的内容） -->
         <el-button @click="copyPrefixText" :size="'large'" :type="'warning'">
           <i class="i-ic:round-content-copy text-lg"></i>
-          <span>复制前缀</span>
+          <span>复制</span>
         </el-button>
       </div>
     </div>

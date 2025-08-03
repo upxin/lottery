@@ -5,13 +5,13 @@ import { fileURLToPath } from 'url'
 function formatNumber(num) {
   return num.toString().padStart(2, '0')
 }
-const BALL_SIZE = 12
-const BALL_LEN = 2
+const BALL_SIZE = 16
+const BALL_LEN = 1
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dataPath = resolve(__dirname, './b.json')
-const outputPath = resolve(__dirname, 'B.md')
-const WINDOW_SIZE = 20
+const dataPath = resolve(__dirname, './ssqb.json')
+const outputPath = resolve(__dirname, 'SSQB30.md')
+const WINDOW_SIZE = 30
 
 try {
   // 1. 读取并验证数据

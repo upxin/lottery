@@ -116,7 +116,7 @@ try {
     window.percentGroups = percentGroups
   })
 
-  mdContent.push('## 累积统计：')
+  mdContent.push('## 累积周期：' + windows.length)
   mdContent.push('| 百分比 | 数量（个） | 出现次数 |')
   mdContent.push('|------------------------------|')
   mdContent.push('|------------------------------|')

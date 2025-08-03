@@ -2,10 +2,12 @@
   <section
     w-500px
     z-9999
-    class="shadow-gray shadow text-fuchsia p-10px rounded-md fixed bg-cyan"
+    class="bg-klein-blue text-fuchsia pb-10px pt-14px pl-10px rounded-md fixed box-border"
     ref="draggableRef"
     :style="style"
   >
+    <p>{{ list[0] }}</p>
+    <p>{{ list[1] }}</p>
     <div v-for="item in parsedData" :key="item.percent" flex pb-6px>
       <div w-28px>{{ item.percent }}:</div>
       <div class="flex flex-wrap flex-1">
@@ -31,23 +33,22 @@
 <script setup lang="ts">
 // 从localStorage缓存位置信息
 import { useLocalStorage } from '@/hooks/useStorage'
-
 const draggableRef = ref(null)
 const panelWidth = 600
 const initialX = window.innerWidth / 2 - panelWidth / 2
 const panelHeight = 450
 const windowHeight = window.innerHeight
 const initialY = windowHeight - panelHeight
-
+const emits = defineEmits(['close'])
 // 使用VueUse的拖拽功能
 const { style } = useDraggable(draggableRef, {
   initialValue: { x: initialX, y: initialY },
 })
-const emits = defineEmits(['close'])
 
 // 解析Markdown
 const parsedData = ref([])
-const selectedNumbers = useLocalStorage('ssq_mock', new Set())
+const list = ref([])
+const selectedNumbers = useLocalStorage('dlt_mock', new Set())
 
 const parseMarkdown = (content) => {
   const percentGroups = []
@@ -55,7 +56,6 @@ const parseMarkdown = (content) => {
   content.split('\n').forEach((line) => {
     line = line.trim()
     if (!line) return
-
     // 匹配百分比-数字分组（如：35: 18 或 05: 03, 05...）
     if (line.includes(':') && !line.includes('在上20期的百分比分布是')) {
       const [percent, numsStr] = line.split(':').map((part) => part.trim())
@@ -65,6 +65,8 @@ const parseMarkdown = (content) => {
           numbers: numsStr.split(',').map((num) => num.trim()),
         })
       }
+    } else {
+      list.value.push(line)
     }
   })
 

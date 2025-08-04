@@ -7,11 +7,11 @@ function formatNumber(num) {
 }
 const BALL_SIZE = 33
 const BALL_LEN = 6
+const WINDOW_SIZE = 20
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataPath = resolve(__dirname, './ssq.json')
-const outputPath = resolve(__dirname, 'SSQ.md')
-const WINDOW_SIZE = 20
+const outputPath = resolve(__dirname, 'SSQ.txt')
 
 try {
   // 1. 读取并验证数据
@@ -38,119 +38,112 @@ try {
     })
   })
 
-  // 2. 生成滑动窗口
+  // 2. 生成滑动窗口（关键修改：包含最后一个可能没有下一期的窗口）
+  // 窗口范围：n到n+19期（共20期），允许最后一个窗口没有下一期数据
   const windows = []
-  for (let i = 0; i <= data.length - WINDOW_SIZE; i++) {
-    windows.push(data.slice(i, i + WINDOW_SIZE))
+  for (let n = 0; n <= data.length - WINDOW_SIZE; n++) {
+    // 修改循环条件，去掉-1，确保最后一个窗口被包含
+    const windowStart = n
+    const windowData = data.slice(windowStart, windowStart + WINDOW_SIZE) // 窗口数据：n到n+19期
+    const nextPeriodIndex = windowStart + WINDOW_SIZE // 下一期索引：n+20
+    const nextPeriodData = data[nextPeriodIndex] || null // 可能没有下一期数据（最后一个窗口）
+
+    windows.push({
+      windowIndex: n + 1,
+      periodRange: `${n + 1}-${n + WINDOW_SIZE}期`, // 窗口期数范围（如483-502期）
+      nextPeriodNum: nextPeriodIndex + 1, // 下一期期数（可能不存在）
+      windowData,
+      nextPeriodData, // 可能为null（最后一个窗口）
+    })
   }
 
   const mdContent = []
-  // 存储“在上20期的百分比分布”的累积统计结果
-  const distributionStats = {}
+  const distributionStats = {} // 仅统计有下一期数据的窗口的累积分布
 
-  // 3. 处理每组数据
-  windows.forEach((window, windowIndex) => {
-    const lastDraw = window[window.length - 1]
-    mdContent.push(`##第${windowIndex + 1}组（最后一期：${lastDraw.join(' ')}）`)
+  // 3. 处理每个窗口：
+  // - 无论是否有下一期，都展示窗口自身的百分比分布
+  // - 只有有下一期数据时，才展示下一期分布并参与累积统计
+  windows.forEach((window) => {
+    const { windowIndex, periodRange, nextPeriodNum, windowData, nextPeriodData } = window
 
-    // 统计当前组20期的数字分布
-    const numberCounts = {}
-    for (let i = 1; i <= BALL_SIZE; i++) {
-      numberCounts[formatNumber(i)] = 0
-    }
-    window.flat().forEach((num) => {
-      numberCounts[num]++
+    // 窗口标题（所有窗口都显示）
+    mdContent.push(`--- 第${windowIndex}窗口（${periodRange}）---`)
+
+    // 统计窗口内数字出现次数（用于计算自身百分比分布）
+    const windowNumCounts = {}
+    windowData.flat().forEach((num) => {
+      windowNumCounts[num] = (windowNumCounts[num] || 0) + 1
     })
 
-    // 生成当前组的百分比分组（百分比→数字列表）
-    const percentGroups = {}
-    Object.entries(numberCounts).forEach(([num, count]) => {
-      const percent = ((count / WINDOW_SIZE) * 100).toFixed(0)
-      percentGroups[percent] = (percentGroups[percent] || []).concat(num)
-    })
-
-    // 4. 计算“在上20期的百分比分布”（仅第2组及以后）
-    let distributionStr = ''
-    if (windowIndex > 0) {
-      const prevPercentGroups = windows[windowIndex - 1].percentGroups // 上一组的百分比分组
-      const distribution = {}
-
-      // 统计当前最后一期数字在上一组的百分比分布
-      lastDraw.forEach((num) => {
-        // 查找数字在上一组的百分比
-        for (const [percent, nums] of Object.entries(prevPercentGroups)) {
-          if (nums.includes(num)) {
-            distribution[percent] = (distribution[percent] || 0) + 1
-            break
-          }
-        }
+    // 一、下一期分布（仅当有下一期数据时展示）
+    if (nextPeriodData) {
+      const nextPeriodPercentGroups = {}
+      nextPeriodData.forEach((num) => {
+        const count = windowNumCounts[num] || 0
+        const percent = ((count / WINDOW_SIZE) * 100).toFixed(0)
+        nextPeriodPercentGroups[percent] = (nextPeriodPercentGroups[percent] || []).concat(num)
       })
-
-      distributionStr = Object.entries(distribution)
+      const nextPeriodDistStr = Object.entries(nextPeriodPercentGroups)
         .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
-        .map(([percent, count]) => `${percent}(${count}个)`)
-        .join(' ')
-      mdContent.push(`在上${WINDOW_SIZE}期的百分比分布 ${distributionStr}`)
+        .map(
+          ([percent, nums]) =>
+            `${percent}%:${nums.sort((a, b) => parseInt(a) - parseInt(b)).join(',')}`,
+        )
+        .join('  ')
+      mdContent.push(`第${nextPeriodNum}期在本窗口的分布：${nextPeriodDistStr}`)
 
-      // 5. 累积统计到distributionStats中
-      Object.entries(distribution).forEach(([percent, count]) => {
+      // 仅对有下一期数据的窗口进行累积统计
+      Object.entries(nextPeriodPercentGroups).forEach(([percent, nums]) => {
+        const count = nums.length
         const countKey = count.toString()
-        // 初始化百分比统计
-        if (!distributionStats[percent]) {
-          distributionStats[percent] = {}
-        }
-        // 初始化该百分比下的数量统计
+        if (!distributionStats[percent]) distributionStats[percent] = {}
         distributionStats[percent][countKey] = (distributionStats[percent][countKey] || 0) + 1
       })
+    } else {
+      // 无下一期数据时，提示说明（可选）
+      mdContent.push('')
     }
 
-    // 输出当前组的百分比分组
-    Object.entries(percentGroups)
+    // 二、窗口自身的百分比分布（所有窗口都必须展示，包括最后一个窗口）
+    const currentWindowPercentGroups = {}
+    // 统计出现过的数字（百分比>0%）
+    Object.entries(windowNumCounts).forEach(([num, count]) => {
+      const percent = ((count / WINDOW_SIZE) * 100).toFixed(0)
+      currentWindowPercentGroups[percent] = (currentWindowPercentGroups[percent] || []).concat(num)
+    })
+    // 补充0%（未出现的数字）
+    const allPossibleNums = Array.from({ length: BALL_SIZE }, (_, i) => formatNumber(i + 1))
+    const zeroPercentNums = allPossibleNums.filter((num) => !windowNumCounts.hasOwnProperty(num))
+    if (zeroPercentNums.length > 0) {
+      currentWindowPercentGroups['0'] = zeroPercentNums
+    }
+    // 每个百分比单独换行展示
+    Object.entries(currentWindowPercentGroups)
       .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
       .forEach(([percent, nums]) => {
-        mdContent.push(`${formatNumber(percent)} : ${nums.sort().join(', ')}`)
+        const sortedNums = nums.sort((a, b) => parseInt(a) - parseInt(b))
+        mdContent.push(`${formatNumber(percent)}%: ${sortedNums.join(',')}`)
       })
-
-    mdContent.push('')
-    // 存储当前组的百分比分组，供下一组使用
-    window.percentGroups = percentGroups
+    mdContent.push('\n') // 窗口间空行分隔
   })
 
-  mdContent.push('## 累积周期：' + windows.length)
-  mdContent.push('| 百分比 | 数量（个） | 出现次数 |')
-  mdContent.push('|------------------------------|')
-  mdContent.push('|------------------------------|')
-
-  function getPercentTotalStats(distributionStats) {
-    const result = []
-    // 遍历每个百分比，累加次数
-    Object.entries(distributionStats).forEach(([percent, countMap]) => {
-      let total = 0
-      // 累加当前百分比下所有数量的出现次数
-      Object.values(countMap).forEach((num) => {
-        total += num
-      })
-      result.push({ percent, total })
-    })
-    // 按百分比降序排序
-    return result.sort((a, b) => parseInt(b.percent) - parseInt(a.percent))
-  }
-  const percentTotalStats = getPercentTotalStats(distributionStats)
-  percentTotalStats.forEach(({ percent, total }) => {
-    mdContent.push(`| ${formatNumber(percent)}% | ${total}次     |`)
-  })
-  mdContent.push('|------------------------------|')
-  mdContent.push('|------------------------------|')
-
-  // 按百分比降序排列，相同百分比下按数量升序
+  // 4. 累积统计（仅包含有下一期数据的窗口）
+  mdContent.push('## 累积统计（仅含存在下一期数据的窗口）')
+  mdContent.push('\n### 下一期在窗口分布的累积')
+  mdContent.push('| 百分比 | 数字个数 | 出现次数 |')
+  mdContent.push('| :----- | :-------: | -------: |')
   Object.entries(distributionStats)
     .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
     .forEach(([percent, countMap]) => {
+      let total = 0
+      Object.values(countMap).forEach((times) => (total += times))
+      mdContent.push(`| ${percent}% |   总计   | ${total}次 |`)
       Object.entries(countMap)
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
         .forEach(([count, times]) => {
-          mdContent.push(`| ${formatNumber(percent)}% | ${count}个 | ${times}次     |`)
+          mdContent.push(`| ${percent}% |    ${count}个    | ${times}次 |`)
         })
+      mdContent.push('| :----- | :-------: | -------: |')
     })
 
   // 写入文件

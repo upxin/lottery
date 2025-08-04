@@ -5,12 +5,12 @@ import { fileURLToPath } from 'url'
 function formatNumber(num) {
   return num.toString().padStart(2, '0')
 }
-const BALL_SIZE = 16
-const BALL_LEN = 1
+const BALL_SIZE = 12
+const BALL_LEN = 2
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataPath = resolve(__dirname, './ssqb.json')
-const outputPath = resolve(__dirname, 'SSQB30.md')
+const outputPath = resolve(__dirname, 'SSQB.md')
 const WINDOW_SIZE = 30
 
 try {
@@ -45,13 +45,13 @@ try {
   }
 
   const mdContent = []
-  // 存储“在上20期的百分比分布”的累积统计结果
   const distributionStats = {}
+  const combinationStats = {}
 
   // 3. 处理每组数据
   windows.forEach((window, windowIndex) => {
     const lastDraw = window[window.length - 1]
-    mdContent.push(`##第${windowIndex + 1}组（最后一期：${lastDraw.join(' ')}）`)
+    mdContent.push(`## 第${windowIndex + 1}组（最后一期：${lastDraw.join(' ')}）`)
 
     // 统计当前组20期的数字分布
     const numberCounts = {}
@@ -62,22 +62,20 @@ try {
       numberCounts[num]++
     })
 
-    // 生成当前组的百分比分组（百分比→数字列表）
+    // 生成当前组的百分比分组
     const percentGroups = {}
     Object.entries(numberCounts).forEach(([num, count]) => {
       const percent = ((count / WINDOW_SIZE) * 100).toFixed(0)
       percentGroups[percent] = (percentGroups[percent] || []).concat(num)
     })
 
-    // 4. 计算“在上20期的百分比分布”（仅第2组及以后）
+    // 4. 计算上20期的百分比分布
     let distributionStr = ''
     if (windowIndex > 0) {
-      const prevPercentGroups = windows[windowIndex - 1].percentGroups // 上一组的百分比分组
+      const prevPercentGroups = windows[windowIndex - 1].percentGroups
       const distribution = {}
 
-      // 统计当前最后一期数字在上一组的百分比分布
       lastDraw.forEach((num) => {
-        // 查找数字在上一组的百分比
         for (const [percent, nums] of Object.entries(prevPercentGroups)) {
           if (nums.includes(num)) {
             distribution[percent] = (distribution[percent] || 0) + 1
@@ -92,66 +90,85 @@ try {
         .join(' ')
       mdContent.push(`在上${WINDOW_SIZE}期的百分比分布 ${distributionStr}`)
 
-      // 5. 累积统计到distributionStats中
+      // 累积统计
       Object.entries(distribution).forEach(([percent, count]) => {
         const countKey = count.toString()
-        // 初始化百分比统计
         if (!distributionStats[percent]) {
           distributionStats[percent] = {}
         }
-        // 初始化该百分比下的数量统计
         distributionStats[percent][countKey] = (distributionStats[percent][countKey] || 0) + 1
       })
+
+      // 统计百分比组合
+      const currentCombination = Object.keys(distribution).sort((a, b) => parseInt(a) - parseInt(b))
+      if (currentCombination.length > 0) {
+        const combinationKey = currentCombination.join(',')
+        combinationStats[combinationKey] = (combinationStats[combinationKey] || 0) + 1
+      }
     }
 
     // 输出当前组的百分比分组
     Object.entries(percentGroups)
       .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
       .forEach(([percent, nums]) => {
-        mdContent.push(`${formatNumber(percent)} : ${nums.sort().join(', ')}`)
+        mdContent.push(`${formatNumber(percent)}% : ${nums.sort().join(', ')}`)
       })
 
     mdContent.push('')
-    // 存储当前组的百分比分组，供下一组使用
     window.percentGroups = percentGroups
   })
 
   mdContent.push('## 累积周期：' + windows.length)
 
-  mdContent.push('| 百分比 | 数量（个） | 出现次数 |')
-  mdContent.push('|------------------------------|')
-  mdContent.push('|------------------------------|')
+  // 优化表格对齐 - 百分比分布累积统计
+  mdContent.push('\n### 百分比分布累积统计')
+  // 使用冒号设置对齐方式：左对齐|居中|右对齐
+  mdContent.push('| 百分比   | 数量（个） | 出现次数 |')
+  mdContent.push('| :------- | :---------: | -------: |') // 关键：通过冒号控制对齐
 
   function getPercentTotalStats(distributionStats) {
     const result = []
-    // 遍历每个百分比，累加次数
     Object.entries(distributionStats).forEach(([percent, countMap]) => {
       let total = 0
-      // 累加当前百分比下所有数量的出现次数
       Object.values(countMap).forEach((num) => {
         total += num
       })
       result.push({ percent, total })
     })
-    // 按百分比降序排序
     return result.sort((a, b) => parseInt(b.percent) - parseInt(a.percent))
   }
   const percentTotalStats = getPercentTotalStats(distributionStats)
   percentTotalStats.forEach(({ percent, total }) => {
-    mdContent.push(`| ${formatNumber(percent)}% | ${total}次     |`)
+    mdContent.push(`| ${formatNumber(percent)}% |    总计    | ${total}次 |`)
   })
-  mdContent.push('|------------------------------|')
-  mdContent.push('|------------------------------|')
 
-  // 按百分比降序排列，相同百分比下按数量升序
   Object.entries(distributionStats)
     .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
     .forEach(([percent, countMap]) => {
       Object.entries(countMap)
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
         .forEach(([count, times]) => {
-          mdContent.push(`| ${formatNumber(percent)}% | ${count}个 | ${times}次     |`)
+          // 统一数字宽度，确保对齐
+          mdContent.push(`| ${formatNumber(percent)}% |    ${count}个    | ${times}次 |`)
         })
+    })
+
+  // 优化表格对齐 - 百分比组合统计
+  mdContent.push('\n### 百分比组合出现次数统计')
+  mdContent.push('| 百分比组合         | 出现次数 |')
+  mdContent.push('| :---------------- | -------: |') // 左对齐组合，右对齐次数
+
+  // 按出现次数降序排列，统一格式宽度
+  Object.entries(combinationStats)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([combination, times]) => {
+      const formattedCombination = combination
+        .split(',')
+        .map((p) => `${p}%`)
+        .join(' + ')
+      // 对短组合补充空格，增强视觉对齐（Markdown会自动忽略多余空格，但视觉上更整齐）
+      const paddedCombination = formattedCombination.padEnd(15, ' ')
+      mdContent.push(`| ${paddedCombination} | ${times}次 |`)
     })
 
   // 写入文件

@@ -32,8 +32,8 @@ export function useLotteryData(
   const rawData = ref<LotteryData>({ g1: [], g2: [], ipt: '' })
   const parsedRows = ref<ParsedRow[]>([])
 
-  const highlightedBack = ref(new Set()) // 后区高亮 (1-backCount)
-  const highlightedFront = ref(new Set()) // 前区高亮 (1-frontCount)
+  const highlightedBack = ref(new Set<number>()) // 后区高亮 (1-backCount)
+  const highlightedFront = ref(new Set<number>()) // 前区高亮 (1-frontCount)
 
   const availablePeriods = computed(() => {
     const ret = Object.keys(files)

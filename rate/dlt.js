@@ -131,19 +131,27 @@ try {
   mdContent.push('## 累积统计（仅含存在下一期数据的窗口）')
   mdContent.push('\n### 下一期在窗口分布的累积')
   mdContent.push('| 百分比 | 数字个数 | 出现次数 |')
-  mdContent.push('| :----- | :-------: | -------: |')
+  mdContent.push('|--------------------------|')
   Object.entries(distributionStats)
     .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
     .forEach(([percent, countMap]) => {
       let total = 0
       Object.values(countMap).forEach((times) => (total += times))
-      mdContent.push(`| ${percent}% |   总计   | ${total}次 |`)
+      mdContent.push(`| ${percent.padEnd(6, ' ')} |   总计   | ${total}次 |`)
+    })
+
+  mdContent.push('|--------------------------|')
+
+  Object.entries(distributionStats)
+    .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+    .forEach(([percent, countMap]) => {
+      let total = 0
+      Object.values(countMap).forEach((times) => (total += times))
       Object.entries(countMap)
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
         .forEach(([count, times]) => {
-          mdContent.push(`| ${percent}% |    ${count}个    | ${times}次 |`)
+          mdContent.push(`| ${percent.padEnd(6, ' ')} |    ${count}个    | ${times}次 |`)
         })
-      mdContent.push('| :----- | :-------: | -------: |')
     })
 
   // 写入文件

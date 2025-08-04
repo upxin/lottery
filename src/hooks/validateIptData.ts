@@ -1,6 +1,10 @@
 export const validateIptData = (ipt: string, front = 33, back = 16): string | null => {
   if (typeof ipt !== 'string' || !ipt.trim()) {
-    return '错误'
+    ElNotification({
+      title: '错误提示',
+      message: `暂无数据`,
+      duration: 0,
+    })
   }
 
   const lines = ipt.trim().split('\n')

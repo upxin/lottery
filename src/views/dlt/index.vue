@@ -101,16 +101,24 @@
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <Mock v-show="showPanel" @close="toggle()"></Mock>
+  <Mock
+    v-show="showPanel"
+    :content="markdownContent"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+  ></Mock>
 </template>
 
 <script lang="ts" setup>
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
-import Mock from './Mock.vue'
+import Mock from '../components/Mock.vue'
+import markdownContent from './cur.md?raw' // 父组件中导入Markdown内容（或动态获取）
+
 const tableRef = useTemplateRef('tableRef')
-const [showPanel, toggle] = useToggle(false)
+const [showPanel, toggle] = useToggle(true)
 
 const extraHeight = ref(60)
 const { getHeight } = useAutoHeight(extraHeight)
@@ -132,6 +140,8 @@ const {
   parsedRows,
   frontHeaders,
   backHeaders,
+  highlightedBack,
+  highlightedFront,
   reBackHighLight,
   prevHis,
   nextHis,

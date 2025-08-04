@@ -10,8 +10,8 @@ const BALL_LEN = 6
 const WINDOW_SIZE = 20
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dataPath = resolve(__dirname, './ssq.json')
-const outputPath = resolve(__dirname, 'SSQ.txt')
+const dataPath = resolve(__dirname, './dlt.json')
+const outputPath = resolve(__dirname, 'DLT.txt')
 
 try {
   // 1. 读取并验证数据
@@ -131,19 +131,27 @@ try {
   mdContent.push('## 累积统计（仅含存在下一期数据的窗口）')
   mdContent.push('\n### 下一期在窗口分布的累积')
   mdContent.push('| 百分比 | 数字个数 | 出现次数 |')
-  mdContent.push('| :----- | :-------: | -------: |')
+  mdContent.push('|--------------------------|')
   Object.entries(distributionStats)
     .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
     .forEach(([percent, countMap]) => {
       let total = 0
       Object.values(countMap).forEach((times) => (total += times))
       mdContent.push(`| ${percent}% |   总计   | ${total}次 |`)
+    })
+
+  mdContent.push('|--------------------------|')
+
+  Object.entries(distributionStats)
+    .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+    .forEach(([percent, countMap]) => {
+      let total = 0
+      Object.values(countMap).forEach((times) => (total += times))
       Object.entries(countMap)
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
         .forEach(([count, times]) => {
           mdContent.push(`| ${percent}% |    ${count}个    | ${times}次 |`)
         })
-      mdContent.push('| :----- | :-------: | -------: |')
     })
 
   // 写入文件

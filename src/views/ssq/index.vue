@@ -102,14 +102,21 @@
 
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <Mock v-show="showPanel" @close="toggle()"></Mock>
+  <Mock
+    :content="markdownContent"
+    v-show="showPanel"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+  ></Mock>
 </template>
 
 <script lang="ts" setup>
 import { useLotteryData } from '@/hooks/useLoadData'
 import { useHighLight } from '@/hooks/useHighLight'
 import { useAutoHeight } from '@/hooks/useHeight'
-import Mock from './Mock.vue'
+import Mock from '../components/Mock.vue'
+import markdownContent from './cur.md?raw' // 父组件中导入Markdown内容（或动态获取）
 
 const [showPanel, toggle] = useToggle(false)
 const extraHeight = ref(60)
@@ -140,6 +147,8 @@ const {
   getCellClass,
   getCommaClass,
   getHeaderCellClass,
+  highlightedBack,
+  highlightedFront,
 } = useLotteryData('ssq', files, {
   frontCount: 33, // 前区数量
   backCount: 16, // 后区数量

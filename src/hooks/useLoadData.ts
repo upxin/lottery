@@ -127,10 +127,11 @@ export function useLotteryData(
 
       // 更新原始数据
       rawData.value = {
-        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : lotteryType === 'dlt' ? g1?.slice(1, 6) : g1,
+        g1: lotteryType === 'ssq' ? g1?.slice(1, 7) : g1?.slice(1, 6),
         g2: lotteryType === 'ssq' ? g1?.slice(-1) : g1?.slice(-2),
         ipt,
       }
+      console.log(rawData.value.g1, 88)
 
       syncHighlightFromData()
 
@@ -230,7 +231,6 @@ export function useLotteryData(
       parsedRows.value = noSortData
     }
     sorted.value = !sorted.value
-    console.log(sorted.value)
   }
 
   const nextHis = () => {
@@ -369,8 +369,8 @@ export function useLotteryData(
   // 表头单元格样式（保持不变，本身不依赖 row）
   const getHeaderCellClass = (prop: string) => {
     const parsed = parseColumnProp(prop)
-    if (!parsed) return ''
 
+    if (!parsed) return ''
     const isHighlighted =
       parsed.type === 'N'
         ? highlightedFront.value.has(parsed.index)

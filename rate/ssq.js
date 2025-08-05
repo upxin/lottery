@@ -10,9 +10,9 @@ const BALL_LEN = 6
 const WINDOW_SIZE = 20
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dataPath = resolve(__dirname, './dlt.json')
-const outputPath = resolve(__dirname, 'DLT.txt')
-
+const dataPath = resolve(__dirname, './ssq.json')
+const outputPath = resolve(__dirname, `SSQ${WINDOW_SIZE}.txt`)
+const outputPathTotal = resolve(__dirname, `SSQ_TOTAL${WINDOW_SIZE}.txt`)
 try {
   // 1. 读取并验证数据
   const rawData = readFileSync(dataPath, 'utf-8')
@@ -24,7 +24,7 @@ try {
 
   data.forEach((draw, drawIndex) => {
     if (!Array.isArray(draw) || draw.length !== BALL_LEN) {
-      throw new Error(`第${drawIndex + 1}期数据错误：需包含${BALL_LEN}个数字`)
+      throw new Error(`第${drawIndex + 1}期数据错误: 需包含${BALL_LEN}个数字`)
     }
     draw.forEach((num, numIndex) => {
       if (
@@ -33,19 +33,19 @@ try {
         parseInt(num) < 1 ||
         parseInt(num) > BALL_SIZE
       ) {
-        throw new Error(`第${drawIndex + 1}期第${numIndex + 1}个数字错误：${num}`)
+        throw new Error(`第${drawIndex + 1}期第${numIndex + 1}个数字错误: ${num}`)
       }
     })
   })
 
-  // 2. 生成滑动窗口（关键修改：包含最后一个可能没有下一期的窗口）
-  // 窗口范围：n到n+19期（共20期），允许最后一个窗口没有下一期数据
+  // 2. 生成滑动窗口（关键修改: 包含最后一个可能没有下一期的窗口）
+  // 窗口范围: n到n+19期（共20期），允许最后一个窗口没有下一期数据
   const windows = []
   for (let n = 0; n <= data.length - WINDOW_SIZE; n++) {
     // 修改循环条件，去掉-1，确保最后一个窗口被包含
     const windowStart = n
-    const windowData = data.slice(windowStart, windowStart + WINDOW_SIZE) // 窗口数据：n到n+19期
-    const nextPeriodIndex = windowStart + WINDOW_SIZE // 下一期索引：n+20
+    const windowData = data.slice(windowStart, windowStart + WINDOW_SIZE) // 窗口数据: n到n+19期
+    const nextPeriodIndex = windowStart + WINDOW_SIZE // 下一期索引: n+20
     const nextPeriodData = data[nextPeriodIndex] || null // 可能没有下一期数据（最后一个窗口）
 
     windows.push({
@@ -58,14 +58,14 @@ try {
   }
 
   const mdContent = []
+  const totalContent = []
   const distributionStats = {} // 仅统计有下一期数据的窗口的累积分布
 
-  // 3. 处理每个窗口：
-  // - 无论是否有下一期，都展示窗口自身的百分比分布
-  // - 只有有下一期数据时，才展示下一期分布并参与累积统计
-  windows.forEach((window) => {
+  windows.forEach((window, index) => {
     const { windowIndex, periodRange, nextPeriodNum, windowData, nextPeriodData } = window
-
+    if (index > 0) {
+      mdContent.push('---separator---')
+    }
     // 窗口标题（所有窗口都显示）
     mdContent.push(`--- 第${windowIndex}窗口（${periodRange}）---`)
 
@@ -87,10 +87,10 @@ try {
         .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
         .map(
           ([percent, nums]) =>
-            `${percent}%:${nums.sort((a, b) => parseInt(a) - parseInt(b)).join(',')}`,
+            `${percent}%（${nums.sort((a, b) => parseInt(a) - parseInt(b)).join(',')}）`,
         )
-        .join('  ')
-      mdContent.push(`第${nextPeriodNum}期在本窗口的分布：${nextPeriodDistStr}`)
+        .join(' ')
+      mdContent.push(`第${nextPeriodNum}期在本窗口的分布 ${nextPeriodDistStr}`)
 
       // 仅对有下一期数据的窗口进行累积统计
       Object.entries(nextPeriodPercentGroups).forEach(([percent, nums]) => {
@@ -100,8 +100,7 @@ try {
         distributionStats[percent][countKey] = (distributionStats[percent][countKey] || 0) + 1
       })
     } else {
-      // 无下一期数据时，提示说明（可选）
-      mdContent.push('')
+      mdContent.push('最新')
     }
 
     // 二、窗口自身的百分比分布（所有窗口都必须展示，包括最后一个窗口）
@@ -124,23 +123,22 @@ try {
         const sortedNums = nums.sort((a, b) => parseInt(a) - parseInt(b))
         mdContent.push(`${formatNumber(percent)}%: ${sortedNums.join(',')}`)
       })
-    mdContent.push('\n') // 窗口间空行分隔
   })
 
   // 4. 累积统计（仅包含有下一期数据的窗口）
-  mdContent.push('## 累积统计（仅含存在下一期数据的窗口）')
-  mdContent.push('\n### 下一期在窗口分布的累积')
-  mdContent.push('| 百分比 | 数字个数 | 出现次数 |')
-  mdContent.push('|--------------------------|')
+  totalContent.push('## 累积统计' + windows.length)
+  totalContent.push('\n### 下一期在窗口分布的累积')
+  totalContent.push('| 百分比 | 数字个数 | 出现次数 |')
+  totalContent.push('|--------------------------|')
   Object.entries(distributionStats)
     .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
     .forEach(([percent, countMap]) => {
       let total = 0
       Object.values(countMap).forEach((times) => (total += times))
-      mdContent.push(`| ${percent}% |   总计   | ${total}次 |`)
+      totalContent.push(`| ${percent.padEnd(6, ' ')} |   总计   | ${total}次 |`)
     })
 
-  mdContent.push('|--------------------------|')
+  totalContent.push('|--------------------------|')
 
   Object.entries(distributionStats)
     .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
@@ -150,14 +148,16 @@ try {
       Object.entries(countMap)
         .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
         .forEach(([count, times]) => {
-          mdContent.push(`| ${percent}% |    ${count}个    | ${times}次 |`)
+          totalContent.push(`| ${percent.padEnd(6, ' ')} |    ${count}个    | ${times}次 |`)
         })
     })
 
   // 写入文件
   writeFileSync(outputPath, mdContent.join('\n'), 'utf-8')
-  console.log(`统计完成！已保存至：${outputPath}`)
+  writeFileSync(outputPathTotal, totalContent.join('\n'), 'utf-8')
+
+  console.log(`统计完成！已保存至: ${outputPath}`)
 } catch (err) {
-  console.error('错误：', err.message)
+  console.error('错误: ', err.message)
   process.exit(1)
 }

@@ -6,8 +6,9 @@
     ref="draggableRef"
     :style="style"
   >
-    <div v-if="parsedData.part1.length">
-      <div v-for="item in parsedData.part1" :key="`part1_${item.percent}`" flex my-2px>
+    <p text-amber v-if="type">{{ type }}</p>
+    <div v-if="parsedData">
+      <div v-for="item in parsedData" :key="`part1_${item.percent}`" flex my-6px>
         <div w-42px>{{ item.percent }}:</div>
         <div class="flex flex-wrap flex-1">
           <el-button
@@ -16,25 +17,6 @@
             v-for="c in item.numbers"
             :key="`part1_${item.percent}_${c}`"
             :type="selectedPart1.has(c) ? 'success' : 'default'"
-          >
-            {{ c }}
-          </el-button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="parsedData.part1.length && parsedData.part2.length" py-4px>{{ f }} , {{ b }}</div>
-
-    <div v-if="parsedData.part2.length">
-      <div v-for="item in parsedData.part2" :key="`part2_${item.percent}`" flex my-2px>
-        <div w-42px>{{ item.percent }}:</div>
-        <div class="flex flex-wrap flex-1">
-          <el-button
-            @click="handleNum('part2', c)"
-            style="margin: 0 4px"
-            v-for="c in item.numbers"
-            :key="`part2_${item.percent}_${c}`"
-            :type="selectedPart2.has(c) ? 'success' : 'default'"
           >
             {{ c }}
           </el-button>
@@ -63,6 +45,7 @@ const props = withDefaults(
   defineProps<{
     front: number[]
     back: number[]
+    type: string | number
     content: string // 新增：从父组件传入的Markdown内容
   }>(),
   {
@@ -86,35 +69,28 @@ const { style } = useDraggable(draggableRef, {
 })
 
 // 解析后的数据（数字列表）
-const parsedData = ref({
-  part1: [] as Array<{ percent: string; numbers: string[] }>,
-  part2: [] as Array<{ percent: string; numbers: string[] }>,
-})
+const parsedData = ref([])
 
 // 前后区高亮状态（选中状态）
 const selectedPart1 = ref(new Set<string>())
 const selectedPart2 = ref(new Set<string>())
-
-// 解析Markdown（使用父组件传入的content）
-const parseMarkdown = (content: string) => {
-  const parts = content.split(/---+/).map((part) => part.trim())
-  parsedData.value.part1 = parts[0] ? parsePart(parts[0]) : []
-  parsedData.value.part2 = parts[1] ? parsePart(parts[1]) : []
-}
 
 const parsePart = (partContent: string) => {
   const percentGroups: Array<{ percent: string; numbers: string[] }> = []
   partContent.split('\n').forEach((line) => {
     line = line.trim()
     if (!line) return
-    const [percent, numsStr] = line.split(':').map((part) => part.trim())
-    if (percent && numsStr) {
-      percentGroups.push({
-        percent,
-        numbers: numsStr.split(',').map((num) => num.trim()),
-      })
+    if (line.includes(':')) {
+      const [percent, numsStr] = line.split(':').map((part) => part.trim())
+      if (percent && numsStr) {
+        percentGroups.push({
+          percent,
+          numbers: numsStr.split(',').map((num) => num.trim()),
+        })
+      }
     }
   })
+  parsedData.value = percentGroups
   return percentGroups
 }
 
@@ -167,14 +143,6 @@ const clearBack = () => {
   selectedPart2.value = new Set()
 }
 
-// 初始化：使用父组件传入的content解析数据，并设置高亮
-onMounted(() => {
-  if (props.content) {
-    parseMarkdown(props.content)
-    setHighlightFromProps()
-  }
-})
-
 // 监听props变化：
 // 1. content变化时重新解析数据
 // 2. front/back变化时更新高亮
@@ -182,11 +150,11 @@ watch(
   () => props.content,
   (newContent) => {
     if (newContent) {
-      parseMarkdown(newContent)
+      parsePart(newContent)
       setHighlightFromProps() // 重新解析后同步高亮
     }
   },
-  { immediate: false }, // 初始化时已在onMounted处理
+  { immediate: true }, // 初始化时已在onMounted处理
 )
 
 watch(
@@ -196,14 +164,4 @@ watch(
   },
   { deep: true },
 )
-
-const f = computed(() => {
-  const ret = [...props.front].sort((a, b) => a - b)
-  return ret.join(' ')
-})
-
-const b = computed(() => {
-  const ret = [...props.back].sort((a, b) => a - b)
-  return ret.join(' ')
-})
 </script>

@@ -105,33 +105,33 @@
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
     type="20: 10% 15%"
-    v-show="showPanel20"
+    v-show="showPanel"
     :content="markdownContent20"
-    @close="toggle20()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="15: 13%"
-    v-show="showPanel15"
+    type="15: 13% 7%"
+    v-show="showPanel"
     :content="markdownContent15"
-    @close="toggle15()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="10: 20%"
-    v-show="showPanel10"
+    type="10: 10% 20%"
+    v-show="showPanel"
     :content="markdownContent10"
-    @close="toggle10()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="5"
-    v-show="showPanel5"
+    type="5:0% 20%"
+    v-show="showPanel"
     :content="markdownContent5"
-    @close="toggle5()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
@@ -167,10 +167,7 @@ const windows5 = splitContentToWindows(Content5)
 
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
-const [showPanel20, toggle20] = useToggle(true)
-const [showPanel15, toggle15] = useToggle(true)
-const [showPanel10, toggle10] = useToggle(true)
-const [showPanel5, toggle5] = useToggle(true)
+const [showPanel, toggle] = useToggle(true)
 
 // 表格高度与基础配置
 const extraHeight = ref(60)

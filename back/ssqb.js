@@ -5,13 +5,24 @@ import { fileURLToPath } from 'url'
 function formatNumber(num) {
   return num.toString().padStart(2, '0')
 }
-const BALL_SIZE = 12
-const BALL_LEN = 2
+const BALL_SIZE = 16
+const BALL_LEN = 1
+let WINDOW_SIZE = 20 // 默认值
+const args = process.argv.slice(2)
+for (const arg of args) {
+  if (arg.startsWith('--')) {
+    const numStr = arg.slice(2) // 例如 --5 会截取为 '5'
+    const num = parseInt(numStr, 10)
+    // 验证是否为有效的正整数
+    if (!isNaN(num) && num > 0) {
+      WINDOW_SIZE = num // 覆盖默认值
+    }
+  }
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataPath = resolve(__dirname, './ssqb.json')
-const outputPath = resolve(__dirname, 'SSQB.md')
-const WINDOW_SIZE = 30
+const outputPath = resolve(__dirname, `SSQB${WINDOW_SIZE}.txt`)
 
 try {
   // 1. 读取并验证数据

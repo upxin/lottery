@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     mx-auto
-    style="width: 1000px"
+    style="width: 1040px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -30,7 +30,7 @@
       :class-name="getCellClass(col.prop)"
     >
       <template #header>
-        <div @click.stop="toggleHighlight(col.prop)" :class="getHeaderCellClass(col.prop)">
+        <div @click.stop="toggleHighlight(col.prop)">
           {{ col.label }}
         </div>
       </template>
@@ -146,10 +146,10 @@ import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 // 导入全量数据文件
-import Content10 from '#/rate/DLT10.TXT?raw'
-import Content15 from '#/rate/DLT15.TXT?raw'
-import Content5 from '#/rate/DLT5.TXT?raw'
-import Content20 from '#/rate/DLT20.TXT?raw'
+import Content10 from '#/rate/SSQ10.TXT?raw'
+import Content15 from '#/rate/SSQ15.TXT?raw'
+import Content5 from '#/rate/SSQ5.TXT?raw'
+import Content20 from '#/rate/SSQ20.TXT?raw'
 
 // 分割Content为窗口数组（按---分割并过滤空内容）
 const splitContentToWindows = (content: string) => {

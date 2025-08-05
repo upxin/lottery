@@ -46,16 +46,16 @@ body {
 
 // 高亮colum
 .high-colum {
-  @apply bg-sky-blue text-lemon-yellow;
+  @apply bg-sky-blue text-red;
   font-weight: bold;
 }
 
-.header-highlight-n {
-  @apply bg-klein-blue text-lemon-yellow;
-}
-.header-highlight-h {
-  @apply bg-klein-blue text-lemon-yellow;
-}
+// .header-highlight-n {
+//   @apply bg-klein-blue text-blueGray;
+// }
+// .header-highlight-h {
+//   @apply bg-klein-blue text-blueGray;
+// }
 .comma-cell-single,
 .comma-header {
   @apply text-sky;

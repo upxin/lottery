@@ -131,7 +131,6 @@ export function useLotteryData(
         g2: lotteryType === 'ssq' ? g1?.slice(-1) : g1?.slice(-2),
         ipt,
       }
-      console.log(rawData.value.g1, 88)
 
       syncHighlightFromData()
 

@@ -100,11 +100,12 @@
     <el-button @click="toggle20()">显示模拟盘20</el-button>
     <el-button @click="toggle15()">显示模拟盘15</el-button>
     <el-button @click="toggle10()">显示模拟盘10</el-button>
+    <el-button @click="toggle5()">显示模拟盘5</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
-    type="20: 10% 15%"
+    type="20: 15% 20% 10%"
     v-show="showPanel20"
     :content="markdownContent20"
     @close="toggle20()"
@@ -112,7 +113,7 @@
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="15: 13%"
+    type="15: 13% 20%"
     v-show="showPanel15"
     :content="markdownContent15"
     @close="toggle15()"
@@ -120,7 +121,7 @@
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="10: 20%"
+    type="10: 20% 10%"
     v-show="showPanel10"
     :content="markdownContent10"
     @close="toggle10()"
@@ -128,7 +129,7 @@
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="5"
+    type="5: 0% 20%"
     v-show="showPanel5"
     :content="markdownContent5"
     @close="toggle5()"
@@ -260,4 +261,7 @@ const markdownContent10 = computed(() => {
 const markdownContent5 = computed(() => {
   return windows5[index5.value] || ''
 })
+
+const showBack = ref(false)
+provide('showBack', { showBack })
 </script>

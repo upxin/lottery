@@ -6,24 +6,38 @@
     ref="draggableRef"
     :style="style"
   >
-    <p text-amber v-if="type">{{ type }}</p>
+    <div text-amber v-if="type">{{ type }}</div>
     <div v-if="parsedData">
       <div v-for="item in parsedData" :key="`part1_${item.percent}`" flex my-6px>
         <div w-42px>{{ item.percent }}:</div>
         <div class="flex flex-wrap flex-1">
           <el-button
-            @click="handleNum('part1', c)"
             style="margin: 0 4px"
             v-for="c in item.numbers"
             :key="`part1_${item.percent}_${c}`"
-            :type="selectedPart1.has(c) ? 'success' : 'default'"
+            :type="selectedFront.has(c) ? 'success' : 'default'"
           >
             {{ c }}
           </el-button>
         </div>
       </div>
     </div>
-
+    <div text-amber v-if="btype && showBack">{{ btype }}</div>
+    <div v-if="parsedDataBack && showBack">
+      <div v-for="item in parsedDataBack" :key="`part1_${item.percent}`" flex my-6px>
+        <div w-42px>{{ item.percent }}:</div>
+        <div class="flex flex-wrap flex-1">
+          <el-button
+            style="margin: 0 4px"
+            v-for="c in item.numbers"
+            :key="`part1_${item.percent}_${c}`"
+            :type="selectedBack.has(c) ? 'success' : 'default'"
+          >
+            {{ c }}
+          </el-button>
+        </div>
+      </div>
+    </div>
     <div class="flex justify-center mt-6">
       <el-button @click="copy">复制</el-button>
       <el-button @click="clearFront">清除前区</el-button>
@@ -34,46 +48,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
 import { useDraggable } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 
 // 接收父组件传入的参数：
 // - front/back：需要高亮的数字
 // - content：Markdown内容（替代本地cur.md）
+const { showBack } = inject('showBack')
 const props = withDefaults(
   defineProps<{
     front: number[]
     back: number[]
     type: string | number
     content: string // 新增：从父组件传入的Markdown内容
+    contentBack?: string
+    btype?: string
   }>(),
   {
     front: () => [],
     back: () => [],
     content: '', // 默认空字符串
+    contentBack: '',
+    btype: '-------',
   },
 )
 
 // 拖拽配置
 const draggableRef = ref<HTMLElement | null>(null)
-const panelWidth = 600
-const initialX = window.innerWidth / 2 - panelWidth / 2
-const panelHeight = 550
-const windowHeight = window.innerHeight
-const initialY = windowHeight - panelHeight
 const emits = defineEmits(['close'])
 
 const { style } = useDraggable(draggableRef, {
-  initialValue: { x: initialX, y: initialY },
+  initialValue: { x: 0, y: 0 },
 })
 
 // 解析后的数据（数字列表）
 const parsedData = ref([])
 
 // 前后区高亮状态（选中状态）
-const selectedPart1 = ref(new Set<string>())
-const selectedPart2 = ref(new Set<string>())
+const selectedFront = ref(new Set<string>())
+const selectedBack = ref(new Set<string>())
 
 const parsePart = (partContent: string) => {
   const percentGroups: Array<{ percent: string; numbers: string[] }> = []
@@ -90,34 +103,22 @@ const parsePart = (partContent: string) => {
       }
     }
   })
-  parsedData.value = percentGroups
   return percentGroups
 }
 
 // 将props中的数字设置为对应区域的高亮状态
 const setHighlightFromProps = () => {
   const frontStrs = props.front.map((num) => num.toString().padStart(2, '0'))
-  selectedPart1.value = new Set(frontStrs)
+  selectedFront.value = new Set(frontStrs)
 
   const backStrs = props.back.map((num) => num.toString().padStart(2, '0'))
-  selectedPart2.value = new Set(backStrs)
-}
-
-// 处理数字点击
-const handleNum = (part: 'part1' | 'part2', num: string) => {
-  const targetSet = part === 'part1' ? selectedPart1 : selectedPart2
-  if (targetSet.value.has(num)) {
-    targetSet.value.delete(num)
-  } else {
-    targetSet.value.add(num)
-  }
-  targetSet.value = new Set(targetSet.value) // 强制更新
+  selectedBack.value = new Set(backStrs)
 }
 
 // 复制选中数据
 const copy = () => {
-  const part1 = Array.from(selectedPart1.value).sort((a, b) => +a - +b)
-  const part2 = Array.from(selectedPart2.value).sort((a, b) => +a - +b)
+  const part1 = Array.from(selectedFront.value).sort((a, b) => +a - +b)
+  const part2 = Array.from(selectedBack.value).sort((a, b) => +a - +b)
 
   let result = ''
   if (part1.length) result += `${part1.join(' ')} , `
@@ -136,11 +137,11 @@ const copy = () => {
 
 // 清除选中状态
 const clearFront = () => {
-  selectedPart1.value = new Set()
+  selectedFront.value = new Set()
 }
 
 const clearBack = () => {
-  selectedPart2.value = new Set()
+  selectedBack.value = new Set()
 }
 
 // 监听props变化：
@@ -150,7 +151,19 @@ watch(
   () => props.content,
   (newContent) => {
     if (newContent) {
-      parsePart(newContent)
+      parsedData.value = parsePart(newContent)
+      setHighlightFromProps() // 重新解析后同步高亮
+    }
+  },
+  { immediate: true }, // 初始化时已在onMounted处理
+)
+
+const parsedDataBack = ref([])
+watch(
+  () => props.contentBack,
+  (newContent) => {
+    if (newContent) {
+      parsedDataBack.value = parsePart(newContent)
       setHighlightFromProps() // 重新解析后同步高亮
     }
   },

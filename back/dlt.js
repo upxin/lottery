@@ -21,7 +21,7 @@ for (const arg of args) {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dataPath = resolve(__dirname, './dltb.json')
+const dataPath = resolve(__dirname, './dlt.json')
 const outputPath = resolve(__dirname, `DLTB${WINDOW_SIZE}.txt`)
 const outputPathTotal = resolve(__dirname, `DLTB_TOTAL${WINDOW_SIZE}.txt`)
 try {

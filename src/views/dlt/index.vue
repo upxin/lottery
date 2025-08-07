@@ -97,10 +97,7 @@
     <el-button @click="clear" :type="'danger'">
       {{ '清空高亮' }}
     </el-button>
-    <el-button @click="toggle20()">显示模拟盘20</el-button>
-    <el-button @click="toggle15()">显示模拟盘15</el-button>
-    <el-button @click="toggle10()">显示模拟盘10</el-button>
-    <el-button @click="toggle5()">显示模拟盘10</el-button>
+    <el-button @click="toggle()">显示模拟盘</el-button>
 
     <el-button @click="toggleBack()">后区</el-button>
   </div>
@@ -108,40 +105,40 @@
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
     type="20: 10% 15%"
-    v-show="showPanel20"
+    v-show="showPanel"
     :content="markdownContent20"
     :content-back="bmarkdownContent20"
-    @close="toggle20()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
     :btype="'20: 15% 20%'"
   ></Mock>
   <Mock
     type="15: 13% 7%"
-    v-show="showPanel15"
+    v-show="showPanel"
     :content="markdownContent15"
     :content-back="bmarkdownContent15"
-    @close="toggle15()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
     :btype="'15: 13% 20%'"
   ></Mock>
   <Mock
     type="10: 10% 20%"
-    v-show="showPanel10"
+    v-show="showPanel"
     :content-back="bmarkdownContent10"
     :content="markdownContent10"
-    @close="toggle10()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
     :btype="'10: 10% 20%'"
   ></Mock>
   <Mock
     type="5:0% 20%"
-    v-show="showPanel5"
+    v-show="showPanel"
     :content-back="bmarkdownContent5"
     :content="markdownContent5"
-    @close="toggle5()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
     :btype="'5: 0% 20%'"
@@ -186,10 +183,7 @@ const bwindows10 = splitContentToWindows(bContent10)
 const bwindows5 = splitContentToWindows(bContent5)
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
-const [showPanel5, toggle5] = useToggle(true)
-const [showPanel10, toggle10] = useToggle(true)
-const [showPanel15, toggle15] = useToggle(true)
-const [showPanel20, toggle20] = useToggle(true)
+const [showPanel, toggle] = useToggle(true)
 
 // 表格高度与基础配置
 const extraHeight = ref(60)

@@ -16,6 +16,7 @@
             v-for="c in item.numbers"
             :key="`part1_${item.percent}_${c}`"
             :type="selectedFront.has(c) ? 'success' : 'default'"
+            @click="handleFront(c)"
           >
             {{ c }}
           </el-button>
@@ -24,14 +25,15 @@
     </div>
     <div text-amber v-if="btype && showBack">{{ btype }}</div>
     <div v-if="parsedDataBack && showBack">
-      <div v-for="item in parsedDataBack" :key="`part1_${item.percent}`" flex my-6px>
+      <div v-for="item in parsedDataBack" :key="`part2_${item.percent}`" flex my-6px>
         <div w-42px>{{ item.percent }}:</div>
         <div class="flex flex-wrap flex-1">
           <el-button
             style="margin: 0 4px"
             v-for="c in item.numbers"
-            :key="`part1_${item.percent}_${c}`"
+            :key="`part2_${item.percent}_${c}`"
             :type="selectedBack.has(c) ? 'success' : 'default'"
+            @click="handleBack(c)"
           >
             {{ c }}
           </el-button>
@@ -54,7 +56,7 @@ import { ElMessage } from 'element-plus'
 // 接收父组件传入的参数：
 // - front/back：需要高亮的数字
 // - content：Markdown内容（替代本地cur.md）
-const { showBack } = inject('showBack')
+const { showBack, setBack, setFront } = inject('showBack')
 const props = withDefaults(
   defineProps<{
     front: number[]
@@ -177,4 +179,11 @@ watch(
   },
   { deep: true },
 )
+
+function handleBack(v) {
+  setBack(parseInt(v))
+}
+function handleFront(v) {
+  setFront(parseInt(v))
+}
 </script>

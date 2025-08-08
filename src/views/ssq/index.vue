@@ -97,42 +97,39 @@
     <el-button @click="clear" :type="'danger'">
       {{ '清空高亮' }}
     </el-button>
-    <el-button @click="toggle20()">显示模拟盘20</el-button>
-    <el-button @click="toggle15()">显示模拟盘15</el-button>
-    <el-button @click="toggle10()">显示模拟盘10</el-button>
-    <el-button @click="toggle5()">显示模拟盘5</el-button>
+    <el-button @click="toggle()">显示模拟盘</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
     type="20: 15% 20% 10%"
-    v-show="showPanel20"
+    v-show="showPanel"
     :content="markdownContent20"
-    @close="toggle20()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
     type="15: 13% 20%"
-    v-show="showPanel15"
+    v-show="showPanel"
     :content="markdownContent15"
-    @close="toggle15()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
     type="10: 20% 10%"
-    v-show="showPanel10"
+    v-show="showPanel"
     :content="markdownContent10"
-    @close="toggle10()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
     type="5: 0% 20%"
-    v-show="showPanel5"
+    v-show="showPanel"
     :content="markdownContent5"
-    @close="toggle5()"
+    @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
@@ -168,10 +165,7 @@ const windows5 = splitContentToWindows(Content5)
 
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
-const [showPanel20, toggle20] = useToggle(true)
-const [showPanel15, toggle15] = useToggle(true)
-const [showPanel10, toggle10] = useToggle(true)
-const [showPanel5, toggle5] = useToggle(true)
+const [showPanel, toggle] = useToggle(true)
 
 // 表格高度与基础配置
 const extraHeight = ref(60)

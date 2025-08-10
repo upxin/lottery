@@ -257,5 +257,20 @@ const markdownContent5 = computed(() => {
 })
 
 const showBack = ref(false)
-provide('showBack', { showBack })
+function setFront(v) {
+  if (highlightedFront.value.has(v)) {
+    highlightedFront.value.delete(v)
+  } else {
+    highlightedFront.value.add(v)
+  }
+}
+
+function setBack(v) {
+  if (highlightedBack.value.has(v)) {
+    highlightedBack.value.delete(v)
+  } else {
+    highlightedBack.value.add(v)
+  }
+}
+provide('showBack', { showBack, setFront, setBack })
 </script>

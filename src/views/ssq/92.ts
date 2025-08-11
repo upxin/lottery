@@ -1,4 +1,4 @@
 export const g1 = []
 export const ipt = `
-01,01
+0509101620262930,031112
 `

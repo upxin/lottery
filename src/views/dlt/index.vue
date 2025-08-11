@@ -134,7 +134,7 @@
     :btype="'10: 10% 20%'"
   ></Mock>
   <Mock
-    type="5:0% 20%"
+    type="5: 0% 20%"
     v-show="showPanel"
     :content-back="bmarkdownContent5"
     :content="markdownContent5"

@@ -42,17 +42,13 @@
     </div>
     <div class="flex justify-center mt-6">
       <el-button @click="copy">复制</el-button>
-      <el-button @click="clearFront">清除前区</el-button>
-      <el-button @click="clearBack">清除后区</el-button>
+      <el-button @click="reset">重置位置</el-button>
       <el-button @click="emits('close')" :type="'danger'">关闭</el-button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { useDraggable } from '@vueuse/core'
-import { ElMessage } from 'element-plus'
-
 // 接收父组件传入的参数：
 // - front/back：需要高亮的数字
 // - content：Markdown内容（替代本地cur.md）
@@ -72,17 +68,24 @@ const props = withDefaults(
     content: '', // 默认空字符串
     contentBack: '',
     btype: '-------',
+    type: '',
   },
 )
 
 // 拖拽配置
 const draggableRef = ref<HTMLElement | null>(null)
 const emits = defineEmits(['close'])
-
+const initPos = useStorage(props.type, { x: 0, y: 10 })
 const { style } = useDraggable(draggableRef, {
-  initialValue: { x: 0, y: 0 },
+  initialValue: initPos.value,
+  onEnd(position) {
+    initPos.value = position
+  },
 })
 
+function reset() {
+  localStorage.clear()
+}
 // 解析后的数据（数字列表）
 const parsedData = ref([])
 
@@ -135,15 +138,6 @@ const copy = () => {
     .writeText(result)
     .then(() => ElMessage.success('已复制选中数据'))
     .catch(() => ElMessage.error('复制失败'))
-}
-
-// 清除选中状态
-const clearFront = () => {
-  selectedFront.value = new Set()
-}
-
-const clearBack = () => {
-  selectedBack.value = new Set()
 }
 
 // 监听props变化：

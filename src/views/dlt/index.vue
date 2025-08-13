@@ -103,36 +103,54 @@
     <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
-  <el-dialog v-model="showCount" :z-index="9999999">
+  <el-dialog v-model="showCount" width="800">
     <div flex justify-around>
       <div>
         <p>前区(数字： 次数)</p>
         <div
-          :class="{ 'text-red': highlightedFront.has(Number(item.num)) }"
+          flex
+          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(Number(item.num)) }"
           v-for="item in counts?.front || []"
           :key="item.num"
         >
-          {{ item.num }}：{{ item.count }}
+          <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
 
-      <div class="h-400px w-200px flex flex-wrap justify-between">
-        <p>后区组合(数字： 次数)</p>
-        <div w-100px v-for="(item, index) in dltBackCom || []" :key="`${item.num}_${index}`">
-          {{ item.combinationStr }}：{{ item.count }}
+      <div class="h-400px w-230px flex flex-wrap justify-between">
+        <p>后区组合(数字： 次数){{ combinBack }}</p>
+        <div
+          w-100px
+          flex
+          v-for="(item, index) in dltBackCom || []"
+          :key="`${item.num}_${index}`"
+          :class="{ ' text-amber font-bold': combinBack === item.combinationStr }"
+        >
+          <span class="w-50px">{{ item.combinationStr }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
 
       <div>
         <p>后区单个(数字： 次数)</p>
         <div
+          flex
           v-for="(item, index) in counts?.back || []"
-          :class="{ 'text-blue': highlightedBack.has(Number(item.num)) }"
+          :class="{ 'text-blue font-bold': highlightedBack.has(Number(item.num)) }"
           :key="`${item.num}_${index}`"
         >
-          {{ item.num }}：{{ item.count }}
+          <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
+    </div>
+    <div flex justify-center pt-10px>
+      <el-button type="primary" @click="currentHis = minHis" size="small" class="mr-2">
+        最早一期
+      </el-button>
+      <el-button type="primary" @click="prevHis" size="small" class="ml-2"> 上一期 </el-button>
+      <el-button type="primary" @click="nextHis" size="small" class="mr-2"> 下一期 </el-button>
+      <el-button type="primary" @click="currentHis = maxHis" size="small" class="mr-2">
+        最新一期
+      </el-button>
     </div>
   </el-dialog>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
@@ -342,5 +360,13 @@ function setBack(v) {
     highlightedBack.value.add(v)
   }
 }
+const combinBack = computed(() => {
+  const list = []
+  for (const element of highlightedBack.value) {
+    const temp = Number(element).toString()
+    list.push(temp.padStart(2, '0'))
+  }
+  return list.join(',')
+})
 provide('showBack', { showBack, setFront, setBack })
 </script>

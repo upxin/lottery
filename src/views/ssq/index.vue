@@ -64,24 +64,6 @@
       </template>
     </el-table-column>
   </el-table>
-  <div pos-fixed top-0 left-0>
-    <div
-      :class="{ 'text-red': highlightedFront.has(Number(item.num)) }"
-      v-for="item in counts?.front || []"
-      :key="item.num"
-    >
-      {{ item.num }}：{{ item.count }}
-    </div>
-  </div>
-  <div pos-fixed top-0 left-30>
-    <div
-      v-for="(item, index) in counts?.back || []"
-      :class="{ 'text-blue': highlightedBack.has(Number(item.num)) }"
-      :key="`${item.num}_${index}`"
-    >
-      {{ item.num }}：{{ item.count }}
-    </div>
-  </div>
   <div ref="footerRef" class="c-bottom">
     <el-select
       v-model="currentHis"
@@ -151,7 +133,41 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
-  <el-dialog v-model="showCount"> </el-dialog>
+  <el-dialog v-model="showCount" :z-index="9999999">
+    <div flex justify-around>
+      <div>
+        <p>前区(数字： 次数)</p>
+        <div
+          flex
+          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(Number(item.num)) }"
+          v-for="item in counts?.front || []"
+          :key="item.num"
+        >
+          <span class="w-50px">{{ item.num }}：</span><span>{{ item.count }}</span>
+        </div>
+      </div>
+      <div>
+        <p>后区单个(数字： 次数)</p>
+        <div
+          v-for="(item, index) in counts?.back || []"
+          :class="{ 'text-blue font-bold': highlightedBack.has(Number(item.num)) }"
+          :key="`${item.num}_${index}`"
+        >
+          {{ item.num }}：{{ item.count }}
+        </div>
+      </div>
+    </div>
+    <div flex justify-center>
+      <el-button type="primary" @click="currentHis = minHis" size="small" class="mr-2">
+        最早一期
+      </el-button>
+      <el-button type="primary" @click="prevHis" size="small" class="ml-2"> 上一期 </el-button>
+      <el-button type="primary" @click="nextHis" size="small" class="mr-2"> 下一期 </el-button>
+      <el-button type="primary" @click="currentHis = maxHis" size="small" class="mr-2">
+        最新一期
+      </el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>

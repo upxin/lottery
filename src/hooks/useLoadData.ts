@@ -107,7 +107,7 @@ export function useLotteryData(
       const ipt = typeof mod?.ipt === 'string' ? mod.ipt : ''
       const g1 = mod.g1
 
-      const singleTickets = convertToSingleTickets(ipt)
+      const singleTickets = convertToSingleTickets(ipt, lotteryType)
       counts.value = countNumberFrequency(singleTickets)
       // 数据校验
       let frontMax = 33

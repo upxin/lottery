@@ -100,8 +100,33 @@
     <el-button @click="toggle()">显示模拟盘</el-button>
 
     <el-button @click="toggleBack()">后区</el-button>
+    <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
+  <el-dialog v-model="showCount" :z-index="9999999">
+    <div flex justify-around>
+      <div mr-20px>
+        <p>前区</p>
+        <div
+          :class="{ 'text-red': highlightedFront.has(Number(item.num)) }"
+          v-for="item in counts?.front || []"
+          :key="item.num"
+        >
+          {{ item.num }}：{{ item.count }}
+        </div>
+      </div>
+      <div>
+        <p>后区</p>
+        <div
+          v-for="(item, index) in counts?.back || []"
+          :class="{ 'text-blue': highlightedBack.has(Number(item.num)) }"
+          :key="`${item.num}_${index}`"
+        >
+          {{ item.num }}：{{ item.count }}
+        </div>
+      </div>
+    </div>
+  </el-dialog>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
     type="20: 10% 15%"
@@ -164,6 +189,8 @@ import bContent15 from '#/back/DLTB15.txt?raw'
 import bContent5 from '#/back/DLTB5.txt?raw'
 import bContent20 from '#/back/DLTB20.txt?raw'
 // 分割Content为窗口数组（按---分割并过滤空内容）
+const showCount = ref(false)
+
 const splitContentToWindows = (content: string) => {
   return content
     .split('---separator---')
@@ -225,6 +252,7 @@ const {
   getCommaClass,
   getHeaderCellClass,
   clear,
+  counts,
 } = useLotteryData('dlt', files, {
   frontCount: 35,
   backCount: 12,

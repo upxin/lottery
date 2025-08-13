@@ -115,6 +115,7 @@
       {{ '清空高亮' }}
     </el-button>
     <el-button @click="toggle()">显示模拟盘</el-button>
+    <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
@@ -150,6 +151,7 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
+  <el-dialog v-model="showCount"> </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -165,7 +167,7 @@ import Content10 from '#/rate/SSQ10.TXT?raw'
 import Content15 from '#/rate/SSQ15.TXT?raw'
 import Content5 from '#/rate/SSQ5.TXT?raw'
 import Content20 from '#/rate/SSQ20.TXT?raw'
-
+const showCount = ref(false)
 // 分割Content为窗口数组（按---分割并过滤空内容）
 const splitContentToWindows = (content: string) => {
   return content

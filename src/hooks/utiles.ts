@@ -1,7 +1,7 @@
-const FRONT_BALL_COUNT = 6 // 前区数字数量
-const BACK_BALL_COUNT = 1 // 后区数字数量
+export function convertToSingleTickets(input, lotteryType) {
+  const FRONT_BALL_COUNT = lotteryType === 'ssq' ? 6 : 5 // 前区数字数量
+  const BACK_BALL_COUNT = lotteryType === 'ssq' ? 1 : 2 // 后区数字数量
 
-export function convertToSingleTickets(input) {
   const lines = input.trim().split('\n')
   const singleTickets = []
   lines.forEach((line, lineIdx) => {

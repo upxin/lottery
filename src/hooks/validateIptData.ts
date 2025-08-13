@@ -1,9 +1,9 @@
 export const validateIptData = (ipt: string, front = 33, back = 16): string | null => {
   if (typeof ipt !== 'string' || !ipt.trim()) {
-    ElNotification({
-      title: '错误提示',
+    ElMessage({
       message: `暂无数据`,
-      duration: 0,
+      duration: 10000,
+      type: 'error',
     })
   }
 

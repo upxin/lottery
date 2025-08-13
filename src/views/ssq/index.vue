@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     mx-auto
-    style="width: 1040px"
+    style="width: 1050px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -13,7 +13,7 @@
   >
     <el-table-column
       type="index"
-      :width="width"
+      :width="30"
       label="In"
       align="center"
       :resizable="false"
@@ -64,7 +64,24 @@
       </template>
     </el-table-column>
   </el-table>
-
+  <div pos-fixed top-0 left-0>
+    <div
+      :class="{ 'text-red': highlightedFront.has(Number(item.num)) }"
+      v-for="item in counts?.front || []"
+      :key="item.num"
+    >
+      {{ item.num }}：{{ item.count }}
+    </div>
+  </div>
+  <div pos-fixed top-0 left-30>
+    <div
+      v-for="(item, index) in counts?.back || []"
+      :class="{ 'text-blue': highlightedBack.has(Number(item.num)) }"
+      :key="`${item.num}_${index}`"
+    >
+      {{ item.num }}：{{ item.count }}
+    </div>
+  </div>
   <div ref="footerRef" class="c-bottom">
     <el-select
       v-model="currentHis"
@@ -207,6 +224,7 @@ const {
   getCommaClass,
   getHeaderCellClass,
   clear,
+  counts,
 } = useLotteryData('ssq', files, {
   frontCount: 33,
   backCount: 16,

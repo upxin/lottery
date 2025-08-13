@@ -1,4 +1,5 @@
-import { validateIptData, validateIptDatakl8 } from './validateIptData'
+import { validateIptData } from './validateIptData'
+import { convertToSingleTickets, countNumberFrequency } from './utiles'
 
 // 类型定义
 export interface LotteryData {
@@ -27,7 +28,7 @@ export function useLotteryData(
   const title = useTitle()
 
   const footerRef = ref<HTMLElement | null>(null)
-
+  const counts = ref()
   const currentHis = ref<string | number>() // 支持数字/字符串期号
   const rawData = ref<LotteryData>({ g1: [], g2: [], ipt: '' })
   const parsedRows = ref<ParsedRow[]>([])
@@ -105,6 +106,9 @@ export function useLotteryData(
       const mod: any = files[filePath]
       const ipt = typeof mod?.ipt === 'string' ? mod.ipt : ''
       const g1 = mod.g1
+
+      const singleTickets = convertToSingleTickets(ipt)
+      counts.value = countNumberFrequency(singleTickets)
       // 数据校验
       let frontMax = 33
       let backMax = 12
@@ -138,10 +142,9 @@ export function useLotteryData(
       regData()
       return true
     } catch (e: any) {
-      ElNotification({
-        title: '错误提示',
+      ElMessage({
         message: `数据加载失败：${e?.message ?? '未知错误'}`,
-        duration: 0,
+        duration: 10000,
       })
       rawData.value = { g1: [], g2: [], ipt: '' }
       return false
@@ -477,5 +480,6 @@ export function useLotteryData(
     reBackHighLight,
     // 原始数据
     rawData,
+    counts,
   }
 }

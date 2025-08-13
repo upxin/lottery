@@ -39,10 +39,13 @@ export function convertToSingleTickets(input, lotteryType) {
       frontCombinations.forEach((fronts) => {
         backCombinations.forEach((backs) => {
           const sortedFronts = [...fronts].sort((a, b) => a - b)
+          const sortedBacks = [...backs].sort((a, b) => a - b) // 后区组合内部排序，确保统计一致性
           singleTickets.push({
-            front: sortedFronts, // 前区数字数组
-            back: backs, // 后区数字数组
-            full: `${sortedFronts.join(' ')} ${backs.join(' ')}`,
+            front: sortedFronts,
+            back: sortedBacks,
+            full: `${sortedFronts.join(' ')} ${sortedBacks.join(' ')}`,
+            // 新增后区组合标识（用于统计）
+            backCombinationKey: sortedBacks.join(','),
           })
         })
       })
@@ -54,7 +57,7 @@ export function convertToSingleTickets(input, lotteryType) {
 }
 
 export function countNumberFrequency(tickets) {
-  // 初始化计数器：前区和后区分别统计
+  // 初始化计数器：前区和后区分别统计（单个数字）
   const frontCounter = new Map()
   const backCounter = new Map()
 
@@ -65,7 +68,7 @@ export function countNumberFrequency(tickets) {
       frontCounter.set(num, (frontCounter.get(num) || 0) + 1)
     })
 
-    // 统计后区数字
+    // 统计后区数字（单个）
     ticket.back.forEach((num) => {
       backCounter.set(num, (backCounter.get(num) || 0) + 1)
     })
@@ -84,9 +87,38 @@ export function countNumberFrequency(tickets) {
   }
 
   return {
-    front: sortByFrequency(frontCounter), // 前区统计结果
-    back: sortByFrequency(backCounter), // 后区统计结果
+    front: sortByFrequency(frontCounter), // 前区单个数字统计
+    back: sortByFrequency(backCounter), // 后区单个数字统计
   }
+}
+
+// 新增：统计后区组合出现次数（如两两组合）
+export function countBackCombinationFrequency(tickets) {
+  const backCombinationCounter = new Map()
+
+  tickets.forEach((ticket) => {
+    // 使用预先处理的组合标识（已排序）
+    const combinationKey = ticket.backCombinationKey
+    backCombinationCounter.set(
+      combinationKey,
+      (backCombinationCounter.get(combinationKey) || 0) + 1,
+    )
+  })
+
+  // 排序：按次数倒序，次数相同则按组合升序
+  return Array.from(backCombinationCounter.entries())
+    .sort((a, b) => {
+      if (b[1] !== a[1]) {
+        return b[1] - a[1] // 次数倒序
+      }
+      // 组合字符串比较（如 "01,02" < "01,03"）
+      return a[0].localeCompare(b[0])
+    })
+    .map(([combination, count]) => ({
+      combination: combination.split(','), // 还原为数组
+      combinationStr: combination, // 组合字符串（如 "01,02"）
+      count,
+    }))
 }
 
 export function combination(arr, n) {
@@ -106,12 +138,16 @@ export function combination(arr, n) {
   return result
 }
 
-// const singleTickets = convertToSingleTickets(ipt)
-// const frequency = countNumberFrequency(singleTickets)
+// 使用示例
+// const ipt = `
+// 0509101620262930,031112
+// 05080911131824293233,0708
+// `;
+// const tickets = convertToSingleTickets(ipt, 'dlt'); // 假设'dlt'类型后区为2个
+// const numberFreq = countNumberFrequency(tickets);
+// const backCombFreq = countBackCombinationFrequency(tickets);
 
-// // 输出结果
-// console.log(`生成单式票总数: ${singleTickets.length}`)
-// console.log('\n前区数字出现次数（按次数倒序）:')
-// console.table(frequency.front)
-// console.log('\n后区数字出现次数（按次数倒序）:')
-// console.table(frequency.back)
+// console.log('后区单个数字统计:');
+// console.table(numberFreq.back);
+// console.log('后区组合统计:');
+// console.table(backCombFreq);

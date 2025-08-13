@@ -105,8 +105,8 @@
   <Error :err-msg="errMsg"></Error>
   <el-dialog v-model="showCount" :z-index="9999999">
     <div flex justify-around>
-      <div mr-20px>
-        <p>前区</p>
+      <div>
+        <p>前区(数字： 次数)</p>
         <div
           :class="{ 'text-red': highlightedFront.has(Number(item.num)) }"
           v-for="item in counts?.front || []"
@@ -115,8 +115,16 @@
           {{ item.num }}：{{ item.count }}
         </div>
       </div>
+
+      <div class="h-400px w-200px flex flex-wrap justify-between">
+        <p>后区组合(数字： 次数)</p>
+        <div w-100px v-for="(item, index) in dltBackCom || []" :key="`${item.num}_${index}`">
+          {{ item.combinationStr }}：{{ item.count }}
+        </div>
+      </div>
+
       <div>
-        <p>后区</p>
+        <p>后区单个(数字： 次数)</p>
         <div
           v-for="(item, index) in counts?.back || []"
           :class="{ 'text-blue': highlightedBack.has(Number(item.num)) }"
@@ -253,6 +261,7 @@ const {
   getHeaderCellClass,
   clear,
   counts,
+  dltBackCom,
 } = useLotteryData('dlt', files, {
   frontCount: 35,
   backCount: 12,

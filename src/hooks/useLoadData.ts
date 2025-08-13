@@ -1,5 +1,9 @@
 import { validateIptData } from './validateIptData'
-import { convertToSingleTickets, countNumberFrequency } from './utiles'
+import {
+  convertToSingleTickets,
+  countNumberFrequency,
+  countBackCombinationFrequency,
+} from './utiles'
 
 // 类型定义
 export interface LotteryData {
@@ -29,6 +33,8 @@ export function useLotteryData(
 
   const footerRef = ref<HTMLElement | null>(null)
   const counts = ref()
+  const dltBackCom = ref()
+
   const currentHis = ref<string | number>() // 支持数字/字符串期号
   const rawData = ref<LotteryData>({ g1: [], g2: [], ipt: '' })
   const parsedRows = ref<ParsedRow[]>([])
@@ -90,7 +96,6 @@ export function useLotteryData(
   }
 
   const errMsg = ref('')
-
   // 加载指定期号数据
   const loadData = async (period: string | number) => {
     const loading = ElLoading.service({
@@ -109,6 +114,8 @@ export function useLotteryData(
 
       const singleTickets = convertToSingleTickets(ipt, lotteryType)
       counts.value = countNumberFrequency(singleTickets)
+      dltBackCom.value = countBackCombinationFrequency(singleTickets)
+
       // 数据校验
       let frontMax = 33
       let backMax = 12
@@ -481,5 +488,6 @@ export function useLotteryData(
     // 原始数据
     rawData,
     counts,
+    dltBackCom,
   }
 }

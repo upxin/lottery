@@ -103,10 +103,10 @@
     <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
-  <el-dialog v-model="showCount" width="800">
+  <el-dialog v-model="showCount" width="800" :close-on-click-modal="false">
     <div flex justify-around>
       <div>
-        <p>前区(数字： 次数)</p>
+        <div>前区(数字： 次数)</div>
         <div
           flex
           :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(Number(item.num)) }"
@@ -118,20 +118,20 @@
       </div>
 
       <div class="h-400px w-230px flex flex-wrap justify-between">
-        <p>后区组合(数字： 次数){{ combinBack }}</p>
+        <div>后区组合(数字： 次数)</div>
         <div
           w-100px
           flex
           v-for="(item, index) in dltBackCom || []"
           :key="`${item.num}_${index}`"
-          :class="{ ' text-amber font-bold': combinBack === item.combinationStr }"
+          :class="{ ' text-amber font-bold': combinBack.includes(item.combinationStr) }"
         >
           <span class="w-50px">{{ item.combinationStr }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
 
       <div>
-        <p>后区单个(数字： 次数)</p>
+        <div>后区单个(数字： 次数)</div>
         <div
           flex
           v-for="(item, index) in counts?.back || []"
@@ -360,13 +360,58 @@ function setBack(v) {
     highlightedBack.value.add(v)
   }
 }
+
+function getSortedCombinations(list, count) {
+  // 边界条件处理
+  if (count <= 0 || count > list.length) {
+    return [] // 选取个数无效时返回空数组
+  }
+  if (count === list.length) {
+    // 选取个数等于列表长度时，只有一个组合（排序后的原列表）
+    return [[...list].sort((a, b) => a - b)]
+  }
+
+  const result = []
+
+  // 回溯法生成组合
+  const backtrack = (startIndex, currentCombination) => {
+    // 当当前组合长度达到目标个数时，排序后加入结果
+    if (currentCombination.length === count) {
+      result.push([...currentCombination].sort((a, b) => a - b))
+      return
+    }
+
+    // 从startIndex开始遍历，避免重复组合（如[1,2]和[2,1]视为同一组合）
+    for (let i = startIndex; i < list.length; i++) {
+      // 加入当前元素
+      currentCombination.push(list[i])
+      // 递归选取下一个元素（从i+1开始，确保不重复选取）
+      backtrack(i + 1, currentCombination)
+      // 回溯：移除最后一个元素，尝试其他可能性
+      currentCombination.pop()
+    }
+  }
+
+  // 从索引0开始，初始组合为空
+  backtrack(0, [])
+
+  return result
+}
+
 const combinBack = computed(() => {
   const list = []
+  const coms = []
   for (const element of highlightedBack.value) {
-    const temp = Number(element).toString()
-    list.push(temp.padStart(2, '0'))
+    list.push(element)
   }
-  return list.join(',')
+
+  const combinations = getSortedCombinations(list, 2)
+
+  for (const c of combinations) {
+    const temp = `${Number(c[0]).toString().padStart(2, '0')},${Number(c[1]).toString().padStart(2, '0')}`
+    coms.push(temp)
+  }
+  return coms
 })
 provide('showBack', { showBack, setFront, setBack })
 </script>

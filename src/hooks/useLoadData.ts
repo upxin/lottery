@@ -51,7 +51,8 @@ export function useLotteryData(
         return match ? match[1] : null
       })
       .filter((period): period is string => period !== null)
-      .sort((a, b) => b.localeCompare(a)) // 降序排列（最新在前）
+      // 修复：按数字大小降序排序（先转为数字再比较）
+      .sort((a, b) => Number(b) - Number(a))
 
     return ret
   })

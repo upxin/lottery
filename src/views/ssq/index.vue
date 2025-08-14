@@ -102,38 +102,6 @@
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
-    type="20: 15% 20% 10%"
-    v-show="showPanel"
-    :content="markdownContent20"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-  ></Mock>
-  <Mock
-    type="15: 13% 20%"
-    v-show="showPanel"
-    :content="markdownContent15"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-  ></Mock>
-  <Mock
-    type="10: 20% 10%"
-    v-show="showPanel"
-    :content="markdownContent10"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-  ></Mock>
-  <Mock
-    type="5: 0% 20%"
-    v-show="showPanel"
-    :content="markdownContent5"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-  ></Mock>
-  <Mock
     type="50"
     v-show="showPanel"
     :content="markdownContent50"
@@ -187,10 +155,10 @@ import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 // 导入全量数据文件
-import Content10 from '#/rate/SSQ10.TXT?raw'
-import Content15 from '#/rate/SSQ15.TXT?raw'
-import Content5 from '#/rate/SSQ5.TXT?raw'
-import Content20 from '#/rate/SSQ20.TXT?raw'
+// import Content10 from '#/rate/SSQ10.TXT?raw'
+// import Content15 from '#/rate/SSQ15.TXT?raw'
+// import Content5 from '#/rate/SSQ5.TXT?raw'
+// import Content20 from '#/rate/SSQ20.TXT?raw'
 import Content50 from '#/rate/SSQ50.TXT?raw'
 
 const showCount = ref(false)
@@ -202,11 +170,6 @@ const splitContentToWindows = (content: string) => {
     .filter(Boolean)
 }
 
-// 预处理三个Content为窗口数组
-const windows20 = splitContentToWindows(Content20)
-const windows15 = splitContentToWindows(Content15)
-const windows10 = splitContentToWindows(Content10)
-const windows5 = splitContentToWindows(Content5)
 const windows50 = splitContentToWindows(Content50)
 
 // 面板显示状态管理
@@ -221,12 +184,14 @@ const { getRowClassName, handleRowClick } = useHighLight()
 
 // 数据加载与处理
 const his = import.meta.glob('./hisData/*.ts', { eager: true })
+// 分别匹配：1-9.ts、10-99.ts、100-199.ts、200.ts
 const curData = {
-  ...import.meta.glob('./[1-9].ts', { eager: true }),
-  ...import.meta.glob('./[1-9][0-9].ts', { eager: true }),
+  ...import.meta.glob('./[1-9].ts', { eager: true }), // 1-9.ts
+  ...import.meta.glob('./[1-9][0-9].ts', { eager: true }), // 10-99.ts
   ...import.meta.glob('./1[0-9][0-9].ts', { eager: true }),
-  ...import.meta.glob('./200.ts', { eager: true }),
+  ...import.meta.glob('./2[0-9][0-9].ts', { eager: true }), // 100-199.ts（包含100.ts）
 }
+
 const files = Object.assign({}, his, curData)
 
 // 彩票数据核心逻辑（假设maxHis和minHis是ref类型）
@@ -259,52 +224,20 @@ const {
   backCount: 16,
 })
 
-// 核心算法：根据currentHis与maxHis的差值计算索引
-// currentHis = maxHis → 差值0 → 索引length-1（最后一个）
-// currentHis = maxHis - n → 差值n → 索引length-1 -n
 const getIndexByDifference = (windowList: string[]) => {
   if (windowList.length === 0) return 0
-
-  // 访问ref的值（关键修正：maxHis和minHis若为ref需加.value）
-  const current = currentHis.value
-  const max = maxHis.value
-  const min = minHis.value
-
-  // 计算当前期与最新期的差值（current ≤ max）
-  const difference = max - current
-
-  // 计算目标索引（从最后一个往前偏移difference位）
+  const current = Number(currentHis.value)
+  const max = Number(maxHis.value)
+  if (isNaN(current) || isNaN(max)) return 0 // 处理非数字期号的异常
+  const difference = max - current // 数字减法，正确计算差值
   const index = windowList.length - 1 - difference
-
-  // 边界保护：索引不能小于0（若期号过早，固定取第一个窗口）
   return Math.max(index, 0)
 }
 
-// 为每个窗口数组计算索引（使用差值算法）
-const index20 = computed(() => getIndexByDifference(windows20))
-const index15 = computed(() => getIndexByDifference(windows15))
-const index10 = computed(() => getIndexByDifference(windows10))
-const index5 = computed(() => getIndexByDifference(windows5))
 const index50 = computed(() => getIndexByDifference(windows50))
 
-// 动态生成markdown内容
-const markdownContent20 = computed(() => {
-  return windows20[index20.value] || ''
-})
-
-const markdownContent15 = computed(() => {
-  return windows15[index15.value] || ''
-})
-
-const markdownContent10 = computed(() => {
-  return windows10[index10.value] || ''
-})
-
-const markdownContent5 = computed(() => {
-  return windows5[index5.value] || ''
-})
 const markdownContent50 = computed(() => {
-  return windows5[index50.value] || ''
+  return windows50[index50.value] || ''
 })
 const showBack = ref(false)
 function setFront(v) {

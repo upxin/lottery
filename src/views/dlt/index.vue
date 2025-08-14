@@ -301,23 +301,14 @@ const {
   backCount: 12,
 })
 
-// 核心算法：根据currentHis与maxHis的差值计算索引
-// currentHis = maxHis → 差值0 → 索引length-1（最后一个）
-// currentHis = maxHis - n → 差值n → 索引length-1 -n
 const getIndexByDifference = (windowList: string[]) => {
   if (windowList.length === 0) return 0
+  const current = Number(currentHis.value)
+  const max = Number(maxHis.value)
+  if (isNaN(current) || isNaN(max)) return 0 // 处理非数字期号的异常
 
-  // 访问ref的值（关键修正：maxHis和minHis若为ref需加.value）
-  const current = currentHis.value
-  const max = maxHis.value
-
-  // 计算当前期与最新期的差值（current ≤ max）
-  const difference = max - current
-
-  // 计算目标索引（从最后一个往前偏移difference位）
+  const difference = max - current // 数字减法，正确计算差值
   const index = windowList.length - 1 - difference
-
-  // 边界保护：索引不能小于0（若期号过早，固定取第一个窗口）
   return Math.max(index, 0)
 }
 

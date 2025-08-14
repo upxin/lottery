@@ -7,7 +7,7 @@ function formatNumber(num) {
 }
 const BALL_SIZE = 33
 const BALL_LEN = 6
-const list = [5, 10, 15, 20, 50]
+const list = [50]
 
 function main(windowSize) {
   const __dirname = dirname(fileURLToPath(import.meta.url))

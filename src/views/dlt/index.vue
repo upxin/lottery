@@ -194,6 +194,16 @@
     :front="Array.from(highlightedFront)"
     :btype="'5: 0% 20%'"
   ></Mock>
+
+  <Mock
+    type="50"
+    v-show="showPanel"
+    :content="markdownContent50"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'50'"
+  ></Mock>
 </template>
 
 <script lang="ts" setup>
@@ -209,11 +219,14 @@ import Content10 from '#/rate/DLT10.txt?raw'
 import Content15 from '#/rate/DLT15.txt?raw'
 import Content5 from '#/rate/DLT5.txt?raw'
 import Content20 from '#/rate/DLT20.txt?raw'
+import Content50 from '#/rate/DLT50.txt?raw'
 
-import bContent10 from '#/back/DLTB10.txt?raw'
-import bContent15 from '#/back/DLTB15.txt?raw'
-import bContent5 from '#/back/DLTB5.txt?raw'
-import bContent20 from '#/back/DLTB20.txt?raw'
+import bContent10 from '#/back/DLT10.txt?raw'
+import bContent15 from '#/back/DLT15.txt?raw'
+import bContent5 from '#/back/DLT5.txt?raw'
+// import bContent50 from '#/back/DLT50.txt?raw'
+
+import bContent20 from '#/back/DLT20.txt?raw'
 // 分割Content为窗口数组（按---分割并过滤空内容）
 const showCount = ref(false)
 
@@ -229,11 +242,14 @@ const windows20 = splitContentToWindows(Content20)
 const windows15 = splitContentToWindows(Content15)
 const windows10 = splitContentToWindows(Content10)
 const windows5 = splitContentToWindows(Content5)
+const windows50 = splitContentToWindows(Content50)
 
 const bwindows20 = splitContentToWindows(bContent20)
 const bwindows15 = splitContentToWindows(bContent15)
 const bwindows10 = splitContentToWindows(bContent10)
 const bwindows5 = splitContentToWindows(bContent5)
+// const bwindows50 = splitContentToWindows(bContent50)
+
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
 const [showPanel, toggle] = useToggle(true)
@@ -294,7 +310,6 @@ const getIndexByDifference = (windowList: string[]) => {
   // 访问ref的值（关键修正：maxHis和minHis若为ref需加.value）
   const current = currentHis.value
   const max = maxHis.value
-  const min = minHis.value
 
   // 计算当前期与最新期的差值（current ≤ max）
   const difference = max - current
@@ -311,11 +326,14 @@ const index20 = computed(() => getIndexByDifference(windows20))
 const index15 = computed(() => getIndexByDifference(windows15))
 const index10 = computed(() => getIndexByDifference(windows10))
 const index5 = computed(() => getIndexByDifference(windows5))
+const index50 = computed(() => getIndexByDifference(windows50))
 
 const bindex20 = computed(() => getIndexByDifference(bwindows20))
 const bindex15 = computed(() => getIndexByDifference(bwindows15))
 const bindex10 = computed(() => getIndexByDifference(bwindows10))
 const bindex5 = computed(() => getIndexByDifference(bwindows5))
+// const bindex50 = computed(() => getIndexByDifference(bwindows50))
+
 // 动态生成markdown内容
 const markdownContent20 = computed(() => {
   return windows20[index20.value] || ''
@@ -341,10 +359,15 @@ const bmarkdownContent10 = computed(() => {
 const markdownContent5 = computed(() => {
   return windows5[index5.value] || ''
 })
+const markdownContent50 = computed(() => {
+  return windows50[index50.value] || ''
+})
 const bmarkdownContent5 = computed(() => {
   return bwindows5[bindex5.value] || ''
 })
-
+// const bmarkdownContent50 = computed(() => {
+//   return bwindows50[bindex50.value] || ''
+// })
 function setFront(v) {
   if (highlightedFront.value.has(v)) {
     highlightedFront.value.delete(v)

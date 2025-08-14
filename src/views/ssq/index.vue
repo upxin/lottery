@@ -133,6 +133,14 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
+  <Mock
+    type="50"
+    v-show="showPanel"
+    :content="markdownContent50"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+  ></Mock>
   <el-dialog v-model="showCount" :z-index="9999999">
     <div flex justify-around>
       <div>
@@ -183,6 +191,8 @@ import Content10 from '#/rate/SSQ10.TXT?raw'
 import Content15 from '#/rate/SSQ15.TXT?raw'
 import Content5 from '#/rate/SSQ5.TXT?raw'
 import Content20 from '#/rate/SSQ20.TXT?raw'
+import Content50 from '#/rate/SSQ50.TXT?raw'
+
 const showCount = ref(false)
 // 分割Content为窗口数组（按---分割并过滤空内容）
 const splitContentToWindows = (content: string) => {
@@ -197,6 +207,7 @@ const windows20 = splitContentToWindows(Content20)
 const windows15 = splitContentToWindows(Content15)
 const windows10 = splitContentToWindows(Content10)
 const windows5 = splitContentToWindows(Content5)
+const windows50 = splitContentToWindows(Content50)
 
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
@@ -274,6 +285,7 @@ const index20 = computed(() => getIndexByDifference(windows20))
 const index15 = computed(() => getIndexByDifference(windows15))
 const index10 = computed(() => getIndexByDifference(windows10))
 const index5 = computed(() => getIndexByDifference(windows5))
+const index50 = computed(() => getIndexByDifference(windows50))
 
 // 动态生成markdown内容
 const markdownContent20 = computed(() => {
@@ -291,7 +303,9 @@ const markdownContent10 = computed(() => {
 const markdownContent5 = computed(() => {
   return windows5[index5.value] || ''
 })
-
+const markdownContent50 = computed(() => {
+  return windows5[index50.value] || ''
+})
 const showBack = ref(false)
 function setFront(v) {
   if (highlightedFront.value.has(v)) {

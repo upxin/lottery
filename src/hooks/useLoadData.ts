@@ -30,6 +30,7 @@ export function useLotteryData(
 ) {
   const { frontCount, backCount } = columnConfig
   const title = useTitle()
+  const route = useRoute()
 
   const footerRef = ref<HTMLElement | null>(null)
   const counts = ref()
@@ -145,7 +146,7 @@ export function useLotteryData(
 
       syncHighlightFromData()
 
-      title.value = `${lotteryType} ${period}`
+      title.value = `${String(route.name)} ${period}`
       regData()
       return true
     } catch (e: any) {

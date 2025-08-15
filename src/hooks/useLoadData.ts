@@ -289,9 +289,9 @@ export function useLotteryData(
       ElMessage.warning('没有有效数据可复制')
       return
     }
-
+    const temp = Array.from(new Set(lines))
     navigator.clipboard
-      .writeText(lines.join('\n'))
+      .writeText(temp.join('\n'))
       .then(() => ElMessage.success('已复制表格数据'))
       .catch(() => ElMessage.error('复制失败'))
   }

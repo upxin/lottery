@@ -185,24 +185,14 @@
     :btype="'10: 10% 20%'"
   ></Mock>
   <Mock
-    type="5: 0% 20%"
-    v-show="showPanel"
-    :content-back="bmarkdownContent5"
-    :content="markdownContent5"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'5: 0% 20%'"
-  ></Mock>
-
-  <Mock
-    type="50"
+    type="50： 12% 14% 16% 10%"
     v-show="showPanel"
     :content="markdownContent50"
+    :content-back="bmarkdownContent50"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'50'"
+    :btype="'50: 16% 18% 20% 14%'"
   ></Mock>
 </template>
 
@@ -224,7 +214,7 @@ import Content50 from '#/rate/DLT50.txt?raw'
 import bContent10 from '#/back/DLT10.txt?raw'
 import bContent15 from '#/back/DLT15.txt?raw'
 import bContent5 from '#/back/DLT5.txt?raw'
-// import bContent50 from '#/back/DLT50.txt?raw'
+import bContent50 from '#/back/DLT50.txt?raw'
 
 import bContent20 from '#/back/DLT20.txt?raw'
 // 分割Content为窗口数组（按---分割并过滤空内容）
@@ -248,7 +238,7 @@ const bwindows20 = splitContentToWindows(bContent20)
 const bwindows15 = splitContentToWindows(bContent15)
 const bwindows10 = splitContentToWindows(bContent10)
 const bwindows5 = splitContentToWindows(bContent5)
-// const bwindows50 = splitContentToWindows(bContent50)
+const bwindows50 = splitContentToWindows(bContent50)
 
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
@@ -322,8 +312,7 @@ const index50 = computed(() => getIndexByDifference(windows50))
 const bindex20 = computed(() => getIndexByDifference(bwindows20))
 const bindex15 = computed(() => getIndexByDifference(bwindows15))
 const bindex10 = computed(() => getIndexByDifference(bwindows10))
-const bindex5 = computed(() => getIndexByDifference(bwindows5))
-// const bindex50 = computed(() => getIndexByDifference(bwindows50))
+const bindex50 = computed(() => getIndexByDifference(bwindows50))
 
 // 动态生成markdown内容
 const markdownContent20 = computed(() => {
@@ -353,12 +342,9 @@ const markdownContent5 = computed(() => {
 const markdownContent50 = computed(() => {
   return windows50[index50.value] || ''
 })
-const bmarkdownContent5 = computed(() => {
-  return bwindows5[bindex5.value] || ''
+const bmarkdownContent50 = computed(() => {
+  return bwindows50[bindex50.value] || ''
 })
-// const bmarkdownContent50 = computed(() => {
-//   return bwindows50[bindex50.value] || ''
-// })
 function setFront(v) {
   if (highlightedFront.value.has(v)) {
     highlightedFront.value.delete(v)
@@ -428,4 +414,33 @@ const combinBack = computed(() => {
   return coms
 })
 provide('showBack', { showBack, setFront, setBack })
+
+function getFilteredChartBall2DArray() {
+  const table = document.getElementById('chartsTable')
+  const result = []
+  if (!table) {
+    console.warn('未找到id为chartsTable的表格')
+    return result
+  }
+  const trs = table.getElementsByTagName('tr')
+  for (let i = 0; i < trs.length; i++) {
+    const tr = trs[i]
+    const trData = []
+    const tds = tr.querySelectorAll('td[class^="chartBall"]')
+
+    tds.forEach((td) => {
+      if (td.innerText) {
+        trData.push(td.innerText.trim().padStart(2, '0'))
+      }
+    })
+
+    // 只保留有数据的行（trData长度大于0时才添加）
+    if (trData.length > 0) {
+      result.push(trData.slice(0, 5))
+    }
+  }
+  return result
+}
+const filteredBall2DArray = getFilteredChartBall2DArray()
+console.log(filteredBall2DArray)
 </script>

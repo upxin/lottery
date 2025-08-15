@@ -102,7 +102,7 @@
   <Error :err-msg="errMsg"></Error>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
-    type="50"
+    type="50: 16 18 20 14"
     v-show="showPanel"
     :content="markdownContent50"
     @close="toggle()"
@@ -155,11 +155,7 @@ import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 // 导入全量数据文件
-// import Content10 from '#/rate/SSQ10.TXT?raw'
-// import Content15 from '#/rate/SSQ15.TXT?raw'
-// import Content5 from '#/rate/SSQ5.TXT?raw'
-// import Content20 from '#/rate/SSQ20.TXT?raw'
-import Content50 from '#/rate/SSQ50.TXT?raw'
+import Content50 from '#/ssq/SSQ50.TXT?raw'
 
 const showCount = ref(false)
 // 分割Content为窗口数组（按---分割并过滤空内容）

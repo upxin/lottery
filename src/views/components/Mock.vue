@@ -7,7 +7,10 @@
     :style="style"
   >
     <!-- 前区标题 -->
-    <div text-amber v-if="type && !showBack">前区: {{ type }}</div>
+    <div text-amber v-if="type && !showBack" flex justify-between pr-20px>
+      <span>前区 {{ type }}</span>
+      <el-button @click="reset" size="small">重置位置</el-button>
+    </div>
     <!-- 前区按钮列表 -->
     <div v-if="parsedData && !showBack">
       <div v-for="item in parsedData" :key="`part1_${item.percent}`" flex my-6px>
@@ -28,7 +31,10 @@
     </div>
 
     <!-- 后区标题（控制显示） -->
-    <div text-amber v-if="btype && showBack">后区: {{ btype }}</div>
+    <div text-amber v-if="btype && showBack" flex justify-between pr-20px>
+      <span> 后区 {{ btype }} </span>
+      <el-button @click="reset" size="small">重置位置</el-button>
+    </div>
     <!-- 后区按钮列表（控制显示） -->
     <div v-if="parsedDataBack && showBack">
       <div v-for="item in parsedDataBack" :key="`part2_${item.percent}`" flex my-6px>
@@ -46,13 +52,6 @@
           </el-button>
         </div>
       </div>
-    </div>
-
-    <!-- 操作按钮组 -->
-    <div class="flex justify-center mt-6 gap-4">
-      <el-button @click="copy" size="small">复制</el-button>
-      <el-button @click="reset" size="small">重置位置</el-button>
-      <el-button @click="emits('close')" type="danger" size="small">关闭</el-button>
     </div>
   </section>
 </template>
@@ -89,7 +88,6 @@ const props = withDefaults(defineProps<MockProps>(), {
 
 // 3. 拖拽功能配置（使用useStorage持久化位置，修复reset逻辑）
 const draggableRef = ref<HTMLElement | null>(null)
-const emits = defineEmits<{ (e: 'close'): void }>()
 // 用type作为storage的key，避免多Mock组件位置冲突
 const storageKey = `mock_pos_${String(props.type || 'default')}`
 const initPos = useStorage(storageKey, { x: 0, y: 10 })

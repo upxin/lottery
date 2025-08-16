@@ -155,6 +155,66 @@
   </el-dialog>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
+    type="50： 12% 14% 16% 10%"
+    v-show="showPanel"
+    :content="Content50"
+    :content-back="bContent50"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'50: 16% 18% 20% 14%'"
+  ></Mock>
+  <Mock
+    type="45"
+    v-show="showPanel"
+    :content="Content45"
+    :content-back="bContent45"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="45"
+  ></Mock>
+  <Mock
+    type="40"
+    v-show="showPanel"
+    :content="Content40"
+    :content-back="bContent40"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="40"
+  ></Mock>
+  <Mock
+    type="35"
+    v-show="showPanel"
+    :content="Content35"
+    :content-back="bContent35"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="35"
+  ></Mock>
+  <Mock
+    type="30"
+    v-show="showPanel"
+    :content="Content30"
+    :content-back="bContent30"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="30"
+  ></Mock>
+  <Mock
+    type="25"
+    v-show="showPanel"
+    :content="Content25"
+    :content-back="bContent25"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="25"
+  ></Mock>
+  <Mock
     type="20: 10% 15%"
     v-show="showPanel"
     :content="Content20"
@@ -184,16 +244,6 @@
     :front="Array.from(highlightedFront)"
     :btype="'10: 10% 20%'"
   ></Mock>
-  <Mock
-    type="50： 12% 14% 16% 10%"
-    v-show="showPanel"
-    :content="Content50"
-    :content-back="bContent50"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'50: 16% 18% 20% 14%'"
-  ></Mock>
 </template>
 
 <script lang="ts" setup>
@@ -203,17 +253,32 @@ import { useAutoHeight } from '@/hooks/useHeight'
 import Mock from '../components/Mock.vue'
 import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
-
-// 导入全量数据文件
 import Content10 from '#/rate/DLT10.txt?raw'
-import Content15 from '#/rate/DLT15.txt?raw'
-import Content20 from '#/rate/DLT20.txt?raw'
-import Content50 from '#/rate/DLT50.txt?raw'
 import bContent10 from '#/back/DLT10.txt?raw'
+
+import Content15 from '#/rate/DLT15.txt?raw'
 import bContent15 from '#/back/DLT15.txt?raw'
-import bContent50 from '#/back/DLT50.txt?raw'
+
+import Content20 from '#/rate/DLT20.txt?raw'
 import bContent20 from '#/back/DLT20.txt?raw'
-// 分割Content为窗口数组（按---分割并过滤空内容）
+
+import Content25 from '#/rate/DLT25.txt?raw'
+import bContent25 from '#/back/DLT25.txt?raw'
+
+import Content30 from '#/rate/DLT30.txt?raw'
+import bContent30 from '#/back/DLT30.txt?raw'
+
+import Content35 from '#/rate/DLT35.txt?raw'
+import bContent35 from '#/back/DLT35.txt?raw'
+
+import Content40 from '#/rate/DLT40.txt?raw'
+import bContent40 from '#/back/DLT40.txt?raw'
+
+import Content45 from '#/rate/DLT45.txt?raw'
+import bContent45 from '#/back/DLT45.txt?raw'
+
+import Content50 from '#/rate/DLT50.txt?raw'
+import bContent50 from '#/back/DLT50.txt?raw'
 
 const showCount = ref(false)
 

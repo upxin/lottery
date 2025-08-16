@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     mx-auto
-    style="width: 1050px"
+    style="width: 1120px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -13,7 +13,7 @@
   >
     <el-table-column
       type="index"
-      :width="30"
+      :width="width + 20"
       label="In"
       align="center"
       :resizable="false"
@@ -30,7 +30,7 @@
       :class-name="getCellClass(col.prop)"
     >
       <template #header>
-        <div @click.stop="toggleHighlight(col.prop)">
+        <div @click.stop="toggleHighlight(col.prop)" :class="getHeaderCellClass(col.prop)">
           {{ col.label }}
         </div>
       </template>
@@ -64,6 +64,7 @@
       </template>
     </el-table-column>
   </el-table>
+
   <div ref="footerRef" class="c-bottom">
     <el-select
       v-model="currentHis"
@@ -97,43 +98,51 @@
       {{ '清空高亮' }}
     </el-button>
     <el-button @click="toggle()">显示模拟盘</el-button>
+
+    <el-button @click="toggleBack()">后区</el-button>
     <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
-  <ScrollTable :el="tableRef?.$el"></ScrollTable>
-  <Mock
-    type="50: 16 18 20 14"
-    v-show="showPanel"
-    :content="markdownContent50"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-  ></Mock>
-  <el-dialog v-model="showCount" :z-index="9999999">
+  <el-dialog v-model="showCount" width="800" :close-on-click-modal="false">
     <div flex justify-around>
       <div>
-        <p>前区(数字： 次数)</p>
+        <div>前区(数字： 次数)</div>
         <div
           flex
           :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(Number(item.num)) }"
           v-for="item in counts?.front || []"
           :key="item.num"
         >
-          <span class="w-50px">{{ item.num }}：</span><span>{{ item.count }}</span>
+          <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
-      <div>
-        <p>后区单个(数字： 次数)</p>
+
+      <div class="h-400px w-230px flex flex-wrap justify-between">
+        <div>后区组合(数字： 次数)</div>
         <div
+          w-100px
+          flex
+          v-for="(item, index) in dltBackCom || []"
+          :key="`${item.num}_${index}`"
+          :class="{ ' text-amber font-bold': combinBack.includes(item.combinationStr) }"
+        >
+          <span class="w-50px">{{ item.combinationStr }}:</span><span>{{ item.count }}</span>
+        </div>
+      </div>
+
+      <div>
+        <div>后区单个(数字： 次数)</div>
+        <div
+          flex
           v-for="(item, index) in counts?.back || []"
           :class="{ 'text-blue font-bold': highlightedBack.has(Number(item.num)) }"
           :key="`${item.num}_${index}`"
         >
-          {{ item.num }}：{{ item.count }}
+          <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
     </div>
-    <div flex justify-center>
+    <div flex justify-center pt-10px>
       <el-button type="primary" @click="currentHis = minHis" size="small" class="mr-2">
         最早一期
       </el-button>
@@ -144,6 +153,47 @@
       </el-button>
     </div>
   </el-dialog>
+  <ScrollTable :el="tableRef?.$el"></ScrollTable>
+  <Mock
+    type="20: 10% 15%"
+    v-show="showPanel"
+    :content="Content20"
+    :content-back="bContent20"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'20: 15% 20%'"
+  ></Mock>
+  <Mock
+    type="15: 13% 7%"
+    v-show="showPanel"
+    :content="Content15"
+    :content-back="bContent15"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'15: 13% 20%'"
+  ></Mock>
+  <Mock
+    type="10: 10% 20%"
+    v-show="showPanel"
+    :content="Content10"
+    :content-back="bContent10"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'10: 10% 20%'"
+  ></Mock>
+  <Mock
+    type="50： 12% 14% 16% 10%"
+    v-show="showPanel"
+    :content="Content50"
+    :content-back="bContent50"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'50: 16% 18% 20% 14%'"
+  ></Mock>
 </template>
 
 <script lang="ts" setup>
@@ -155,18 +205,20 @@ import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 // 导入全量数据文件
-import Content50 from '#/ssq/SSQ50.TXT?raw'
+import Content10 from '#/rate/DLT10.txt?raw'
+import Content15 from '#/rate/DLT15.txt?raw'
+import Content20 from '#/rate/DLT20.txt?raw'
+import Content50 from '#/rate/DLT50.txt?raw'
+import bContent10 from '#/back/DLT10.txt?raw'
+import bContent15 from '#/back/DLT15.txt?raw'
+import bContent50 from '#/back/DLT50.txt?raw'
+import bContent20 from '#/back/DLT20.txt?raw'
+// 分割Content为窗口数组（按---分割并过滤空内容）
 
 const showCount = ref(false)
-// 分割Content为窗口数组（按---分割并过滤空内容）
-const splitContentToWindows = (content: string) => {
-  return content
-    .split('---separator---')
-    .map((window) => window.trim())
-    .filter(Boolean)
-}
 
-const windows50 = splitContentToWindows(Content50)
+const [showBack, toggleBack] = useToggle(false)
+// 预处理三个Content为窗口数组
 
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
@@ -180,14 +232,12 @@ const { getRowClassName, handleRowClick } = useHighLight()
 
 // 数据加载与处理
 const his = import.meta.glob('./hisData/*.ts', { eager: true })
-// 分别匹配：1-9.ts、10-99.ts、100-199.ts、200.ts
 const curData = {
-  ...import.meta.glob('./[1-9].ts', { eager: true }), // 1-9.ts
-  ...import.meta.glob('./[1-9][0-9].ts', { eager: true }), // 10-99.ts
+  ...import.meta.glob('./[1-9].ts', { eager: true }),
+  ...import.meta.glob('./[1-9][0-9].ts', { eager: true }),
   ...import.meta.glob('./1[0-9][0-9].ts', { eager: true }),
-  ...import.meta.glob('./2[0-9][0-9].ts', { eager: true }), // 100-199.ts（包含100.ts）
+  ...import.meta.glob('./200.ts', { eager: true }),
 }
-
 const files = Object.assign({}, his, curData)
 
 // 彩票数据核心逻辑（假设maxHis和minHis是ref类型）
@@ -215,27 +265,12 @@ const {
   getHeaderCellClass,
   clear,
   counts,
+  dltBackCom,
 } = useLotteryData('ssq', files, {
   frontCount: 33,
   backCount: 16,
 })
 
-const getIndexByDifference = (windowList: string[]) => {
-  if (windowList.length === 0) return 0
-  const current = Number(currentHis.value)
-  const max = Number(maxHis.value)
-  if (isNaN(current) || isNaN(max)) return 0 // 处理非数字期号的异常
-  const difference = max - current // 数字减法，正确计算差值
-  const index = windowList.length - 1 - difference
-  return Math.max(index, 0)
-}
-
-const index50 = computed(() => getIndexByDifference(windows50))
-
-const markdownContent50 = computed(() => {
-  return windows50[index50.value] || ''
-})
-const showBack = ref(false)
 function setFront(v) {
   if (highlightedFront.value.has(v)) {
     highlightedFront.value.delete(v)
@@ -251,5 +286,88 @@ function setBack(v) {
     highlightedBack.value.add(v)
   }
 }
+
+function getSortedCombinations(list, count) {
+  // 边界条件处理
+  if (count <= 0 || count > list.length) {
+    return [] // 选取个数无效时返回空数组
+  }
+  if (count === list.length) {
+    // 选取个数等于列表长度时，只有一个组合（排序后的原列表）
+    return [[...list].sort((a, b) => a - b)]
+  }
+
+  const result = []
+
+  // 回溯法生成组合
+  const backtrack = (startIndex, currentCombination) => {
+    // 当当前组合长度达到目标个数时，排序后加入结果
+    if (currentCombination.length === count) {
+      result.push([...currentCombination].sort((a, b) => a - b))
+      return
+    }
+
+    // 从startIndex开始遍历，避免重复组合（如[1,2]和[2,1]视为同一组合）
+    for (let i = startIndex; i < list.length; i++) {
+      // 加入当前元素
+      currentCombination.push(list[i])
+      // 递归选取下一个元素（从i+1开始，确保不重复选取）
+      backtrack(i + 1, currentCombination)
+      // 回溯：移除最后一个元素，尝试其他可能性
+      currentCombination.pop()
+    }
+  }
+
+  // 从索引0开始，初始组合为空
+  backtrack(0, [])
+
+  return result
+}
+
+const combinBack = computed(() => {
+  const list = []
+  const coms = []
+  for (const element of highlightedBack.value) {
+    list.push(element)
+  }
+
+  const combinations = getSortedCombinations(list, 2)
+
+  for (const c of combinations) {
+    const temp = `${Number(c[0]).toString().padStart(2, '0')},${Number(c[1]).toString().padStart(2, '0')}`
+    coms.push(temp)
+  }
+  return coms
+})
 provide('showBack', { showBack, setFront, setBack })
+
+// function getFilteredChartBall2DArray() {
+//   const table = document.getElementById('chartsTable')
+//   const result = []
+//   if (!table) {
+//     console.warn('未找到id为chartsTable的表格')
+//     return result
+//   }
+//   const trs = table.getElementsByTagName('tr')
+//   for (let i = 0; i < trs.length; i++) {
+//     const tr = trs[i]
+//     const trData = []
+//     const tds = tr.querySelectorAll('td[class^="chartBall"]')
+
+//     tds.forEach((td) => {
+//       if (td.innerText) {
+//         trData.push(td.innerText.trim().padStart(2, '0'))
+//       }
+//     })
+
+//     // 只保留有数据的行（trData长度大于0时才添加）
+//     if (trData.length > 0) {
+//       result.push(trData.slice(0, 5))
+//     }
+//   }
+//   return result
+// }
+// const filteredBall2DArray = getFilteredChartBall2DArray()
+provide('maxHis', maxHis)
+provide('currentHis', currentHis)
 </script>

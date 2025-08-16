@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     mx-auto
-    style="width: 1000px"
+    style="width: 1020px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -13,7 +13,7 @@
   >
     <el-table-column
       type="index"
-      :width="width"
+      :width="width + 20"
       label="In"
       align="center"
       :resizable="false"
@@ -157,8 +157,8 @@
   <Mock
     type="20: 10% 15%"
     v-show="showPanel"
-    :content="markdownContent20"
-    :content-back="bmarkdownContent20"
+    :content="Content20"
+    :content-back="bContent20"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -167,8 +167,8 @@
   <Mock
     type="15: 13% 7%"
     v-show="showPanel"
-    :content="markdownContent15"
-    :content-back="bmarkdownContent15"
+    :content="Content15"
+    :content-back="bContent15"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -177,8 +177,8 @@
   <Mock
     type="10: 10% 20%"
     v-show="showPanel"
-    :content-back="bmarkdownContent10"
-    :content="markdownContent10"
+    :content="Content10"
+    :content-back="bContent10"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -187,8 +187,8 @@
   <Mock
     type="50： 12% 14% 16% 10%"
     v-show="showPanel"
-    :content="markdownContent50"
-    :content-back="bmarkdownContent50"
+    :content="Content50"
+    :content-back="bContent50"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -207,38 +207,18 @@ import { useToggle } from '@vueuse/core'
 // 导入全量数据文件
 import Content10 from '#/rate/DLT10.txt?raw'
 import Content15 from '#/rate/DLT15.txt?raw'
-import Content5 from '#/rate/DLT5.txt?raw'
 import Content20 from '#/rate/DLT20.txt?raw'
 import Content50 from '#/rate/DLT50.txt?raw'
-
 import bContent10 from '#/back/DLT10.txt?raw'
 import bContent15 from '#/back/DLT15.txt?raw'
-import bContent5 from '#/back/DLT5.txt?raw'
 import bContent50 from '#/back/DLT50.txt?raw'
-
 import bContent20 from '#/back/DLT20.txt?raw'
 // 分割Content为窗口数组（按---分割并过滤空内容）
+
 const showCount = ref(false)
 
-const splitContentToWindows = (content: string) => {
-  return content
-    .split('---separator---')
-    .map((window) => window.trim())
-    .filter(Boolean)
-}
 const [showBack, toggleBack] = useToggle(false)
 // 预处理三个Content为窗口数组
-const windows20 = splitContentToWindows(Content20)
-const windows15 = splitContentToWindows(Content15)
-const windows10 = splitContentToWindows(Content10)
-const windows5 = splitContentToWindows(Content5)
-const windows50 = splitContentToWindows(Content50)
-
-const bwindows20 = splitContentToWindows(bContent20)
-const bwindows15 = splitContentToWindows(bContent15)
-const bwindows10 = splitContentToWindows(bContent10)
-const bwindows5 = splitContentToWindows(bContent5)
-const bwindows50 = splitContentToWindows(bContent50)
 
 // 面板显示状态管理
 const tableRef = useTemplateRef('tableRef')
@@ -291,60 +271,6 @@ const {
   backCount: 12,
 })
 
-const getIndexByDifference = (windowList: string[]) => {
-  if (windowList.length === 0) return 0
-  const current = Number(currentHis.value)
-  const max = Number(maxHis.value)
-  if (isNaN(current) || isNaN(max)) return 0 // 处理非数字期号的异常
-
-  const difference = max - current // 数字减法，正确计算差值
-  const index = windowList.length - 1 - difference
-  return Math.max(index, 0)
-}
-
-// 为每个窗口数组计算索引（使用差值算法）
-const index20 = computed(() => getIndexByDifference(windows20))
-const index15 = computed(() => getIndexByDifference(windows15))
-const index10 = computed(() => getIndexByDifference(windows10))
-const index5 = computed(() => getIndexByDifference(windows5))
-const index50 = computed(() => getIndexByDifference(windows50))
-
-const bindex20 = computed(() => getIndexByDifference(bwindows20))
-const bindex15 = computed(() => getIndexByDifference(bwindows15))
-const bindex10 = computed(() => getIndexByDifference(bwindows10))
-const bindex50 = computed(() => getIndexByDifference(bwindows50))
-
-// 动态生成markdown内容
-const markdownContent20 = computed(() => {
-  return windows20[index20.value] || ''
-})
-const bmarkdownContent20 = computed(() => {
-  return bwindows20[bindex20.value] || ''
-})
-
-const markdownContent15 = computed(() => {
-  return windows15[index15.value] || ''
-})
-const bmarkdownContent15 = computed(() => {
-  return bwindows15[bindex15.value] || ''
-})
-
-const markdownContent10 = computed(() => {
-  return windows10[index10.value] || ''
-})
-const bmarkdownContent10 = computed(() => {
-  return bwindows10[bindex10.value] || ''
-})
-
-const markdownContent5 = computed(() => {
-  return windows5[index5.value] || ''
-})
-const markdownContent50 = computed(() => {
-  return windows50[index50.value] || ''
-})
-const bmarkdownContent50 = computed(() => {
-  return bwindows50[bindex50.value] || ''
-})
 function setFront(v) {
   if (highlightedFront.value.has(v)) {
     highlightedFront.value.delete(v)
@@ -415,32 +341,33 @@ const combinBack = computed(() => {
 })
 provide('showBack', { showBack, setFront, setBack })
 
-function getFilteredChartBall2DArray() {
-  const table = document.getElementById('chartsTable')
-  const result = []
-  if (!table) {
-    console.warn('未找到id为chartsTable的表格')
-    return result
-  }
-  const trs = table.getElementsByTagName('tr')
-  for (let i = 0; i < trs.length; i++) {
-    const tr = trs[i]
-    const trData = []
-    const tds = tr.querySelectorAll('td[class^="chartBall"]')
+// function getFilteredChartBall2DArray() {
+//   const table = document.getElementById('chartsTable')
+//   const result = []
+//   if (!table) {
+//     console.warn('未找到id为chartsTable的表格')
+//     return result
+//   }
+//   const trs = table.getElementsByTagName('tr')
+//   for (let i = 0; i < trs.length; i++) {
+//     const tr = trs[i]
+//     const trData = []
+//     const tds = tr.querySelectorAll('td[class^="chartBall"]')
 
-    tds.forEach((td) => {
-      if (td.innerText) {
-        trData.push(td.innerText.trim().padStart(2, '0'))
-      }
-    })
+//     tds.forEach((td) => {
+//       if (td.innerText) {
+//         trData.push(td.innerText.trim().padStart(2, '0'))
+//       }
+//     })
 
-    // 只保留有数据的行（trData长度大于0时才添加）
-    if (trData.length > 0) {
-      result.push(trData.slice(0, 5))
-    }
-  }
-  return result
-}
-const filteredBall2DArray = getFilteredChartBall2DArray()
-console.log(filteredBall2DArray)
+//     // 只保留有数据的行（trData长度大于0时才添加）
+//     if (trData.length > 0) {
+//       result.push(trData.slice(0, 5))
+//     }
+//   }
+//   return result
+// }
+// const filteredBall2DArray = getFilteredChartBall2DArray()
+provide('maxHis', maxHis)
+provide('currentHis', currentHis)
 </script>

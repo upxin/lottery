@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     mx-auto
-    style="width: 1120px"
+    style="width: 1020px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -99,7 +99,7 @@
     </el-button>
     <el-button @click="toggle()">显示模拟盘</el-button>
 
-    <el-button @click="toggleBack()">后区</el-button>
+    <el-button @click="toggleBack()">{{ !showBack ? '看后区' : '看前区' }}</el-button>
     <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
@@ -155,44 +155,58 @@
   </el-dialog>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
-    type="20: 10% 15%"
+    type="35: 17 20"
+    v-show="showPanel"
+    :content="Content35"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="35"
+  ></Mock>
+  <Mock
+    type="30: 17 20"
+    v-show="showPanel"
+    :content="Content30"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="30"
+  ></Mock>
+  <Mock
+    type="25: 16 20"
+    v-show="showPanel"
+    :content="Content25"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    btype="25"
+  ></Mock>
+  <Mock
+    type="20: 15 20"
     v-show="showPanel"
     :content="Content20"
-    :content-back="bContent20"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'20: 15% 20%'"
+    :btype="'20: 15 20'"
   ></Mock>
   <Mock
-    type="15: 13% 7%"
+    type="*15: 13 20"
     v-show="showPanel"
     :content="Content15"
-    :content-back="bContent15"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'15: 13% 20%'"
+    :btype="'15: 13 20'"
   ></Mock>
   <Mock
-    type="10: 10% 20%"
+    type="*10: 20 10"
     v-show="showPanel"
     :content="Content10"
-    :content-back="bContent10"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'10: 10% 20%'"
-  ></Mock>
-  <Mock
-    type="50： 12% 14% 16% 10%"
-    v-show="showPanel"
-    :content="Content50"
-    :content-back="bContent50"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'50: 16% 18% 20% 14%'"
+    :btype="'10: 10 20'"
   ></Mock>
 </template>
 
@@ -204,16 +218,12 @@ import Mock from '../components/Mock.vue'
 import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
-// 导入全量数据文件
-import Content10 from '#/rate/DLT10.txt?raw'
-import Content15 from '#/rate/DLT15.txt?raw'
-import Content20 from '#/rate/DLT20.txt?raw'
-import Content50 from '#/rate/DLT50.txt?raw'
-import bContent10 from '#/back/DLT10.txt?raw'
-import bContent15 from '#/back/DLT15.txt?raw'
-import bContent50 from '#/back/DLT50.txt?raw'
-import bContent20 from '#/back/DLT20.txt?raw'
-// 分割Content为窗口数组（按---分割并过滤空内容）
+import Content10 from '#/ssq/SSQ10.txt?raw'
+import Content15 from '#/ssq/SSQ15.txt?raw'
+import Content20 from '#/ssq/SSQ20.txt?raw'
+import Content25 from '#/ssq/SSQ25.txt?raw'
+import Content30 from '#/ssq/SSQ30.txt?raw'
+import Content35 from '#/ssq/SSQ35.txt?raw'
 
 const showCount = ref(false)
 
@@ -239,7 +249,7 @@ const curData = {
   ...import.meta.glob('./200.ts', { eager: true }),
 }
 const files = Object.assign({}, his, curData)
-
+console.log(his)
 // 彩票数据核心逻辑（假设maxHis和minHis是ref类型）
 const {
   footerRef,

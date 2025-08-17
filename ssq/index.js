@@ -7,17 +7,46 @@ function formatNumber(num) {
 }
 const BALL_SIZE = 33
 const BALL_LEN = 6
-const list = [10, 15, 20, 25, 30, 35, 40, 45, 50]
+const list = [10, 15, 20, 25, 30, 35]
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const dataPath = resolve(__dirname, './ssq.json')
+const rawData = readFileSync(dataPath, 'utf-8')
+const data = JSON.parse(rawData) // 解析为二维数组：[["03","04",...], ["02","11",...]]
+const times = {}
+for (const element of data) {
+  // 遍历每一期数据
+  for (const n of element) {
+    // 遍历当期每个数字
+    times[n] = times[n] ? times[n] + 1 : 1 // 累加次数
+  }
+}
+
+const sortedTimes = Object.entries(times)
+  .sort(([numA, countA], [numB, countB]) => {
+    // 优先按次数降序（次数多的在前）
+    if (countA !== countB) {
+      return countB - countA
+    }
+    // 次数相同时，按数字升序（数字小的在前）
+    return parseInt(numA) - parseInt(numB)
+  })
+  // 可选：将数组格式转为 "数字: 次数" 的字符串格式（更易读）
+  .map(([num, count]) => `${num}: ${count}次`)
+
+writeFileSync(
+  resolve(__dirname, `times.txt`),
+  // 格式二选一：选一种你需要的格式
+  sortedTimes.join('\n'), // 格式1：文本格式（每行一个，清晰）
+  // JSON.stringify(sortedTimes, null, 2), // 格式2：JSON数组格式（便于后续解析）
+  'utf-8',
+)
 
 function main(windowSize) {
-  const __dirname = dirname(fileURLToPath(import.meta.url))
-  const dataPath = resolve(__dirname, './ssq.json')
   const outputPath = resolve(__dirname, `SSQ${windowSize}.txt`)
   const outputPathTotal = resolve(__dirname, `SSQ_TOTAL${windowSize}.txt`)
   try {
     // 1. 读取并验证数据
-    const rawData = readFileSync(dataPath, 'utf-8')
-    const data = JSON.parse(rawData)
 
     if (!Array.isArray(data) || data.length < windowSize) {
       throw new Error(`数据不足${windowSize}期，无法生成统计`)

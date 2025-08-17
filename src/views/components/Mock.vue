@@ -1,10 +1,10 @@
 <template>
   <section
     w-500px
-    z-9999
     class="bg-white text-fuchsia shadow-md shadow-coolGray pb-10px pt-14px pl-10px rounded-md fixed box-border"
     ref="draggableRef"
-    :style="style"
+    :style="{ left: x + 'px', top: y + 'px', zIndex }"
+    @click="handlePanel"
   >
     <!-- 前区标题 -->
     <div text-amber v-if="type && !showBack" flex justify-between pr-20px>
@@ -87,18 +87,29 @@ const props = withDefaults(defineProps<MockProps>(), {
 })
 
 // 3. 拖拽功能配置（使用useStorage持久化位置，修复reset逻辑）
-const draggableRef = ref<HTMLElement | null>(null)
+const draggableRef = useTemplateRef('draggableRef')
 // 用type作为storage的key，避免多Mock组件位置冲突
-const storageKey = `mock_pos_${String(props.type || 'default')}`
+const storageKey = `mock_pos_${String(props.type)}`
 const initPos = useStorage(storageKey, { x: 0, y: 10 })
-const { style } = useDraggable(draggableRef, {
+const { x, y } = useDraggable(draggableRef, {
   initialValue: initPos.value,
   onEnd(position) {
     initPos.value = position // 拖拽结束才更新位置，减少响应式触发
   },
 })
 
-// 4. 重置位置（仅清除当前组件的位置缓存，不影响其他组件）
+const globalZIndex = useStorage('mock_max_zindex', 100)
+const zIndex = ref(globalZIndex.value)
+const isFirstLoad = useStorage('mock_is_first_load', true)
+if (isFirstLoad.value) {
+  globalZIndex.value = 10 // 重置为初始值
+  isFirstLoad.value = false // 标记为已初始化
+}
+const handlePanel = () => {
+  zIndex.value = globalZIndex.value + 1
+  globalZIndex.value = zIndex.value
+}
+
 const reset = () => {
   initPos.value = { x: 0, y: 10 } // 重置为初始位置
   ElMessage.success('位置已重置')
@@ -170,28 +181,6 @@ const isSetsEqual = (a: Set<string>, b: Set<string>): boolean => {
     if (!b.has(item)) return false
   }
   return true
-}
-
-// 9. 复制选中数据到剪贴板（优化格式和容错）
-const copy = () => {
-  const frontList = Array.from(selectedFront.value).sort((a, b) => Number(a) - Number(b))
-  const backList = Array.from(selectedBack.value).sort((a, b) => Number(a) - Number(b))
-
-  // 格式化复制内容
-  let result = ''
-  if (frontList.length) result += `前区：${frontList.join(' ')}`
-  if (backList.length) result += `${frontList.length ? ' | ' : ''}后区：${backList.join(' ')}`
-
-  if (!result) {
-    ElMessage.warning('未选中任何数字')
-    return
-  }
-
-  // 复制操作（容错处理）
-  navigator.clipboard
-    .writeText(result)
-    .then(() => ElMessage.success('已复制选中数据'))
-    .catch(() => ElMessage.error('复制失败，请手动复制'))
 }
 
 // 10. 分割Markdown内容为窗口（按分隔符拆分，过滤空窗口）
@@ -290,7 +279,11 @@ const handleFront = (v: string) => {
   const num = parseInt(v, 10)
   if (!isNaN(num)) setFront(num) // 容错：确保是有效数字
 }
-
+function handleRow(list) {
+  for (const element of list) {
+    setFront(Number(element))
+  }
+}
 // 19. 后区按钮点击事件（同理前区）
 const handleBack = (v: string) => {
   const num = parseInt(v, 10)

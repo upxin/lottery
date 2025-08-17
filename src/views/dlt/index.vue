@@ -99,7 +99,7 @@
     </el-button>
     <el-button @click="toggle()">显示模拟盘</el-button>
 
-    <el-button @click="toggleBack()">后区</el-button>
+    <el-button @click="toggleBack()">{{ !showBack ? '看后区' : '看前区' }}</el-button>
     <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
@@ -155,17 +155,17 @@
   </el-dialog>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
-    type="50： 12% 14% 16% 10%"
+    type="50: 12 14 16 10"
     v-show="showPanel"
     :content="Content50"
     :content-back="bContent50"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'50: 16% 18% 20% 14%'"
+    :btype="'50: 16 18 20 14'"
   ></Mock>
   <Mock
-    type="45"
+    type="45: 13 16 11"
     v-show="showPanel"
     :content="Content45"
     :content-back="bContent45"
@@ -175,7 +175,7 @@
     btype="45"
   ></Mock>
   <Mock
-    type="40"
+    type="40: 13 15 10"
     v-show="showPanel"
     :content="Content40"
     :content-back="bContent40"
@@ -185,7 +185,7 @@
     btype="40"
   ></Mock>
   <Mock
-    type="35"
+    type="35: 14 11"
     v-show="showPanel"
     :content="Content35"
     :content-back="bContent35"
@@ -195,7 +195,7 @@
     btype="35"
   ></Mock>
   <Mock
-    type="30"
+    type="30: 13 10 17"
     v-show="showPanel"
     :content="Content30"
     :content-back="bContent30"
@@ -205,7 +205,7 @@
     btype="30"
   ></Mock>
   <Mock
-    type="25"
+    type="25: 12 16 08"
     v-show="showPanel"
     :content="Content25"
     :content-back="bContent25"
@@ -215,34 +215,34 @@
     btype="25"
   ></Mock>
   <Mock
-    type="20: 10% 15%"
+    type="20: 10 15"
     v-show="showPanel"
     :content="Content20"
     :content-back="bContent20"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'20: 15% 20%'"
+    :btype="'20: 15 20'"
   ></Mock>
   <Mock
-    type="15: 13% 7%"
+    type="15: 13 7"
     v-show="showPanel"
     :content="Content15"
     :content-back="bContent15"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'15: 13% 20%'"
+    :btype="'15: 13 20'"
   ></Mock>
   <Mock
-    type="10: 10% 20%"
+    type="10: 10 20"
     v-show="showPanel"
     :content="Content10"
     :content-back="bContent10"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'10: 10% 20%'"
+    :btype="'10: 10 20'"
   ></Mock>
 </template>
 

@@ -161,7 +161,7 @@ const setHighlightFromProps = () => {
 
   selectedBack.value.clear()
   for (const element of props.back) {
-    selectedFront.value.add(element.toString().padStart(2, '0'))
+    selectedBack.value.add(element.toString().padStart(2, '0'))
   }
 }
 

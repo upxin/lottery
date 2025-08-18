@@ -402,6 +402,7 @@ const combinBack = computed(() => {
     const temp = `${Number(c[0]).toString().padStart(2, '0')},${Number(c[1]).toString().padStart(2, '0')}`
     coms.push(temp)
   }
+
   return coms
 })
 provide('showBack', { showBack, setFront, setBack })

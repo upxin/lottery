@@ -6,12 +6,11 @@
     :style="{ left: x + 'px', top: y + 'px', zIndex }"
     @click="handlePanel"
   >
-    <!-- 前区标题 -->
+    <!-- 前区 -->
     <div text-amber v-if="type && !showBack" flex justify-between pr-20px>
       <span>前区 {{ type }}</span>
       <el-button @click="reset" size="small">重置位置</el-button>
     </div>
-    <!-- 前区按钮列表 -->
     <div v-if="parsedData && !showBack">
       <div v-for="item in parsedData" :key="`part1_${item.percent}`" flex my-6px>
         <div w-42px>{{ item.percent }}:</div>
@@ -30,12 +29,11 @@
       </div>
     </div>
 
-    <!-- 后区标题（控制显示） -->
+    <!-- 后区 -->
     <div text-amber v-if="btype && showBack" flex justify-between pr-20px>
-      <span> 后区 {{ btype }} </span>
+      <span>后区 {{ btype }}</span>
       <el-button @click="reset" size="small">重置位置</el-button>
     </div>
-    <!-- 后区按钮列表（控制显示） -->
     <div v-if="parsedDataBack && showBack">
       <div v-for="item in parsedDataBack" :key="`part2_${item.percent}`" flex my-6px>
         <div w-42px>{{ item.percent }}:</div>
@@ -57,26 +55,26 @@
 </template>
 
 <script setup lang="ts">
-// 1. 注入父组件提供的状态和方法
+// 1. 注入父组件依赖
 interface ShowBackInject {
   showBack: boolean
   setFront: (num: number) => void
   setBack: (num: number) => void
 }
-const { showBack, setBack, setFront } = inject<ShowBackInject>('showBack', {
+const { showBack, setFront, setBack } = inject<ShowBackInject>('showBack', {
   showBack: false,
   setFront: () => {},
   setBack: () => {},
 })
 
-// 2. 定义Props类型并设置默认值（明确类型，避免any）
+// 2. Props定义
 interface MockProps {
-  front: number[] // 前区高亮数字（父组件传入）
-  back?: number[] // 后区高亮数字（父组件传入）
-  type?: string | number // 前区标题
-  content: string // 前区Markdown内容
-  contentBack?: string // 后区Markdown内容
-  btype?: string // 后区标题
+  front: number[]
+  back?: number[]
+  type?: string | number
+  content: string
+  contentBack?: string
+  btype?: string
 }
 const props = withDefaults(defineProps<MockProps>(), {
   front: () => [],
@@ -86,190 +84,147 @@ const props = withDefaults(defineProps<MockProps>(), {
   type: '',
 })
 
-// 3. 拖拽功能配置（使用useStorage持久化位置，修复reset逻辑）
+// 3. 拖拽与层级（基础功能不改动）
 const draggableRef = useTemplateRef('draggableRef')
-// 用type作为storage的key，避免多Mock组件位置冲突
-const storageKey = `mock_pos_${String(props.type)}`
+const storageKey = `mock_pos_${String(props.type || 'default')}`
 const initPos = useStorage(storageKey, { x: 0, y: 10 })
 const { x, y } = useDraggable(draggableRef, {
   initialValue: initPos.value,
-  onEnd(position) {
-    initPos.value = position // 拖拽结束才更新位置，减少响应式触发
-  },
+  onEnd: (p) => (initPos.value = p),
 })
-
-const globalZIndex = useStorage('mock_max_zindex', 100)
-const zIndex = ref(globalZIndex.value)
-const isFirstLoad = useStorage('mock_is_first_load', true)
-if (isFirstLoad.value) {
-  globalZIndex.value = 10 // 重置为初始值
-  isFirstLoad.value = false // 标记为已初始化
-}
-const handlePanel = () => {
-  zIndex.value = globalZIndex.value + 1
-  globalZIndex.value = zIndex.value
-}
-
 const reset = () => {
-  initPos.value = { x: 0, y: 10 } // 重置为初始位置
+  initPos.value = { x: 0, y: 10 }
   ElMessage.success('位置已重置')
 }
 
-// 5. 解析Markdown内容的类型定义（明确数据结构）
+const globalZIndex = useStorage('mock_max_zindex', 10)
+const zIndex = ref(globalZIndex.value)
+const handlePanel = () => {
+  zIndex.value = ++globalZIndex.value
+}
+
+// 4. 内容解析（保持格式统一）
 interface ParsedGroup {
   percent: string
   numbers: string[]
 }
-const parsedData = ref<ParsedGroup[]>([]) // 前区解析结果
-const parsedDataBack = ref<ParsedGroup[]>([]) // 后区解析结果
-
-// 6. 选中状态管理（使用Set，避免重复值）
-const selectedFront = ref(new Set<string>()) // 前区选中的数字（字符串格式，补零后）
-const selectedBack = ref(new Set<string>()) // 后区选中的数字（字符串格式，补零后）
-
-// 7. 核心优化：解析Markdown内容的工具函数（纯函数，无响应式副作用）
-const parsePart = (partContent: string): ParsedGroup[] => {
-  const percentGroups: ParsedGroup[] = []
-  if (!partContent) return percentGroups // 空内容直接返回，避免无效循环
-
-  partContent.split('\n').forEach((line) => {
-    line = line.trim()
-    if (!line || !line.includes(':')) return // 跳过空行和格式错误的行
-
-    const [percent, numsStr] = line.split(':').map((part) => part.trim())
-    if (!percent || !numsStr) return // 缺少关键信息，跳过
-
-    // 解析数字列表，去重+补零+排序（统一格式）
-    const numbers = Array.from(new Set(numsStr.split(',').map((num) => num.trim())))
-      .filter((num) => /^\d+$/.test(num)) // 过滤非数字
-      .map((num) => num.padStart(2, '0')) // 补零为两位数
-      .sort((a, b) => Number(a) - Number(b)) // 按数字大小排序
-
-    if (numbers.length) {
-      percentGroups.push({ percent, numbers })
-    }
-  })
-  return percentGroups
-}
-
-// 8. 核心优化：同步父组件Props到选中状态（仅在数据变化时更新，避免循环）
-const setHighlightFromProps = () => {
-  selectedFront.value.clear()
-  for (const element of props.front) {
-    selectedFront.value.add(element.toString().padStart(2, '0'))
-  }
-
-  selectedBack.value.clear()
-  for (const element of props.back) {
-    selectedBack.value.add(element.toString().padStart(2, '0'))
-  }
-}
-
-// 10. 分割Markdown内容为窗口（按分隔符拆分，过滤空窗口）
-const splitContentToWindows = (content: string): string[] => {
+const parsePart = (content: string): ParsedGroup[] => {
+  if (!content) return []
   return content
-    .split('---separator---')
-    .map((window) => window.trim())
-    .filter(Boolean) // 过滤空窗口
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && l.includes(':'))
+    .map((l) => {
+      const [p, nums] = l.split(':').map((part) => part.trim())
+      const numList = Array.from(new Set(nums.split(',').map((n) => n.trim())))
+        .filter((n) => /^\d+$/.test(n))
+        .map((n) => n.padStart(2, '0'))
+        .sort((a, b) => Number(a) - Number(b))
+      return { percent: p, numbers: numList }
+    })
 }
 
+// 5. 窗口拆分（一次性拆分，避免重复计算）
+const splitWindows = (content: string) =>
+  content
+    .split('---separator---')
+    .map((w) => w.trim())
+    .filter(Boolean)
+const windows = ref(splitWindows(props.content))
+const bwindows = ref(splitWindows(props.contentBack))
+
+// 6. 注入期号（重点：初始化时 currentHis 默认为 maxHis）
 const currentHis = inject<{ value: string | number }>('currentHis', { value: '0' })
 const maxHis = inject<{ value: string | number }>('maxHis', { value: '0' })
 
-// 12. 前区内容处理（监听content变化，解析并同步状态）
-const windows = splitContentToWindows(props.content)
-const index = ref(maxHis.value)
-const markdownContent = ref(windows[index.value] || '')
-
-// 13. 后区内容处理（同理前区）
-const bwindows = splitContentToWindows(props.contentBack || '')
-const bindex = ref(maxHis.value)
-const markdownContentBack = ref(bwindows[bindex.value] || '')
-
-// 14. 监听期号变化，更新窗口索引（避免重复解析）
-const getIndexByDifference = (windowList: string[]): number => {
+// 🔴 核心优化：按“期号差值”计算窗口索引（完全贴合你的需求）
+const getExactIndex = (windowList: string[]) => {
   if (windowList.length === 0) return 0
 
+  // 转为数字（容错：非数字时取最后一项）
   const current = Number(currentHis.value)
   const max = Number(maxHis.value)
+  if (isNaN(current) || isNaN(max)) return windowList.length - 1
 
-  // 非数字期号默认取第0个窗口
-  if (isNaN(current) || isNaN(max)) return 0
+  // 关键：计算“当前期号与最大期号的差值”（偏移量）
+  const diff = max - current // 例：max=100, current=89 → diff=11
+  // 窗口索引 = 窗口总数 - 1 - 偏移量 → 即“倒数第 N 个窗口”
+  // 例：窗口数=20 → 20-1-11=8 → 取第8个索引（对应倒数第11个窗口）
+  let index = windowList.length - 1 - diff
 
-  // 计算差值（最新期号 - 当前期号）
-  const difference = max - current
-
-  // 计算目标索引并限制在 [0, windowList.length - 1] 范围内
-  let index = windowList.length - 1 - difference
+  // 边界保护：偏移量超过窗口总数时，取第0个；偏移量为负时，取最后一个
   index = Math.max(0, Math.min(index, windowList.length - 1))
-
+  console.log(index)
   return index
 }
 
-watch(
-  () => currentHis.value,
-  () => {
-    // 1. 更新前区内容索引和内容
-    const newIndex = getIndexByDifference(windows)
-    if (newIndex !== index.value) {
-      // 索引变化时才更新，减少无效渲染
-      index.value = newIndex
-      markdownContent.value = windows[index.value] || ''
-    }
-
-    // 2. 更新后区内容索引和内容
-    const newBIndex = getIndexByDifference(bwindows)
-    if (newBIndex !== bindex.value) {
-      bindex.value = newBIndex
-      markdownContentBack.value = bwindows[bindex.value] || ''
-    }
-  },
-  { immediate: true },
-)
-
-// 15. 监听前区内容变化，重新解析并同步状态
-watch(
-  () => markdownContent.value,
-  (newContent) => {
-    parsedData.value = parsePart(newContent)
-    setHighlightFromProps() // 解析后同步选中状态
-  },
-  { immediate: true },
-)
-
-// 16. 监听后区内容变化，重新解析并同步状态
-watch(
-  () => markdownContentBack.value,
-  (newContent) => {
-    parsedDataBack.value = parsePart(newContent)
-    setHighlightFromProps()
-  },
-  { immediate: true },
-)
-
-// 17. 监听父组件传入的高亮数字变化，同步选中状态
-watch(
-  [() => props.front, () => props.back],
-  () => {
-    setHighlightFromProps()
-  },
-  { deep: true, immediate: true },
-)
-
-// 18. 前区按钮点击事件（调用父组件方法，更新全局高亮）
-const handleFront = (v: string) => {
-  const num = parseInt(v, 10)
-  if (!isNaN(num)) setFront(num) // 容错：确保是有效数字
+// 7. 内容更新（用新索引方法匹配窗口）
+const parsedData = ref<ParsedGroup[]>([])
+const parsedDataBack = ref<ParsedGroup[]>([])
+const updateFront = () => {
+  const idx = getExactIndex(windows.value)
+  parsedData.value = parsePart(windows.value[idx] || '')
 }
-// 19. 后区按钮点击事件（同理前区）
+const updateBack = () => {
+  const idx = getExactIndex(bwindows.value)
+  parsedDataBack.value = parsePart(bwindows.value[idx] || '')
+}
+
+// 8. 选中状态同步
+const selectedFront = ref(new Set<string>())
+const selectedBack = ref(new Set<string>())
+const syncSelected = () => {
+  selectedFront.value.clear()
+  props.front.forEach((n) => selectedFront.value.add(n.toString().padStart(2, '0')))
+  selectedBack.value.clear()
+  props.back?.forEach((n) => selectedBack.value.add(n.toString().padStart(2, '0')))
+}
+
+// 9. 监听触发（确保初始化和变化时都匹配）
+// 初始化时：若 currentHis 未同步为 maxHis，强制同步（贴合你的“初始化current=max”需求）
+watch(
+  [currentHis, maxHis],
+  () => {
+    const current = Number(currentHis.value)
+    const max = Number(maxHis.value)
+    // 初始化时强制 currentHis = maxHis（若父组件未处理）
+    if (current !== max && current === 0) {
+      currentHis.value = max.toString()
+    }
+    updateFront()
+    updateBack()
+    syncSelected()
+  },
+  { immediate: true },
+)
+
+// 窗口内容变化时更新
+watch(
+  [() => props.content, () => props.contentBack],
+  () => {
+    windows.value = splitWindows(props.content)
+    bwindows.value = splitWindows(props.contentBack)
+    updateFront()
+    updateBack()
+  },
+  { immediate: true },
+)
+
+// 选中数字变化时同步
+watch([() => props.front, () => props.back], syncSelected, { deep: true, immediate: true })
+
+// 10. 按钮事件
+const handleFront = (v: string) => {
+  const num = parseInt(v)
+  !isNaN(num) && setFront(num)
+}
 const handleBack = (v: string) => {
-  const num = parseInt(v, 10)
-  if (!isNaN(num)) setBack(num)
+  const num = parseInt(v)
+  !isNaN(num) && setBack(num)
 }
 </script>
 
 <style scoped>
-/* 可选：补充组件样式，避免依赖全局样式冲突 */
 .text-amber {
   color: #ff9f43;
   font-weight: 500;
@@ -289,8 +244,5 @@ const handleBack = (v: string) => {
   width: 42px;
   text-align: right;
   margin-right: 8px;
-}
-.gap-4 {
-  gap: 4px;
 }
 </style>

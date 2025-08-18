@@ -164,7 +164,7 @@
     :front="Array.from(highlightedFront)"
     :btype="'50: 16 18 20 14'"
   ></Mock>
-  <Mock
+  <!-- <Mock
     type="45: 13 16 11"
     v-show="showPanel"
     :content="Content45"
@@ -173,8 +173,8 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
     btype="45"
-  ></Mock>
-  <Mock
+  ></Mock> -->
+  <!-- <Mock
     type="40: 13 15 10"
     v-show="showPanel"
     :content="Content40"
@@ -193,7 +193,7 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
     btype="35"
-  ></Mock>
+  ></Mock> -->
   <Mock
     type="30: 13 10 17"
     v-show="showPanel"

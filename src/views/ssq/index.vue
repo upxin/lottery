@@ -155,13 +155,12 @@
   </el-dialog>
   <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
-    type="35: 17 20"
+    type="50: 20 16 18"
     v-show="showPanel"
-    :content="Content35"
+    :content="Content50"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    btype="35"
   ></Mock>
   <Mock
     type="30: 17 20"
@@ -223,7 +222,7 @@ import Content15 from '#/ssq/SSQ15.txt?raw'
 import Content20 from '#/ssq/SSQ20.txt?raw'
 import Content25 from '#/ssq/SSQ25.txt?raw'
 import Content30 from '#/ssq/SSQ30.txt?raw'
-import Content35 from '#/ssq/SSQ35.txt?raw'
+import Content50 from '#/ssq/SSQ50.txt?raw'
 
 const showCount = ref(false)
 

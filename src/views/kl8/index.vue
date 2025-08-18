@@ -186,17 +186,13 @@ const tableRef = ref<any>(null)
 const highlightedNumbers = ref<Set<string>>(new Set())
 
 // 单元格点击：切换数值高亮
-function handleCellClick(value: string | undefined, column: string) {
+function handleCellClick(value: string | undefined) {
   if (!value) return
-
-  // 基于同一个Set操作，确保响应式更新
-  const newSet = new Set(highlightedNumbers.value)
-  if (newSet.has(value)) {
-    newSet.delete(value)
+  if (highlightedNumbers.value.has(value)) {
+    highlightedNumbers.value.delete(value)
   } else {
-    newSet.add(value)
+    highlightedNumbers.value.add(value.toString().padStart(2, '0'))
   }
-  highlightedNumbers.value = newSet
 }
 
 // 初始化
@@ -217,24 +213,22 @@ onMounted(() => {
 })
 
 // 期号计算
-const maxHis = computed(() => Math.max(...availablePeriods.value, 0))
-const minHis = computed(() => Math.min(...availablePeriods.value, 0))
+const maxHis = computed(() => availablePeriods.value.at(-1) || '')
+const minHis = computed(() => availablePeriods.value[0] || '')
 
-// 加载数据
 function loadPeriodData(period: number) {
+  highlightedNumbers.value.clear()
   const filePath = Object.keys(files).find((path) => path.includes(`${period}.ts`))
   if (!filePath) return
-
   const module = files[filePath] as any
-  if (module && module.g1 && module.ipt) {
-    currentData.value = {
-      g1: module.g1,
-      ipt: module.ipt,
-    }
 
-    parseAndRenderTable(module.ipt)
-    setDefaultHighlight(module.g1)
+  currentData.value = {
+    g1: module.g1,
+    ipt: module.ipt,
   }
+
+  parseAndRenderTable(module.ipt)
+  setDefaultHighlight(module.g1)
 }
 
 // 解析表格：数值严格对应列名（07列只显示"07"）
@@ -265,36 +259,27 @@ function parseAndRenderTable(iptContent: string) {
 
 // 设置默认高亮：将g1数据转为两位数字符串存入Set
 function setDefaultHighlight(g1Data: (string | number)[]) {
-  const newSet = new Set<string>()
   g1Data.forEach((item) => {
-    // 统一转为"01"格式的字符串
-    const num = Number(item)
-    if (!isNaN(num) && num >= 1 && num <= 80) {
-      newSet.add(num.toString().padStart(2, '0'))
+    const temp = Number(item)
+    const str = temp.toString().padStart(2, '0')
+
+    if (highlightedNumbers.value.has(str)) {
+      highlightedNumbers.value.delete(str)
+    } else {
+      highlightedNumbers.value.add(str)
     }
   })
-  // 默认同时高亮对应列
-  tableColumns.value.forEach((col) => {
-    if (newSet.has(col)) {
-      newSet.add(col)
-    }
-  })
-  highlightedNumbers.value = newSet
+  console.log(highlightedNumbers.value)
 }
 
 // 表头点击：切换列高亮
 function handleHeaderClick(column: any) {
-  const colName = String(column.label || '').trim()
-  if (!tableColumns.value.includes(colName)) return
-
-  // 基于同一个Set操作，确保响应式更新
-  const newSet = new Set(highlightedNumbers.value)
-  if (newSet.has(colName)) {
-    newSet.delete(colName)
+  const str = Number(column.label).toString().padStart(2, '0')
+  if (highlightedNumbers.value.has(str)) {
+    highlightedNumbers.value.delete(str)
   } else {
-    newSet.add(colName)
+    highlightedNumbers.value.add(str)
   }
-  highlightedNumbers.value = newSet
 }
 
 // 期号变更
@@ -307,6 +292,7 @@ function prevHis() {
   const currentIndex = availablePeriods.value.indexOf(currentHis.value)
   if (currentIndex > 0) {
     currentHis.value = availablePeriods.value[currentIndex - 1]
+    loadPeriodData(currentHis.value)
   }
 }
 
@@ -315,6 +301,7 @@ function nextHis() {
   const currentIndex = availablePeriods.value.indexOf(currentHis.value)
   if (currentIndex < availablePeriods.value.length - 1) {
     currentHis.value = availablePeriods.value[currentIndex + 1]
+    loadPeriodData(currentHis.value)
   }
 }
 
@@ -372,10 +359,11 @@ watch(
 )
 
 function setFront(v) {
-  if (highlightedNumbers.value.has(v)) {
-    highlightedNumbers.value.delete(v)
+  const str = Number(v).toString().padStart(2, '0')
+  if (highlightedNumbers.value.has(str)) {
+    highlightedNumbers.value.delete(str)
   } else {
-    highlightedNumbers.value.add(v)
+    highlightedNumbers.value.add(str)
   }
 }
 provide('showBack', { setFront })

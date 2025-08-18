@@ -52,13 +52,13 @@ export function useLotteryData(
       })
       .filter((period): period is string => period !== null)
       // 修复：按数字大小降序排序（先转为数字再比较）
-      .sort((a, b) => Number(b) - Number(a))
+      .sort((a, b) => Number(a) - Number(b))
 
     return ret
   })
 
-  const minHis = computed(() => availablePeriods.value.at(-1) || '')
-  const maxHis = computed(() => availablePeriods.value[0] || '')
+  const maxHis = computed(() => availablePeriods.value.at(-1) || '')
+  const minHis = computed(() => availablePeriods.value[0] || '')
 
   const getCurrentIndex = () => availablePeriods.value.indexOf(currentHis.value || '')
 
@@ -244,14 +244,14 @@ export function useLotteryData(
     sorted.value = !sorted.value
   }
 
-  const nextHis = () => {
+  const prevHis = () => {
     const currentIdx = getCurrentIndex()
     if (currentIdx > 0) {
       currentHis.value = availablePeriods.value[currentIdx - 1]
     }
   }
 
-  const prevHis = () => {
+  const nextHis = () => {
     const currentIdx = getCurrentIndex()
     if (currentIdx >= 0 && currentIdx < availablePeriods.value.length - 1) {
       currentHis.value = availablePeriods.value[currentIdx + 1]

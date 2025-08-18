@@ -72,7 +72,7 @@ const { showBack, setBack, setFront } = inject<ShowBackInject>('showBack', {
 // 2. 定义Props类型并设置默认值（明确类型，避免any）
 interface MockProps {
   front: number[] // 前区高亮数字（父组件传入）
-  back: number[] // 后区高亮数字（父组件传入）
+  back?: number[] // 后区高亮数字（父组件传入）
   type?: string | number // 前区标题
   content: string // 前区Markdown内容
   contentBack?: string // 后区Markdown内容
@@ -154,33 +154,15 @@ const parsePart = (partContent: string): ParsedGroup[] => {
 
 // 8. 核心优化：同步父组件Props到选中状态（仅在数据变化时更新，避免循环）
 const setHighlightFromProps = () => {
-  // 同步前区选中状态
-  const newFrontStrs = props.front
-    .filter((num) => Number.isInteger(num) && num > 0) // 过滤无效数字
-    .map((num) => num.toString().padStart(2, '0')) // 转为补零字符串
-  const newFrontSet = new Set(newFrontStrs)
-  // 只有当Set内容变化时才更新，避免无效响应式触发
-  if (!isSetsEqual(newFrontSet, selectedFront.value)) {
-    selectedFront.value = newFrontSet
+  selectedFront.value.clear()
+  for (const element of props.front) {
+    selectedFront.value.add(element.toString().padStart(2, '0'))
   }
 
-  // 同步后区选中状态
-  const newBackStrs = props.back
-    .filter((num) => Number.isInteger(num) && num > 0)
-    .map((num) => num.toString().padStart(2, '0'))
-  const newBackSet = new Set(newBackStrs)
-  if (!isSetsEqual(newBackSet, selectedBack.value)) {
-    selectedBack.value = newBackSet
+  selectedBack.value.clear()
+  for (const element of props.back) {
+    selectedFront.value.add(element.toString().padStart(2, '0'))
   }
-}
-
-// 辅助函数：判断两个Set是否完全相等（纯函数，无副作用）
-const isSetsEqual = (a: Set<string>, b: Set<string>): boolean => {
-  if (a.size !== b.size) return false
-  for (const item of a) {
-    if (!b.has(item)) return false
-  }
-  return true
 }
 
 // 10. 分割Markdown内容为窗口（按分隔符拆分，过滤空窗口）
@@ -278,11 +260,6 @@ watch(
 const handleFront = (v: string) => {
   const num = parseInt(v, 10)
   if (!isNaN(num)) setFront(num) // 容错：确保是有效数字
-}
-function handleRow(list) {
-  for (const element of list) {
-    setFront(Number(element))
-  }
 }
 // 19. 后区按钮点击事件（同理前区）
 const handleBack = (v: string) => {

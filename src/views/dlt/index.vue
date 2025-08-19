@@ -406,34 +406,8 @@ const combinBack = computed(() => {
   return coms
 })
 provide('showBack', { showBack, setFront, setBack })
-
-// function getFilteredChartBall2DArray() {
-//   const table = document.getElementById('chartsTable')
-//   const result = []
-//   if (!table) {
-//     console.warn('未找到id为chartsTable的表格')
-//     return result
-//   }
-//   const trs = table.getElementsByTagName('tr')
-//   for (let i = 0; i < trs.length; i++) {
-//     const tr = trs[i]
-//     const trData = []
-//     const tds = tr.querySelectorAll('td[class^="chartBall"]')
-
-//     tds.forEach((td) => {
-//       if (td.innerText) {
-//         trData.push(td.innerText.trim().padStart(2, '0'))
-//       }
-//     })
-
-//     // 只保留有数据的行（trData长度大于0时才添加）
-//     if (trData.length > 0) {
-//       result.push(trData.slice(0, 5))
-//     }
-//   }
-//   return result
-// }
-// const filteredBall2DArray = getFilteredChartBall2DArray()
 provide('maxHis', maxHis)
 provide('currentHis', currentHis)
+provide('highlightedBack', highlightedBack)
+provide('highlightedFront', highlightedFront)
 </script>

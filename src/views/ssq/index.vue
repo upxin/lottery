@@ -163,25 +163,7 @@
     :front="Array.from(highlightedFront)"
   ></Mock>
   <Mock
-    type="30: 17 20"
-    v-show="showPanel"
-    :content="Content30"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    btype="30"
-  ></Mock>
-  <Mock
-    type="25: 16 20"
-    v-show="showPanel"
-    :content="Content25"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    btype="25"
-  ></Mock>
-  <Mock
-    type="20: 15 20"
+    type="20: 15 20 10"
     v-show="showPanel"
     :content="Content20"
     @close="toggle()"
@@ -199,7 +181,7 @@
     :btype="'15: 13 20'"
   ></Mock>
   <Mock
-    type="*10: 20 10"
+    type="*10: 20 10 30"
     v-show="showPanel"
     :content="Content10"
     @close="toggle()"
@@ -220,8 +202,6 @@ import { useToggle } from '@vueuse/core'
 import Content10 from '#/ssq/SSQ10.txt?raw'
 import Content15 from '#/ssq/SSQ15.txt?raw'
 import Content20 from '#/ssq/SSQ20.txt?raw'
-import Content25 from '#/ssq/SSQ25.txt?raw'
-import Content30 from '#/ssq/SSQ30.txt?raw'
 import Content50 from '#/ssq/SSQ50.txt?raw'
 
 const showCount = ref(false)
@@ -349,34 +329,8 @@ const combinBack = computed(() => {
   return coms
 })
 provide('showBack', { showBack, setFront, setBack })
-
-// function getFilteredChartBall2DArray() {
-//   const table = document.getElementById('chartsTable')
-//   const result = []
-//   if (!table) {
-//     console.warn('未找到id为chartsTable的表格')
-//     return result
-//   }
-//   const trs = table.getElementsByTagName('tr')
-//   for (let i = 0; i < trs.length; i++) {
-//     const tr = trs[i]
-//     const trData = []
-//     const tds = tr.querySelectorAll('td[class^="chartBall"]')
-
-//     tds.forEach((td) => {
-//       if (td.innerText) {
-//         trData.push(td.innerText.trim().padStart(2, '0'))
-//       }
-//     })
-
-//     // 只保留有数据的行（trData长度大于0时才添加）
-//     if (trData.length > 0) {
-//       result.push(trData.slice(0, 5))
-//     }
-//   }
-//   return result
-// }
-// const filteredBall2DArray = getFilteredChartBall2DArray()
 provide('maxHis', maxHis)
 provide('currentHis', currentHis)
+provide('highlightedBack', highlightedBack)
+provide('highlightedFront', highlightedFront)
 </script>

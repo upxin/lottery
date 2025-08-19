@@ -7,7 +7,7 @@ function formatNumber(num) {
 }
 const BALL_SIZE = 33
 const BALL_LEN = 6
-const list = [10, 15, 20, 25, 30, 35]
+const list = [10, 15, 20, 50]
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataPath = resolve(__dirname, './ssq.json')

@@ -40,8 +40,8 @@ export function useLotteryData(
   const rawData = ref<LotteryData>({ g1: [], g2: [], ipt: '' })
   const parsedRows = ref<ParsedRow[]>([])
 
-  const highlightedBack = ref(new Set<number>()) // 后区高亮 (1-backCount)
-  const highlightedFront = ref(new Set<number>()) // 前区高亮 (1-frontCount)
+  const highlightedBack = ref(new Set<string>()) // 后区高亮 (1-backCount)
+  const highlightedFront = ref(new Set<string>()) // 前区高亮 (1-frontCount)
 
   const availablePeriods = computed(() => {
     const ret = Object.keys(files)
@@ -166,8 +166,8 @@ export function useLotteryData(
   const syncHighlightFromData = () => {
     highlightedFront.value.clear()
     highlightedBack.value.clear()
-    rawData.value.g1.forEach((num) => highlightedFront.value.add(num))
-    rawData.value.g2.forEach((num) => highlightedBack.value.add(num))
+    rawData.value.g1.forEach((num) => highlightedFront.value.add(num.toString().padStart(2, '0')))
+    rawData.value.g2.forEach((num) => highlightedBack.value.add(num.toString().padStart(2, '0')))
   }
 
   // 解析数据为表格行（修正字段名匹配）
@@ -297,26 +297,20 @@ export function useLotteryData(
   }
 
   const copyHighlighted = () => {
-    // 1. 过滤无效值（排除 0 和非数字），并排序
-    const validFrontNums = Array.from(highlightedFront.value.values())
-      .filter((num) => Number.isInteger(num) && num > 0) // 只保留正整数
-      .sort((a, b) => a - b)
-
-    const validBackNums = Array.from(highlightedBack.value.values())
-      .filter((num) => Number.isInteger(num) && num > 0)
-      .sort((a, b) => a - b)
-
-    // 2. 检查是否有有效数据
+    const validFrontNums = Array.from(highlightedFront.value.values()).sort(
+      (a, b) => Number(a) - Number(b),
+    )
+    const validBackNums = Array.from(highlightedBack.value.values()).sort(
+      (a, b) => Number(a) - Number(b),
+    )
     if (validFrontNums.length === 0 && validBackNums.length === 0) {
       ElMessage.warning('没有可复制的高亮数据')
       return
     }
 
-    // 3. 格式化数字（补零）并拼接（前区 + 逗号 + 后区）
     const formattedFront = validFrontNums.map((num) => String(num).padStart(2, '0')).join(' ')
     const formattedBack = validBackNums.map((num) => String(num).padStart(2, '0')).join(' ')
 
-    // 4. 处理分隔符（只有前区/后区时不显示多余逗号）
     let result = ''
     if (formattedFront && formattedBack) {
       result = `${formattedFront} , ${formattedBack}` // 前后区都有：前区, 后区
@@ -346,24 +340,23 @@ export function useLotteryData(
   const toggleHighlight = (prop: string) => {
     const parsed = parseColumnProp(prop)
     if (!parsed) return
-
+    const str = parsed.index.toString().padStart(2, '0')
     const targetSet = parsed.type === 'N' ? highlightedFront.value : highlightedBack.value
-    if (targetSet.has(parsed.index)) {
-      targetSet.delete(parsed.index)
+    if (targetSet.has(str)) {
+      targetSet.delete(str)
     } else {
-      targetSet.add(parsed.index)
+      targetSet.add(str)
     }
   }
 
   const getCellClass = (prop: string) => {
     const parsed = parseColumnProp(prop)
     if (!parsed) return ''
+    const str = parsed.index.toString().padStart(2, '0')
 
     // 判断是否高亮（仅基于列索引和高亮状态）
     const isHighlighted =
-      parsed.type === 'N'
-        ? highlightedFront.value.has(parsed.index)
-        : highlightedBack.value.has(parsed.index)
+      parsed.type === 'N' ? highlightedFront.value.has(str) : highlightedBack.value.has(str)
 
     // 只在高亮时返回类名
     if (!isHighlighted) return ''
@@ -382,10 +375,10 @@ export function useLotteryData(
     const parsed = parseColumnProp(prop)
 
     if (!parsed) return ''
+    const str = parsed.index.toString().padStart(2, '0')
+
     const isHighlighted =
-      parsed.type === 'N'
-        ? highlightedFront.value.has(parsed.index)
-        : highlightedBack.value.has(parsed.index)
+      parsed.type === 'N' ? highlightedFront.value.has(str) : highlightedBack.value.has(str)
 
     if (!isHighlighted) return ''
 
@@ -412,7 +405,7 @@ export function useLotteryData(
     highlightedFront.value.clear()
   }
 
-  const cacheHighLights = new Set<number>()
+  const cacheHighLights = new Set<string>()
   watch(
     () => highlightedFront.value,
     (v) => {

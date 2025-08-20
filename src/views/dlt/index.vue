@@ -162,38 +162,8 @@
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    :btype="'50: 16 18 20 14'"
+    :btype="'50: 12 14 16'"
   ></Mock>
-  <!-- <Mock
-    type="45: 13 16 11"
-    v-show="showPanel"
-    :content="Content45"
-    :content-back="bContent45"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    btype="45"
-  ></Mock> -->
-  <!-- <Mock
-    type="40: 13 15 10"
-    v-show="showPanel"
-    :content="Content40"
-    :content-back="bContent40"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    btype="40"
-  ></Mock>
-  <Mock
-    type="35: 14 11"
-    v-show="showPanel"
-    :content="Content35"
-    :content-back="bContent35"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    btype="35"
-  ></Mock> -->
   <Mock
     type="30: 13 10 17"
     v-show="showPanel"
@@ -202,7 +172,7 @@
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    btype="30"
+    btype="30: 10 13 17"
   ></Mock>
   <Mock
     type="25: 12 16 08"
@@ -212,7 +182,7 @@
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
-    btype="25"
+    btype="25: 12 16 20"
   ></Mock>
   <Mock
     type="20: 10 15"

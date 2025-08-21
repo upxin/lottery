@@ -4,6 +4,7 @@ export const validateIptData = (ipt: string, front = 33, back = 16): string | nu
       message: `暂无数据`,
       duration: 10000,
       type: 'error',
+      showClose: true,
     })
   }
 

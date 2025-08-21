@@ -109,7 +109,7 @@
         <div>前区(数字： 次数)</div>
         <div
           flex
-          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(Number(item.num)) }"
+          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(item.num) }"
           v-for="item in counts?.front || []"
           :key="item.num"
         >
@@ -135,7 +135,7 @@
         <div
           flex
           v-for="(item, index) in counts?.back || []"
-          :class="{ 'text-blue font-bold': highlightedBack.has(Number(item.num)) }"
+          :class="{ 'text-blue font-bold': highlightedBack.has(item.num) }"
           :key="`${item.num}_${index}`"
         >
           <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>

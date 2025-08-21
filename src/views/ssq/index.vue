@@ -2,7 +2,7 @@
   <el-table
     ref="tableRef"
     mx-auto
-    style="width: 1020px"
+    style="width: 1060px"
     :highlight-current-row="false"
     :data="parsedRows"
     border
@@ -103,39 +103,25 @@
     <el-button @click="showCount = true">显示数量统计</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
-  <el-dialog v-model="showCount" width="800" :close-on-click-modal="false">
+  <el-dialog v-model="showCount" width="800" :close-on-click-modal="true">
     <div flex justify-around>
       <div>
         <div>前区(数字： 次数)</div>
         <div
           flex
-          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(Number(item.num)) }"
+          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(item.num) }"
           v-for="item in counts?.front || []"
           :key="item.num"
         >
           <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
-
-      <div class="h-400px w-230px flex flex-wrap justify-between">
-        <div>后区组合(数字： 次数)</div>
-        <div
-          w-100px
-          flex
-          v-for="(item, index) in dltBackCom || []"
-          :key="`${item.num}_${index}`"
-          :class="{ ' text-amber font-bold': combinBack.includes(item.combinationStr) }"
-        >
-          <span class="w-50px">{{ item.combinationStr }}:</span><span>{{ item.count }}</span>
-        </div>
-      </div>
-
       <div>
         <div>后区单个(数字： 次数)</div>
         <div
           flex
           v-for="(item, index) in counts?.back || []"
-          :class="{ 'text-blue font-bold': highlightedBack.has(Number(item.num)) }"
+          :class="{ 'text-blue font-bold': highlightedBack.has(item.num) }"
           :key="`${item.num}_${index}`"
         >
           <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>

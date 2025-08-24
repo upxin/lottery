@@ -7,7 +7,7 @@ function formatNumber(num) {
 }
 const BALL_SIZE = 35
 const BALL_LEN = 5
-const list = [10, 15, 20, 25, 30, 35, 40, 45, 50]
+const list = [10, 15, 20, 50]
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const dataPath = resolve(__dirname, './dlt.json')
 const rawData = readFileSync(dataPath, 'utf-8')

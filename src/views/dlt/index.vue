@@ -8,7 +8,6 @@
     border
     size="small"
     :height="getHeight"
-    @row-click="handleRowClick"
     :row-class-name="getRowClassName"
   >
     <el-table-column

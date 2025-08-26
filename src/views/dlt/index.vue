@@ -183,6 +183,16 @@
     :front="Array.from(highlightedFront)"
     :btype="'15: 13 20'"
   ></Mock>
+  <Mock
+    type="10: 10 20"
+    v-show="showPanel"
+    :content="Content10"
+    :content-back="bContent10"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'20: 15 20'"
+  ></Mock>
 </template>
 
 <script lang="ts" setup>
@@ -202,6 +212,8 @@ import bContent20 from '#/back/DLT20.txt?raw'
 import Content50 from '#/rate/DLT50.txt?raw'
 import bContent50 from '#/back/DLT50.txt?raw'
 
+import Content10 from '#/rate/DLT10.txt?raw'
+import bContent10 from '#/back/DLT10.txt?raw'
 const showCount = ref(false)
 
 const [showBack, toggleBack] = useToggle(false)

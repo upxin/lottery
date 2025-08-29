@@ -148,33 +148,6 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
-  <Mock
-    type="20: 15 20 10"
-    v-show="showPanel"
-    :content="Content20"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'20: 15 20'"
-  ></Mock>
-  <Mock
-    type="*15: 13 20"
-    v-show="showPanel"
-    :content="Content15"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'15: 13 20'"
-  ></Mock>
-  <Mock
-    type="*10: 20 10 30"
-    v-show="showPanel"
-    :content="Content10"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'10: 10 20'"
-  ></Mock>
 </template>
 
 <script lang="ts" setup>
@@ -214,7 +187,6 @@ const curData = {
   ...import.meta.glob('./200.ts', { eager: true }),
 }
 const files = Object.assign({}, his, curData)
-console.log(his)
 // 彩票数据核心逻辑（假设maxHis和minHis是ref类型）
 const {
   footerRef,

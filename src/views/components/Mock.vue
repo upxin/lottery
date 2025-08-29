@@ -66,7 +66,7 @@ const highlightedBack = inject<Ref<Set<string>>>('highlightedBack')
 interface MockProps {
   front: number[]
   back?: number[]
-  type?: string | number
+  type?: string
   content: string
   contentBack?: string
   btype?: string
@@ -88,7 +88,7 @@ const { x, y } = useDraggable(draggableRef, {
   onEnd: (p) => (initPos.value = p),
 })
 const reset = () => {
-  initPos.value = { x: 0, y: 10 }
+  localStorage.clear()
   ElMessage.success('位置已重置')
 }
 
@@ -159,8 +159,10 @@ watch(
   () => currentHis.value,
   (v, o) => {
     if (v != o) {
-      updateFront()
-      updateBack()
+      nextTick(() => {
+        updateFront()
+        updateBack()
+      })
     }
   },
   { immediate: true },
@@ -171,11 +173,42 @@ watch(
   () => {
     windows.value = splitWindows(props.content)
     bwindows.value = splitWindows(props.contentBack)
-    updateFront()
-    updateBack()
+    extractPercentCounts(props.content)
   },
   { immediate: true },
 )
+
+function extractPercentCounts(text, n = 20) {
+  const lines = text.split('\n')
+  // 过滤出“第xxxx期在本窗口的分布 ...”的行
+  const distLines = lines.filter((line) => line.includes('在本窗口的分布'))
+
+  // 只取最后 n 条
+  const lastN = distLines.slice(-n)
+
+  const counts = {}
+  const list = []
+  lastN.forEach((line) => {
+    // 匹配所有百分比，比如 20%、12%
+    const matches = line.match(/(\d+)%/g)
+    let str = ''
+    if (matches) {
+      matches.forEach((percent: string) => {
+        str += percent.replace('%', '') + ','
+        counts[percent] = (counts[percent] || 0) + 1
+      })
+      list.push(str)
+    }
+  })
+
+  // 排序（按出现次数从大到小）
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
+  const sortdStr = sorted.map((item) => `${item[0]}--${item[1]}`)
+  console.log(props.type)
+  console.table(list)
+  console.table(sortdStr)
+  return sorted
+}
 
 // 10. 按钮事件
 const handleFront = (v: string) => {

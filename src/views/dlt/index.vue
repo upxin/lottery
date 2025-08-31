@@ -183,16 +183,6 @@
     :front="Array.from(highlightedFront)"
     :btype="'15: 13 20'"
   ></Mock>
-  <Mock
-    type="10: 10 20"
-    v-show="showPanel"
-    :content="Content10"
-    :content-back="bContent10"
-    @close="toggle()"
-    :back="Array.from(highlightedBack)"
-    :front="Array.from(highlightedFront)"
-    :btype="'20: 15 20'"
-  ></Mock>
 </template>
 
 <script lang="ts" setup>

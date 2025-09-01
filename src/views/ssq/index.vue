@@ -148,6 +148,14 @@
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
   ></Mock>
+  <Mock
+    type="20: 15 20"
+    v-show="showPanel"
+    :content="Content20"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+  ></Mock>
 </template>
 
 <script lang="ts" setup>

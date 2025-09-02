@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed right-60px top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
+  <div class="flex z-50 pl-10px">
     <Icon
       @click="scrollToTop"
       icon="cuida:caret-up-outline"

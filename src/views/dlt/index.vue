@@ -81,25 +81,22 @@
       ></el-option>
     </el-select>
     <el-button type="primary" @click="currentHis = minHis" size="small" class="mr-2">
-      最早一期
+      first
     </el-button>
-    <el-button type="primary" @click="prevHis" size="small" class="ml-2"> 上一期 </el-button>
-    <el-button type="primary" @click="nextHis" size="small" class="mr-2"> 下一期 </el-button>
+    <el-button type="primary" @click="prevHis" size="small" class="ml-2"> prev </el-button>
+    <el-button type="primary" @click="nextHis" size="small" class="mr-2"> next </el-button>
     <el-button type="primary" @click="currentHis = maxHis" size="small" class="mr-2">
-      最新一期
+      last
     </el-button>
-    <el-button type="primary" @click="copyTable" size="small"> 复制表格数据 </el-button>
-    <el-button type="success" @click="copyHighlighted" size="small"> 复制高亮数据 </el-button>
-    <el-button @click="reBackHighLight" type="warning">
-      {{ '重置高亮' }}
-    </el-button>
-    <el-button @click="clear" :type="'danger'">
-      {{ '清空高亮' }}
-    </el-button>
-    <el-button @click="toggle()">显示模拟盘</el-button>
+    <el-button type="primary" @click="copyTable" size="small"> table </el-button>
+    <el-button type="success" @click="copyHighlighted" size="small"> highlights </el-button>
+    <el-button @click="reBackHighLight" type="warning"> reset </el-button>
+    <el-button @click="clear" :type="'danger'"> clear </el-button>
+    <el-button @click="toggle()">mock</el-button>
 
     <el-button @click="toggleBack()">{{ !showBack ? '看后区' : '看前区' }}</el-button>
-    <el-button @click="showCount = true">显示数量统计</el-button>
+    <el-button @click="showCount = true">count</el-button>
+    <ScrollTable :el="tableRef?.$el"></ScrollTable>
   </div>
   <Error :err-msg="errMsg"></Error>
   <el-dialog v-model="showCount" width="800" :close-on-click-modal="false">
@@ -152,7 +149,6 @@
       </el-button>
     </div>
   </el-dialog>
-  <ScrollTable :el="tableRef?.$el"></ScrollTable>
   <Mock
     type="50: 12 14 16 10"
     v-show="showPanel"
@@ -178,6 +174,16 @@
     v-show="showPanel"
     :content="Content15"
     :content-back="bContent15"
+    @close="toggle()"
+    :back="Array.from(highlightedBack)"
+    :front="Array.from(highlightedFront)"
+    :btype="'15: 13 20'"
+  ></Mock>
+  <Mock
+    type="10：10 20 0"
+    v-show="showPanel"
+    :content="Content10"
+    :content-back="bContent10"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"

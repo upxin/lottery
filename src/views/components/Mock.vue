@@ -205,8 +205,8 @@ function extractPercentCounts(text, n = 20) {
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
   const sortdStr = sorted.map((item) => `${item[0]}--${item[1]}`)
   console.log(props.type)
-  console.table(list)
-  console.table(sortdStr)
+  console.log(list)
+  console.log(sortdStr)
   return sorted
 }
 

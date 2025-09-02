@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'dlt',
       component: () => import('@/views/dlt/index.vue'),
     },
+    {
+      path: '/test',
+      name: 'test',
+      component: () => import('@/views/test/index.vue'),
+    },
   ],
 })
 

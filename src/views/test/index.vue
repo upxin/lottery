@@ -1,5 +1,5 @@
 <template>
-  <div class="linked-charts-container">
+  <div class="linked-charts-container hidden">
     <div class="chart-wrapper">
       <h3>产品销量趋势</h3>
       <div ref="chart1Ref" class="chart-container"></div>
@@ -9,17 +9,21 @@
       <div ref="chart2Ref" class="chart-container"></div>
     </div>
   </div>
+  <el-input v-model="test" id="kk" @input="changeVal"></el-input>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watchEffect } from 'vue'
 import * as echarts from 'echarts'
 import type { ECharts } from 'echarts'
-
+const test = ref(111)
 // 图表容器引用
 const chart1Ref = ref<HTMLDivElement>(null)
 const chart2Ref = ref<HTMLDivElement>(null)
-
+function changeVal(v) {
+  console.log('change', v)
+  test.value = 1000
+}
 // 图表实例
 let chart1: ECharts | null = null
 let chart2: ECharts | null = null

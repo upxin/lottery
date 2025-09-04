@@ -10,7 +10,7 @@ export function useAutoHeight(extraSpace: Ref) {
   const { height: windowHeight } = useWindowSize()
 
   const getHeight = computed(() => {
-    return windowHeight.value - extra.value
+    return windowHeight.value ? windowHeight.value - extra.value : 0
   })
   return { getHeight }
 }

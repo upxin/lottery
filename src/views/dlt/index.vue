@@ -38,7 +38,7 @@
     <!-- 分隔列 -->
     <el-table-column label="," prop="comma" width="40" align="center" :resizable="false">
       <template #header>
-        <div class="comma-header" @click="sortByLen">{{ ',' }}</div>
+        <div class="comma-header">{{ ',' }}</div>
       </template>
       <template #default="{ row }">
         <div :class="getCommaClass(row)">{{ row.comma }}</div>

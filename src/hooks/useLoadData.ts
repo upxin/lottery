@@ -37,8 +37,8 @@ export function useLotteryData(
   const dltBackCom = ref()
 
   const currentHis = ref<string | number>() // 支持数字/字符串期号
-  const rawData = ref<LotteryData>({ g1: [], g2: [], ipt: '' })
-  const parsedRows = ref<ParsedRow[]>([])
+  const rawData = shallowRef<LotteryData>({ g1: [], g2: [], ipt: '' })
+  const parsedRows = shallowRef<ParsedRow[]>([])
 
   const highlightedBack = ref(new Set<string>()) // 后区高亮 (1-backCount)
   const highlightedFront = ref(new Set<string>()) // 前区高亮 (1-frontCount)

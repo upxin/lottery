@@ -1,5 +1,5 @@
 <template>
-  <div class="linked-charts-container hidden">
+  <div class="linked-charts-container">
     <div class="chart-wrapper">
       <h3>产品销量趋势</h3>
       <div ref="chart1Ref" class="chart-container"></div>
@@ -9,21 +9,15 @@
       <div ref="chart2Ref" class="chart-container"></div>
     </div>
   </div>
-  <el-input v-model="test" id="kk" @input="changeVal"></el-input>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watchEffect } from 'vue'
 import * as echarts from 'echarts'
 import type { ECharts } from 'echarts'
-const test = ref(111)
 // 图表容器引用
 const chart1Ref = ref<HTMLDivElement>(null)
 const chart2Ref = ref<HTMLDivElement>(null)
-function changeVal(v) {
-  console.log('change', v)
-  test.value = 1000
-}
 // 图表实例
 let chart1: ECharts | null = null
 let chart2: ECharts | null = null
@@ -32,7 +26,8 @@ let chart2: ECharts | null = null
 const xData = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月']
 
 // 图表1数据（销量）
-const salesData = [120, 190, 150, 230, 180, 250, 220, 310, 280]
+const salesData1 = [120, 190, 0, 230, 180, 250, 220, 310, 280]
+const salesData2 = [120, 190, 555, 230, 180, 250, 220, 310, 280]
 
 // 图表2数据（增长率）
 const growthRateData = [12, 19, 15, 23, 18, 25, 17, 22, 19]
@@ -50,9 +45,15 @@ const initCharts = () => {
   // 创建新实例
   if (chart1Ref.value) {
     chart1 = echarts.init(chart1Ref.value)
+    chart1.on('mousemove', (params) => {
+      console.log(999, params)
+    })
   }
   if (chart2Ref.value) {
     chart2 = echarts.init(chart2Ref.value)
+    chart2.on('mousemove', (params) => {
+      console.log(888, params)
+    })
   }
 
   // 图表1配置 - 柱状图
@@ -85,7 +86,7 @@ const initCharts = () => {
       {
         name: '产品销量', // 系列名称，用于图例联动
         type: 'bar',
-        data: salesData,
+        data: salesData2,
         itemStyle: {
           color: '#4895ef',
         },
@@ -123,18 +124,9 @@ const initCharts = () => {
       {
         name: '产品销量', // 与图表1相同的系列名称，会参与联动
         type: 'line',
-        data: salesData,
+        data: salesData1,
         lineStyle: {
           color: '#4895ef',
-        },
-        symbol: 'circle',
-      },
-      {
-        name: '增长率',
-        type: 'line',
-        data: growthRateData,
-        lineStyle: {
-          color: '#f77f00',
         },
         symbol: 'circle',
       },

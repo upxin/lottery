@@ -89,8 +89,6 @@
       last
     </el-button>
     <el-button type="primary" @click="copyTable" size="small"> table </el-button>
-    <el-button type="primary" @click="copyTable5" size="small"> table5 </el-button>
-
     <el-button type="success" @click="copyHighlighted" size="small"> highlights </el-button>
     <el-button @click="reBackHighLight" type="warning"> reset </el-button>
     <el-button @click="clear" :type="'danger'"> clear </el-button>
@@ -108,9 +106,10 @@
         <div
           flex
           :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(item.num) }"
-          v-for="item in counts?.front || []"
+          v-for="(item, i) in counts?.front || []"
           :key="item.num"
         >
+          <span class="text-klein-blue pr-10px">{{ i }}</span>
           <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
         </div>
       </div>
@@ -252,7 +251,7 @@ const {
   prevHis,
   nextHis,
   copyTable,
-  copyTable5,
+  sortByLen,
   copyHighlighted,
   toggleHighlight,
   availablePeriods,

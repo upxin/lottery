@@ -222,7 +222,7 @@ const tableRef = useTemplateRef('tableRef')
 const [showPanel, toggle] = useToggle(true)
 
 // 表格高度与基础配置
-const extraHeight = ref(60)
+const extraHeight = ref(80)
 const { getHeight } = useAutoHeight(extraHeight)
 const width = 20
 const { getRowClassName, handleRowClick } = useHighLight()

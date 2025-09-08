@@ -109,8 +109,11 @@
           v-for="(item, i) in counts?.front || []"
           :key="item.num"
         >
-          <span class="text-klein-blue pr-10px">{{ i }}</span>
-          <span class="w-30px">{{ item.num }}:</span><span>{{ item.count }}</span>
+          <span class="text-klein-blue pr-10px w-20px">{{ i.toString().padStart(2, '0') }}</span>
+          <span class="w-30px" :class="{ 'text-amber': cList.includes(item.num) }">{{
+            item.num
+          }}</span>
+          <span class="w-30px">{{ item.count }}</span>
         </div>
       </div>
 
@@ -212,7 +215,8 @@ import bContent50 from '#/back/DLT50.txt?raw'
 import Content10 from '#/dlt/DLT10.txt?raw'
 import bContent10 from '#/back/DLT10.txt?raw'
 const showCount = ref(false)
-
+const choosed = '05 09 10 11 12 19 20 22 28 31'
+const cList = choosed.split(' ')
 const [showBack, toggleBack] = useToggle(false)
 // 预处理三个Content为窗口数组
 

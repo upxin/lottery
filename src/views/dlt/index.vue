@@ -165,7 +165,6 @@
     type="20: 10 15"
     v-show="showPanel"
     :content="Content20"
-    :content-back="bContent20"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -175,7 +174,6 @@
     type="15: 13 7"
     v-show="showPanel"
     :content="Content15"
-    :content-back="bContent15"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -185,7 +183,6 @@
     type="10：10 20 0"
     v-show="showPanel"
     :content="Content10"
-    :content-back="bContent10"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"
@@ -202,16 +199,12 @@ import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 import Content15 from '#/dlt/DLT15.txt?raw'
-import bContent15 from '#/back/DLT15.txt?raw'
 
 import Content20 from '#/dlt/DLT20.txt?raw'
-import bContent20 from '#/back/DLT20.txt?raw'
 
 import Content50 from '#/dlt/DLT50.txt?raw'
-import bContent50 from '#/back/DLT50.txt?raw'
 
 import Content10 from '#/dlt/DLT10.txt?raw'
-import bContent10 from '#/back/DLT10.txt?raw'
 const showCount = ref(false)
 
 const [showBack, toggleBack] = useToggle(false)

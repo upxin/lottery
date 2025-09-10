@@ -1,4 +1,4 @@
-export const g1 = []
+export const g1 = ['2025104', '02', '05', '15', '16', '24', '32', '16']
 
 export const ipt = `
 070913141833,08

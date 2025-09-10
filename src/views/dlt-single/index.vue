@@ -103,14 +103,9 @@
     <div flex justify-around>
       <div>
         <div>前区(数字： 次数)</div>
-        <div
-          flex
-          :class="{ 'text-bordeaux-red font-bold': highlightedFront.has(item.num) }"
-          v-for="(item, i) in counts?.front || []"
-          :key="item.num"
-        >
+        <div flex v-for="(item, i) in counts?.front || []" :key="item.num">
           <span class="text-klein-blue pr-10px w-20px">{{ i.toString().padStart(2, '0') }}</span>
-          <span class="w-30px" :class="{ 'text-amber': cList.includes(item.num) }">{{
+          <span class="w-30px" :class="{ 'text-amber': highlightedFront.has(item.num) }">{{
             item.num
           }}</span>
           <span class="w-30px">{{ item.count }}</span>
@@ -207,8 +202,6 @@ import Content50 from '#/dlt/DLT50.txt?raw'
 
 import Content10 from '#/dlt/DLT10.txt?raw'
 const showCount = ref(false)
-const choosed = '05 09 10 11 12 19 20 22 28 31'
-const cList = choosed.split(' ')
 const [showBack, toggleBack] = useToggle(false)
 // 预处理三个Content为窗口数组
 
@@ -337,4 +330,11 @@ provide('maxHis', maxHis)
 provide('currentHis', currentHis)
 provide('highlightedBack', highlightedBack)
 provide('highlightedFront', highlightedFront)
+watch(
+  () => highlightedFront.value,
+  (v) => {
+    console.log(v)
+  },
+  { deep: true, immediate: true },
+)
 </script>

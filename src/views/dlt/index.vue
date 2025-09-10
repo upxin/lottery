@@ -155,7 +155,6 @@
     type="50: 12 14 16 10"
     v-show="showPanel"
     :content="Content50"
-    :content-back="bContent50"
     @close="toggle()"
     :back="Array.from(highlightedBack)"
     :front="Array.from(highlightedFront)"

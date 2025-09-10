@@ -17,10 +17,16 @@ const router = createRouter({
       path: '/ssq',
       name: 'ssq',
       component: Ssq,
+      meta: {
+        show: true,
+      },
     },
     {
       path: '/dlt',
       name: 'dlt',
+      meta: {
+        show: true,
+      },
       component: () => import('@/views/dlt/index.vue'),
     },
     {

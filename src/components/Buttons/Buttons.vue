@@ -13,7 +13,7 @@
 const router = useRouter()
 const routes = computed(() => {
   return router.options.routes.filter((item) => {
-    return item.path !== '/'
+    return item.meta?.show
   })
 })
 

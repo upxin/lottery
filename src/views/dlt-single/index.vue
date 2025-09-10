@@ -97,6 +97,7 @@
     <el-button @click="toggleBack()">{{ !showBack ? '看后区' : '看前区' }}</el-button>
     <el-button @click="showCount = true">count</el-button>
     <ScrollTable :el="tableRef?.$el"></ScrollTable>
+    <el-button @click="copy">choose</el-button>
   </div>
   <Error :err-msg="errMsg"></Error>
   <el-dialog v-model="showCount" width="800" :close-on-click-modal="false">
@@ -325,6 +326,15 @@ const combinBack = computed(() => {
 
   return coms
 })
+function copy() {
+  const result = counts.value.front
+    .slice(-23)
+    .map((item) => item.num)
+    .sort()
+    .join(' ')
+  navigator.clipboard.writeText(result)
+}
+
 provide('showBack', { showBack, setFront, setBack })
 provide('maxHis', maxHis)
 provide('currentHis', currentHis)

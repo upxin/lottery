@@ -335,3 +335,20 @@ provide('currentHis', currentHis)
 provide('highlightedBack', highlightedBack)
 provide('highlightedFront', highlightedFront)
 </script>
+<style lang="scss" scoped>
+:deep(.el-table_1_column_24.is-leaf.el-table__cell) {
+  border-right: 2px solid gray !important;
+}
+
+:deep(.el-table_1_column_13.is-leaf.el-table__cell) {
+  border-right: 2px solid gray !important;
+}
+
+:deep(.el-table__body tr td:nth-child(13)) {
+  border-right: 2px solid gray !important;
+}
+
+:deep(.el-table__body tr td:nth-child(24)) {
+  border-right: 2px solid gray !important;
+}
+</style>

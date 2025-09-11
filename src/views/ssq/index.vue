@@ -94,6 +94,7 @@
     <el-button @click="reBackHighLight" type="warning"> reset </el-button>
     <el-button @click="clear" :type="'danger'"> clear </el-button>
     <el-button @click="toggle()">mock</el-button>
+    <el-button type="primary" @click="copyTable6" size="small"> table6 </el-button>
 
     <el-button @click="toggleBack()">{{ !showBack ? '看后区' : '看前区' }}</el-button>
     <el-button @click="showCount = true">count</el-button>
@@ -171,7 +172,6 @@ import { ref, computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 
 import Content10 from '#/ssq/SSQ10.txt?raw'
-import Content15 from '#/ssq/SSQ15.txt?raw'
 import Content20 from '#/ssq/SSQ20.txt?raw'
 import Content50 from '#/ssq/SSQ50.txt?raw'
 
@@ -220,6 +220,7 @@ const {
   getCellClass,
   errMsg,
   getCommaClass,
+  copyTable6,
   getHeaderCellClass,
   clear,
   counts,
@@ -302,3 +303,20 @@ provide('currentHis', currentHis)
 provide('highlightedBack', highlightedBack)
 provide('highlightedFront', highlightedFront)
 </script>
+<style lang="scss" scoped>
+:deep(.el-table_1_column_23.is-leaf.el-table__cell) {
+  border-right: 2px solid gray !important;
+}
+
+:deep(.el-table_1_column_12.is-leaf.el-table__cell) {
+  border-right: 2px solid gray !important;
+}
+
+:deep(.el-table__body tr td:nth-child(12)) {
+  border-right: 2px solid gray !important;
+}
+
+:deep(.el-table__body tr td:nth-child(23)) {
+  border-right: 2px solid gray !important;
+}
+</style>

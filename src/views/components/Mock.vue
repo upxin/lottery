@@ -178,7 +178,7 @@ watch(
   { immediate: true },
 )
 
-function extractPercentCounts(text, n = 101) {
+function extractPercentCounts(text, n = 51) {
   const lines = text.split('\n')
   // 过滤出“第xxxx期在本窗口的分布 ...”的行
   const distLines = lines.filter((line) => line.includes('在本窗口的分布'))

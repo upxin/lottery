@@ -327,6 +327,37 @@ export function useLotteryData(
       .then(() => ElMessage.success('已复制表格数据'))
       .catch(() => ElMessage.error('复制失败'))
   }
+  const copyTable6 = () => {
+    if (!rawData.value.ipt) {
+      ElMessage.warning('没有可复制的数据')
+      return
+    }
+
+    const lines = rawData.value.ipt
+      .trim()
+      .split('\n')
+      .map((line) => line.replace(/\s+/g, ''))
+      .filter((line) => line)
+      .filter((line) => line.split(/,+/).length === 2)
+      // 新增过滤条件：只保留逗号前面部分长度为10的行
+      .filter((line) => line.split(',')[0].length === 12)
+      .sort((a, b) => {
+        // 新增排序逻辑
+        const aPrefix = a.split(',')[0]
+        const bPrefix = b.split(',')[0]
+        return bPrefix.length - aPrefix.length // 按逗号前长度降序
+      })
+
+    if (lines.length === 0) {
+      ElMessage.warning('没有有效数据可复制')
+      return
+    }
+    const temp = Array.from(new Set(lines))
+    navigator.clipboard
+      .writeText(temp.join('\n'))
+      .then(() => ElMessage.success('已复制表格数据'))
+      .catch(() => ElMessage.error('复制失败'))
+  }
   const copyHighlighted = () => {
     const validFrontNums = Array.from(highlightedFront.value.values()).sort(
       (a, b) => Number(a) - Number(b),
@@ -511,6 +542,7 @@ export function useLotteryData(
     loadData,
     reBackHighLight,
     // 原始数据
+    copyTable6,
     copyTable5,
     rawData,
     counts,

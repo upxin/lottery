@@ -9,17 +9,20 @@ const router = createRouter({
       redirect: '/ssq',
     },
     {
-      path: '/ssq-h',
-      name: 'ssq-h',
-      component: () => import('@/views/ssq-h/index.vue'),
-    },
-    {
       path: '/ssq',
       name: 'ssq',
       component: Ssq,
       meta: {
         show: true,
       },
+    },
+    {
+      path: '/ssq-h',
+      name: 'ssq-h',
+      meta: {
+        show: true,
+      },
+      component: () => import('@/views/ssq-h/index.vue'),
     },
     {
       path: '/dlt',
@@ -32,22 +35,42 @@ const router = createRouter({
     {
       path: '/dlt-single',
       name: 'DltSingle',
+      meta: {
+        show: true,
+      },
       component: () => import('@/views/dlt-single/index.vue'),
     },
     {
       path: '/test',
       name: 'test',
+      meta: {
+        show: true,
+      },
       component: () => import('@/views/test/index.vue'),
     },
     {
       path: '/count-ssq',
       name: 'CountSsq',
+      meta: {
+        show: true,
+      },
       component: () => import('@/views/count-ssq/index.vue'),
     },
     {
       path: '/count-dlt',
       name: 'CountDlt',
+      meta: {
+        show: true,
+      },
       component: () => import('@/views/count-dlt/index.vue'),
+    },
+    {
+      path: '/ssq-s',
+      name: 'SsqSingle',
+      meta: {
+        show: true,
+      },
+      component: () => import('@/views/ssq-s/index.vue'),
     },
   ],
 })
